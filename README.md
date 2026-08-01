@@ -31,7 +31,9 @@ Add `src/app/blog/page.tsx` for the index and `src/app/blog/[slug]/page.tsx` for
 
 ## Waitlist submission status
 
-No CRM, email, or database endpoint was supplied. The form therefore validates in the browser and saves a draft only to `localStorage` under `run-rentless-waitlist-draft`. Its success state and privacy copy explicitly say that nothing has been transmitted. Replace `handleSubmit` in `src/components/home/waitlist-form.tsx` with an authenticated server action or route handler before treating entries as received.
+The waitlist posts to `src/app/api/waitlist/route.ts`, which validates required fields and consent, rejects cross-origin requests, includes a honeypot, and creates or updates the subscriber in Sender. Company, interest, team size, and current-software values are stored in dedicated Sender custom fields and the subscriber is added to the `Run Rentless Waitlist` group.
+
+Set `SENDER_API` as a server-only environment variable in Vercel Production and Preview. Never expose it through a `NEXT_PUBLIC_` variable or commit it to the repository. Local submissions return a clear unavailable response when the variable is absent.
 
 ## Deployment
 
