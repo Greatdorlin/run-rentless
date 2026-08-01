@@ -10,7 +10,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
         width={1280}
         height={546}
         priority
-        sizes={compact ? "44px" : "(max-width: 600px) 156px, 178px"}
+        sizes={compact ? "44px" : "(max-width: 820px) 108px, 118px"}
         className={compact ? "brand-logo__mark" : "brand-logo__image"}
       />
     </Link>
