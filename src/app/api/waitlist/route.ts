@@ -18,7 +18,13 @@ function clean(value: unknown, limit: number) {
 function itemsFrom(payload: unknown): SenderItem[] {
   if (!payload || typeof payload !== "object") return [];
   const data = (payload as { data?: unknown }).data;
-  return Array.isArray(data) ? data as SenderItem[] : [];
+  if (Array.isArray(data)) return data as SenderItem[];
+  if (data && typeof data === "object") {
+    const nested = (data as { data?: unknown }).data;
+    if (Array.isArray(nested)) return nested as SenderItem[];
+    if ("title" in data || "field_name" in data || "id" in data) return [data as SenderItem];
+  }
+  return [];
 }
 
 async function senderFetch(token: string, path: string, init: RequestInit = {}) {
@@ -35,7 +41,12 @@ async function ensureGroup(token: string) {
   const existing = itemsFrom(await list.json()).find((item) => (item.title || item.name) === GROUP_TITLE);
   if (existing?.id) return existing.id;
   const created = await senderFetch(token, "/groups", { method: "POST", body: JSON.stringify({ title: GROUP_TITLE }) });
-  if (!created.ok) throw new Error("Sender group creation failed");
+  if (!created.ok) {
+    const refreshed = await senderFetch(token, "/groups?limit=100");
+    const recovered = refreshed.ok ? itemsFrom(await refreshed.json()).find((item) => (item.title || item.name) === GROUP_TITLE) : undefined;
+    if (recovered?.id) return recovered.id;
+    throw new Error(`Sender group creation failed with ${created.status}`);
+  }
   const payload = await created.json() as { data?: SenderItem };
   if (!payload.data?.id) throw new Error("Sender returned no group id");
   return payload.data.id;
@@ -44,16 +55,30 @@ async function ensureGroup(token: string) {
 async function ensureFields(token: string) {
   const list = await senderFetch(token, "/fields?limit=100");
   if (!list.ok) throw new Error("Sender field lookup failed");
-  const existing = itemsFrom(await list.json());
-  const entries = await Promise.all(Object.entries(FIELD_TITLES).map(async ([key, title]) => {
-    const match = existing.find((item) => item.title === title);
-    if (match?.field_name) return [key, match.field_name] as const;
+  const knownFields = itemsFrom(await list.json());
+  const entries: Array<readonly [string, string]> = [];
+  for (const [key, title] of Object.entries(FIELD_TITLES)) {
+    const match = knownFields.find((item) => item.title === title);
+    if (match?.field_name) {
+      entries.push([key, match.field_name] as const);
+      continue;
+    }
     const created = await senderFetch(token, "/fields", { method: "POST", body: JSON.stringify({ title, type: "text" }) });
-    if (!created.ok) throw new Error("Sender field creation failed");
+    if (!created.ok) {
+      const refreshed = await senderFetch(token, "/fields?limit=100");
+      const recovered = refreshed.ok ? itemsFrom(await refreshed.json()).find((item) => item.title === title) : undefined;
+      if (recovered?.field_name) {
+        knownFields.push(recovered);
+        entries.push([key, recovered.field_name] as const);
+        continue;
+      }
+      throw new Error(`Sender field creation failed for ${key} with ${created.status}`);
+    }
     const payload = await created.json() as { data?: SenderItem };
     if (!payload.data?.field_name) throw new Error("Sender returned no field name");
-    return [key, payload.data.field_name] as const;
-  }));
+    knownFields.push(payload.data);
+    entries.push([key, payload.data.field_name] as const);
+  }
   return Object.fromEntries(entries) as Record<keyof typeof FIELD_TITLES, string>;
 }
 
