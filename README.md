@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Run Rentless marketing site
 
-## Getting Started
+Production marketing site for Run Rentless, built with Next.js App Router, TypeScript, and CSS. The project is deliberately separate from Leads Desk, Product Hub, and Create Great Events.
 
-First, run the development server:
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Quality checks:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Structure
 
-## Learn More
+- `src/app` contains routes, route-level metadata, and page composition.
+- `src/components/home` contains one focused component per homepage section.
+- `src/components/site` contains shared navigation, logo, and footer components.
+- `src/content/site.ts` contains editable marketing copy and repeated structured content.
+- `public/brand` contains the two supplied source JPEGs plus non-destructive derived PNG assets.
 
-To learn more about Next.js, take a look at the following resources:
+### Future blog path
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Add `src/app/blog/page.tsx` for the index and `src/app/blog/[slug]/page.tsx` for articles. Put blog-specific components in `src/components/blog` and content adapters in `src/lib/blog`. Content can begin as typed MDX or local files and later switch to a CMS without changing the homepage sections. Each article can add `generateMetadata`, a route-level `opengraph-image.tsx`, and structured data.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Waitlist submission status
 
-## Deploy on Vercel
+No CRM, email, or database endpoint was supplied. The form therefore validates in the browser and saves a draft only to `localStorage` under `run-rentless-waitlist-draft`. Its success state and privacy copy explicitly say that nothing has been transmitted. Replace `handleSubmit` in `src/components/home/waitlist-form.tsx` with an authenticated server action or route handler before treating entries as received.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Production is connected to the GitHub `master` branch through Vercel Git integration. Pushes to `master` are intended to trigger production deployments automatically.
