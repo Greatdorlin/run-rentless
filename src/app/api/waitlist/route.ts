@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 
 const SENDER_BASE_URL = "https://api.sender.net/v2";
 const GROUP_TITLE = "Run Rentless Waitlist";
+const PROFILE_FIELDS = {
+  company: { title: "Company", type: "text" },
+  interest: { title: "Software interest", type: "text" },
+  teamSize: { title: "Team size", type: "text" },
+  currentSoftware: { title: "Current software", type: "text" },
+  consent: { title: "Marketing consent", type: "text" },
+  submittedAt: { title: "Waitlist submitted at", type: "datetime" },
+} as const;
 
 type SenderItem = { id?: string; title?: string; name?: string; field_name?: string };
 
@@ -46,6 +54,39 @@ async function ensureGroup(token: string) {
   return payload.data.id;
 }
 
+async function ensureProfileFields(token: string) {
+  const list = await senderFetch(token, "/fields");
+  if (!list.ok) throw new Error(`Sender field lookup failed with ${list.status}`);
+  const knownFields = itemsFrom(await list.json());
+  const fieldNames: Partial<Record<keyof typeof PROFILE_FIELDS, string>> = {};
+
+  for (const [key, definition] of Object.entries(PROFILE_FIELDS) as Array<[keyof typeof PROFILE_FIELDS, (typeof PROFILE_FIELDS)[keyof typeof PROFILE_FIELDS]]>) {
+    const existing = knownFields.find((item) => item.title === definition.title);
+    if (existing?.field_name) {
+      fieldNames[key] = existing.field_name;
+      continue;
+    }
+
+    const created = await senderFetch(token, "/fields", {
+      method: "POST",
+      body: JSON.stringify(definition),
+    });
+    if (!created.ok) {
+      const details = (await created.text()).slice(0, 300);
+      console.error(`Sender profile field failed: ${key} (${created.status})`, details);
+      continue;
+    }
+
+    const payload = await created.json() as { data?: SenderItem };
+    if (payload.data?.field_name) {
+      knownFields.push(payload.data);
+      fieldNames[key] = payload.data.field_name;
+    }
+  }
+
+  return fieldNames;
+}
+
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ message: "This submission could not be verified." }, { status: 403 });
@@ -73,8 +114,17 @@ export async function POST(request: Request) {
   }
 
   try {
-    const groupId = await ensureGroup(token);
-    const subscriber = { email, firstname: firstName, lastname: lastName, groups: [groupId], trigger_automation: true };
+    const [groupId, fieldNames] = await Promise.all([ensureGroup(token), ensureProfileFields(token)]);
+    const submittedAt = new Date().toISOString();
+    const fields = Object.fromEntries([
+      fieldNames.company && [fieldNames.company, company],
+      fieldNames.interest && [fieldNames.interest, interest],
+      fieldNames.teamSize && [fieldNames.teamSize, teamSize],
+      fieldNames.currentSoftware && [fieldNames.currentSoftware, currentSoftware || "Not provided"],
+      fieldNames.consent && [fieldNames.consent, "Yes"],
+      fieldNames.submittedAt && [fieldNames.submittedAt, submittedAt],
+    ].filter((entry): entry is [string, string] => Boolean(entry)));
+    const subscriber = { email, firstname: firstName, lastname: lastName, groups: [groupId], fields, trigger_automation: true };
     const lookup = await senderFetch(token, `/subscribers/${encodeURIComponent(email)}`);
     if (!lookup.ok && lookup.status !== 404) throw new Error("Sender subscriber lookup failed");
     const response = await senderFetch(token, lookup.ok ? `/subscribers/${encodeURIComponent(email)}` : "/subscribers", {
@@ -93,12 +143,12 @@ export async function POST(request: Request) {
           team_size: teamSize,
           current_software: currentSoftware || "Not provided",
           marketing_consent: true,
-          submitted_at: new Date().toISOString(),
+          submitted_at: submittedAt,
         },
       }),
     });
     if (!eventResponse.ok) throw new Error(`Sender waitlist event failed with ${eventResponse.status}`);
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, profileFieldsStored: Object.keys(fields).length });
   } catch (error) {
     console.error("Waitlist submission failed", error instanceof Error ? error.message : "Unknown Sender error");
     return NextResponse.json({ message: "We could not add you right now. Please try again in a moment." }, { status: 502 });
