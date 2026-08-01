@@ -2,12 +2,6 @@ import { NextResponse } from "next/server";
 
 const SENDER_BASE_URL = "https://api.sender.net/v2";
 const GROUP_TITLE = "Run Rentless Waitlist";
-const FIELD_TITLES = {
-  company: "Run Rentless Company",
-  interest: "Run Rentless Software Interest",
-  teamSize: "Run Rentless Team Size",
-  currentSoftware: "Run Rentless Current Software",
-} as const;
 
 type SenderItem = { id?: string; title?: string; name?: string; field_name?: string };
 
@@ -52,36 +46,6 @@ async function ensureGroup(token: string) {
   return payload.data.id;
 }
 
-async function ensureFields(token: string) {
-  const list = await senderFetch(token, "/fields?limit=100");
-  if (!list.ok) throw new Error("Sender field lookup failed");
-  const knownFields = itemsFrom(await list.json());
-  const entries: Array<readonly [string, string]> = [];
-  for (const [key, title] of Object.entries(FIELD_TITLES)) {
-    const match = knownFields.find((item) => item.title === title);
-    if (match?.field_name) {
-      entries.push([key, match.field_name] as const);
-      continue;
-    }
-    const created = await senderFetch(token, "/fields", { method: "POST", body: JSON.stringify({ title, type: "text" }) });
-    if (!created.ok) {
-      const refreshed = await senderFetch(token, "/fields?limit=100");
-      const recovered = refreshed.ok ? itemsFrom(await refreshed.json()).find((item) => item.title === title) : undefined;
-      if (recovered?.field_name) {
-        knownFields.push(recovered);
-        entries.push([key, recovered.field_name] as const);
-        continue;
-      }
-      throw new Error(`Sender field creation failed for ${key} with ${created.status}`);
-    }
-    const payload = await created.json() as { data?: SenderItem };
-    if (!payload.data?.field_name) throw new Error("Sender returned no field name");
-    knownFields.push(payload.data);
-    entries.push([key, payload.data.field_name] as const);
-  }
-  return Object.fromEntries(entries) as Record<keyof typeof FIELD_TITLES, string>;
-}
-
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ message: "This submission could not be verified." }, { status: 403 });
@@ -109,16 +73,31 @@ export async function POST(request: Request) {
   }
 
   try {
-    const [groupId, fieldNames] = await Promise.all([ensureGroup(token), ensureFields(token)]);
-    const subscriber = { email, firstname: firstName, lastname: lastName, groups: [groupId], fields: {
-      [fieldNames.company]: company, [fieldNames.interest]: interest, [fieldNames.teamSize]: teamSize, [fieldNames.currentSoftware]: currentSoftware,
-    }, trigger_automation: true };
+    const groupId = await ensureGroup(token);
+    const subscriber = { email, firstname: firstName, lastname: lastName, groups: [groupId], trigger_automation: true };
     const lookup = await senderFetch(token, `/subscribers/${encodeURIComponent(email)}`);
     if (!lookup.ok && lookup.status !== 404) throw new Error("Sender subscriber lookup failed");
     const response = await senderFetch(token, lookup.ok ? `/subscribers/${encodeURIComponent(email)}` : "/subscribers", {
       method: lookup.ok ? "PATCH" : "POST", body: JSON.stringify(subscriber),
     });
     if (!response.ok) throw new Error(`Sender subscriber request failed with ${response.status}`);
+
+    const eventResponse = await senderFetch(token, "/events", {
+      method: "POST",
+      body: JSON.stringify({
+        subscriber: { email },
+        type: "run_rentless_waitlist_submission",
+        properties: {
+          company,
+          software_interest: interest,
+          team_size: teamSize,
+          current_software: currentSoftware || "Not provided",
+          marketing_consent: true,
+          submitted_at: new Date().toISOString(),
+        },
+      }),
+    });
+    if (!eventResponse.ok) throw new Error(`Sender waitlist event failed with ${eventResponse.status}`);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Waitlist submission failed", error instanceof Error ? error.message : "Unknown Sender error");

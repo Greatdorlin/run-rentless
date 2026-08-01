@@ -31,7 +31,7 @@ Add `src/app/blog/page.tsx` for the index and `src/app/blog/[slug]/page.tsx` for
 
 ## Waitlist submission status
 
-The waitlist posts to `src/app/api/waitlist/route.ts`, which validates required fields and consent, rejects cross-origin requests, includes a honeypot, and creates or updates the subscriber in Sender. Company, interest, team size, and current-software values are stored in dedicated Sender custom fields and the subscriber is added to the `Run Rentless Waitlist` group.
+The waitlist posts to `src/app/api/waitlist/route.ts`, which validates required fields and consent, rejects cross-origin requests, includes a honeypot, and creates or updates the subscriber in Sender. The subscriber is added to the `Run Rentless Waitlist` group, while company, interest, team size, current software, consent, and submission time are recorded as a `run_rentless_waitlist_submission` event on that subscriber.
 
 Set `SENDER_API` as a server-only environment variable in Vercel Production and Preview. Never expose it through a `NEXT_PUBLIC_` variable or commit it to the repository. Local submissions return a clear unavailable response when the variable is absent.
 
