@@ -67,6 +67,7 @@ async function ensureProfileFields(token: string) {
   if (!list.ok) throw new Error(`Sender field lookup failed with ${list.status}`);
   const knownFields = itemsFrom(await list.json());
   const fieldNames: Partial<Record<keyof typeof PROFILE_FIELDS, string>> = {};
+  const diagnostics: Array<{ key: string; status: number; details: string }> = [];
 
   for (const [key, definition] of Object.entries(PROFILE_FIELDS) as Array<[keyof typeof PROFILE_FIELDS, (typeof PROFILE_FIELDS)[keyof typeof PROFILE_FIELDS]]>) {
     const existing = knownFields.find((item) => item.title === definition.title);
@@ -82,6 +83,7 @@ async function ensureProfileFields(token: string) {
     if (!created.ok) {
       const details = (await created.text()).slice(0, 300);
       console.error(`Sender profile field failed: ${key} (${created.status})`, details);
+      diagnostics.push({ key, status: created.status, details });
       continue;
     }
 
@@ -93,7 +95,7 @@ async function ensureProfileFields(token: string) {
     }
   }
 
-  return fieldNames;
+  return { fieldNames, diagnostics };
 }
 
 export async function POST(request: Request) {
@@ -123,7 +125,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const [groupId, fieldNames] = await Promise.all([ensureGroup(token), ensureProfileFields(token)]);
+    const [groupId, profileFieldSetup] = await Promise.all([ensureGroup(token), ensureProfileFields(token)]);
+    const { fieldNames, diagnostics } = profileFieldSetup;
     const submittedAt = new Date().toISOString();
     const fields = Object.fromEntries([
       fieldNames.company && [fieldNames.company, company],
@@ -157,7 +160,7 @@ export async function POST(request: Request) {
       }),
     });
     if (!eventResponse.ok) throw new Error(`Sender waitlist event failed with ${eventResponse.status}`);
-    return NextResponse.json({ ok: true, profileFieldsStored: Object.keys(fields).length });
+    return NextResponse.json({ ok: true, profileFieldsStored: Object.keys(fields).length, fieldDiagnostics: diagnostics });
   } catch (error) {
     console.error("Waitlist submission failed", error instanceof Error ? error.message : "Unknown Sender error");
     return NextResponse.json({ message: "We could not add you right now. Please try again in a moment." }, { status: 502 });
