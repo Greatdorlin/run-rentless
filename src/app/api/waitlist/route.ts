@@ -18,15 +18,23 @@ function clean(value: unknown, limit: number) {
 }
 
 function itemsFrom(payload: unknown): SenderItem[] {
-  if (!payload || typeof payload !== "object") return [];
-  const data = (payload as { data?: unknown }).data;
-  if (Array.isArray(data)) return data as SenderItem[];
-  if (data && typeof data === "object") {
-    const nested = (data as { data?: unknown }).data;
-    if (Array.isArray(nested)) return nested as SenderItem[];
-    if ("title" in data || "field_name" in data || "id" in data) return [data as SenderItem];
-  }
-  return [];
+  const found: SenderItem[] = [];
+  const visit = (value: unknown, depth: number) => {
+    if (!value || depth > 5) return;
+    if (Array.isArray(value)) {
+      value.forEach((item) => visit(item, depth + 1));
+      return;
+    }
+    if (typeof value !== "object") return;
+    const record = value as Record<string, unknown>;
+    if (typeof record.field_name === "string" || (typeof record.id === "string" && typeof record.title === "string")) {
+      found.push(record as SenderItem);
+      return;
+    }
+    Object.values(record).forEach((item) => visit(item, depth + 1));
+  };
+  visit(payload, 0);
+  return found;
 }
 
 async function senderFetch(token: string, path: string, init: RequestInit = {}) {
@@ -77,10 +85,11 @@ async function ensureProfileFields(token: string) {
       continue;
     }
 
-    const payload = await created.json() as { data?: SenderItem };
-    if (payload.data?.field_name) {
-      knownFields.push(payload.data);
-      fieldNames[key] = payload.data.field_name;
+    const payload = await created.json();
+    const createdField = itemsFrom(payload).find((item) => item.title === definition.title || Boolean(item.field_name));
+    if (createdField?.field_name) {
+      knownFields.push(createdField);
+      fieldNames[key] = createdField.field_name;
     }
   }
 
