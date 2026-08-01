@@ -9,7 +9,7 @@ const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-disp
 const body = Instrument_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://run-rentless.vercel.app"),
+  metadataBase: new URL("https://run-rentless-zeta.vercel.app"),
   title: { default: "Run Rentless | Private Business Software", template: "%s | Run Rentless" },
   description: "Private business software prepared for your organisation—done-for-you setup, predictable costs, and no compulsory per-user software rent.",
   applicationName: "Run Rentless",
