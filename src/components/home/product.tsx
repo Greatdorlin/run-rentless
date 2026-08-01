@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { launchIncludes, leadsDeskCapabilities } from "@/content/site";
+import { LeadsDeskPreview } from "./leads-desk-preview";
 
 export function Product() {
   return (
@@ -13,14 +14,7 @@ export function Product() {
           </div>
         </div>
         <div className="product__body">
-          <div className="product-preview" aria-label="Illustration of the Leads Desk workspace">
-            <div className="product-preview__nav"><span>LEADS DESK</span><span>Overview</span><span>Pipeline</span><span>Tasks</span></div>
-            <div className="product-preview__main">
-              <div className="product-preview__intro"><div><small>GOOD MORNING</small><strong>Your pipeline,<br />clearly in motion.</strong></div><span>+ New lead</span></div>
-              <div className="product-preview__stats"><div><span>OPEN LEADS</span><strong>248</strong></div><div><span>FOLLOW-UPS</span><strong>18</strong></div><div><span>PIPELINE</span><strong>₦42.8m</strong></div></div>
-              <div className="product-preview__chart"><span /><span /><span /><span /><span /><span /><span /></div>
-            </div>
-          </div>
+          <LeadsDeskPreview compact />
           <div className="product__details">
             <p className="product__lead">Keep leads, next actions, ownership, and opportunity value in one private workspace your team can actually use.</p>
             <div className="capability-grid">

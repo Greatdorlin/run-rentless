@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Link from "next/link";
 import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 import { Footer } from "@/components/site/footer";
 import { Header } from "@/components/site/header";
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a className="skip-link" href="#main-content">Skip to content</a>
         <Header />
         <main id="main-content">{children}</main>
+        <Link className="floating-waitlist" href="/#waitlist">Join the Waitlist <span aria-hidden="true">↗</span></Link>
         <Footer />
       </body>
     </html>

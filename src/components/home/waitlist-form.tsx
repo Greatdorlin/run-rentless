@@ -27,7 +27,6 @@ export function WaitlistForm() {
         <p className="eyebrow eyebrow--dark"><span /> Details saved</p>
         <h3>{name ? `${name.split(" ")[0]}, your` : "Your"} early-access details are ready.</h3>
         <p>This launch preview saves your details on this device only. Email delivery is not connected yet, so nothing has been sent to Run Rentless.</p>
-        <button className="text-button" type="button" onClick={() => setStatus("idle")}>Review or edit details →</button>
       </div>
     );
   }
@@ -44,6 +43,10 @@ export function WaitlistForm() {
         <label><span>Team size</span><select name="teamSize" required defaultValue=""><option value="" disabled>Choose a range</option>{teamSizes.map((option) => <option key={option}>{option}</option>)}</select></label>
       </div>
       <label><span>Current software <em>Optional</em></span><input name="currentSoftware" placeholder="What are you using today?" /></label>
+      <label className="consent-field">
+        <input name="marketingConsent" type="checkbox" required />
+        <span>I agree that Run Rentless may use these details for waitlist updates, private demos, and launch opportunities. I can opt out at any time.</span>
+      </label>
       <button className="button button--dark button--wide" type="submit">Save my early-access details <span aria-hidden="true">↗</span></button>
       <p className="form-privacy">Your information is intended only for Run Rentless products, demos, and launch opportunities. This preview stores entries locally until a secure submission service is connected.</p>
     </form>

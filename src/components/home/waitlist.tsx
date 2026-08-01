@@ -11,6 +11,10 @@ export function Waitlist() {
           <h2 id="waitlist-title">Be first to get Run Rentless.</h2>
           <p>Join the early group shaping simpler, private business software without compulsory per-user rent.</p>
           <ul>{benefits.map((benefit) => <li key={benefit}><span>✓</span>{benefit}</li>)}</ul>
+          <div className="waitlist__reassurance">
+            <strong>A considered launch list.</strong>
+            <p>We will use your details only for Run Rentless products, demos, and launch opportunities—not a noisy mailing list.</p>
+          </div>
         </div>
         <WaitlistForm />
       </div>

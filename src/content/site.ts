@@ -77,12 +77,11 @@ export const reasons = [
 ];
 
 export const comparison = [
-  ["Cost model", "Recurring per-user pricing", "One prepared private deployment"],
-  ["As the team grows", "Software cost often grows with seats", "No compulsory per-user software rent"],
-  ["Workspace", "Typically vendor-controlled infrastructure", "Private workspace and customer data"],
-  ["Setup", "Often self-serve or separately scoped", "Done-for-you configuration and launch"],
-  ["Hosting", "Included while the subscription is active", "24 months included with eligible packages"],
-  ["If payments stop", "Access can end with the subscription", "Installed version is not disabled solely for ending support"],
+  ["What you pay for", "A recurring service, often priced for every user", "A defined implementation price for a prepared private deployment"],
+  ["When your team grows", "The software bill can climb automatically with seats", "Add people without compulsory per-user software rent"],
+  ["Getting ready", "Setup is often self-serve or separately scoped", "Your agreed workspace, access, forms, and launch are prepared for you"],
+  ["Where work lives", "A vendor-controlled, multi-customer service model", "A private workspace and customer data for your organisation"],
+  ["After included hosting", "Access normally depends on keeping the subscription active", "Renew hosting, move to compatible infrastructure, or choose optional support"],
 ];
 
 export const faqs = [
@@ -121,6 +120,7 @@ export const interestOptions = [
   "Product and knowledge management",
   "Internal business tools",
   "Workflow automation",
+  "Email marketing and automation tool",
   "Other",
 ];
 

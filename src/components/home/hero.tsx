@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { trustPoints } from "@/content/site";
+import { LeadsDeskPreview } from "./leads-desk-preview";
 
 export function Hero() {
   return (
@@ -19,29 +20,10 @@ export function Hero() {
           <p className="hero__note">Private deployment <i /> 24 months hosting included <i /> Continued use of the installed version</p>
         </div>
 
-        <div className="hero-visual reveal reveal--delay" aria-label="Illustration of a private Run Rentless business workspace">
+        <div className="hero-visual reveal reveal--delay">
           <div className="orbit orbit--one" aria-hidden="true" />
           <div className="orbit orbit--two" aria-hidden="true" />
-          <div className="workspace-card">
-            <div className="workspace-card__top">
-              <div>
-                <span className="signal" />
-                <p>PRIVATE WORKSPACE</p>
-              </div>
-              <span className="workspace-card__status">LIVE</span>
-            </div>
-            <div className="workspace-card__headline">
-              <p>YOUR BUSINESS SYSTEM</p>
-              <strong>One space.<br />Your rules.</strong>
-            </div>
-            <div className="workspace-card__metric">
-              <span>PER-USER RENT</span>
-              <strong>₦0<span> compulsory</span></strong>
-            </div>
-            <div className="workspace-card__footer">
-              <span>CONTROL</span><span>PRIVACY</span><span>CONTINUITY</span>
-            </div>
-          </div>
+          <LeadsDeskPreview />
           <div className="visual-tag visual-tag--top"><span>24</span> months<br />hosting included</div>
           <div className="visual-tag visual-tag--bottom"><span>✓</span> Setup handled</div>
         </div>
