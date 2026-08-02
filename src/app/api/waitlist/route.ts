@@ -65,6 +65,30 @@ async function senderFetch(token: string, path: string, init: RequestInit = {}) 
   });
 }
 
+async function listProfileFields(token: string) {
+  const fields: SenderItem[] = [];
+
+  for (let page = 1; page <= 20; page += 1) {
+    const response = await senderFetch(token, `/fields?limit=10&page=${page}`);
+    if (!response.ok) throw new Error(`Sender field lookup failed with ${response.status}`);
+    const payload = await response.json() as {
+      meta?: { last_page?: number };
+      has_more_resources?: boolean;
+    };
+    const pageFields = itemsFrom(payload);
+    fields.push(...pageFields);
+
+    const lastPage = payload.meta?.last_page;
+    if ((typeof lastPage === "number" && page >= lastPage) ||
+        (payload.has_more_resources === false) ||
+        pageFields.length === 0) {
+      break;
+    }
+  }
+
+  return fields;
+}
+
 async function ensureGroup(token: string) {
   const list = await senderFetch(token, "/groups?limit=100");
   if (!list.ok) throw new Error("Sender group lookup failed");
@@ -83,9 +107,7 @@ async function ensureGroup(token: string) {
 }
 
 async function ensureProfileFields(token: string) {
-  const list = await senderFetch(token, "/fields?limit=100");
-  if (!list.ok) throw new Error(`Sender field lookup failed with ${list.status}`);
-  const knownFields = itemsFrom(await list.json());
+  const knownFields = await listProfileFields(token);
   const fieldNames: Partial<Record<keyof typeof PROFILE_FIELDS, string>> = {};
   const diagnostics: Array<{ key: string; status: number; details: string }> = [];
 
@@ -107,12 +129,9 @@ async function ensureProfileFields(token: string) {
     if (!created.ok) {
       const details = (await created.text()).slice(0, 300);
       if (created.status === 400 && details.includes("already exists")) {
-        const refreshed = await senderFetch(token, "/fields?limit=100");
-        const recovered = refreshed.ok
-          ? itemsFrom(await refreshed.json()).find(
-              (item) => (item.title || item.name)?.trim().toLowerCase() === definition.title.toLowerCase(),
-            )
-          : undefined;
+        const recovered = (await listProfileFields(token)).find(
+          (item) => (item.title || item.name)?.trim().toLowerCase() === definition.title.toLowerCase(),
+        );
         const recoveredFieldName = recovered?.field_name ||
           (recovered?.name?.startsWith("{$") ? recovered.name : undefined);
         if (recoveredFieldName) {
