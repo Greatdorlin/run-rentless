@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 const SENDER_BASE_URL = "https://api.sender.net/v2";
 const GROUP_TITLE = "Run Rentless Waitlist";
 const PROFILE_FIELDS = {
-  company: { title: "Company", type: "text" },
-  interest: { title: "Software interest", type: "text" },
-  teamSize: { title: "Team size", type: "text" },
-  currentSoftware: { title: "Current software", type: "text" },
-  consent: { title: "Marketing consent", type: "text" },
-  submittedAt: { title: "Waitlist submitted at", type: "datetime" },
+  company: { title: "Company", type: "text", fieldName: "{$company}" },
+  interest: { title: "Software interest", type: "text", fieldName: "{$software_interest}" },
+  teamSize: { title: "Team size", type: "text", fieldName: "{$team_size}" },
+  currentSoftware: { title: "Current software", type: "text", fieldName: "{$current_software}" },
+  consent: { title: "Marketing consent", type: "text", fieldName: "{$marketing_consent}" },
+  submittedAt: { title: "Waitlist submitted at", type: "datetime", fieldName: "{$waitlist_submitted_at}" },
 } as const;
 
 type SenderItem = { id?: string; title?: string; name?: string; field_name?: string };
@@ -125,7 +125,7 @@ async function ensureProfileFields(token: string) {
 
     const created = await senderFetch(token, "/fields", {
       method: "POST",
-      body: JSON.stringify(definition),
+      body: JSON.stringify({ title: definition.title, type: definition.type }),
     });
     if (!created.ok) {
       const details = (await created.text()).slice(0, 300);
@@ -139,6 +139,8 @@ async function ensureProfileFields(token: string) {
           fieldNames[key] = recoveredFieldName;
           continue;
         }
+        fieldNames[key] = definition.fieldName;
+        continue;
       }
       console.error(`Sender profile field failed: ${key} (${created.status})`, details);
       diagnostics.push({ key, status: created.status, details });
@@ -150,6 +152,8 @@ async function ensureProfileFields(token: string) {
     if (createdField?.field_name) {
       knownFields.push(createdField);
       fieldNames[key] = createdField.field_name;
+    } else {
+      fieldNames[key] = definition.fieldName;
     }
   }
 
