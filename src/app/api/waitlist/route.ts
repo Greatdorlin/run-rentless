@@ -79,9 +79,10 @@ async function listProfileFields(token: string) {
     fields.push(...pageFields);
 
     const lastPage = payload.meta?.last_page;
-    if ((typeof lastPage === "number" && page >= lastPage) ||
-        (payload.has_more_resources === false) ||
-        pageFields.length === 0) {
+    const reachedEnd = typeof lastPage === "number"
+      ? page >= lastPage
+      : payload.has_more_resources === false || pageFields.length === 0;
+    if (reachedEnd) {
       break;
     }
   }
