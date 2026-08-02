@@ -27,11 +27,31 @@ function itemsFrom(payload: unknown): SenderItem[] {
     }
     if (typeof value !== "object") return;
     const record = value as Record<string, unknown>;
-    if (typeof record.field_name === "string" || (typeof record.id === "string" && typeof record.title === "string")) {
+    if (
+      typeof record.field_name === "string" ||
+      (typeof record.title === "string" &&
+        (typeof record.id === "string" || typeof record.name === "string"))
+    ) {
       found.push(record as SenderItem);
       return;
     }
-    Object.values(record).forEach((item) => visit(item, depth + 1));
+    Object.entries(record).forEach(([key, item]) => {
+      if (/^\{\$[^}]+\}$/.test(key) && typeof item === "string") {
+        found.push({ field_name: key, title: item });
+      } else if (/^\{\$[^}]+\}$/.test(key) && item && typeof item === "object") {
+        const field = item as Record<string, unknown>;
+        found.push({
+          field_name: key,
+          title:
+            typeof field.title === "string"
+              ? field.title
+              : typeof field.name === "string"
+                ? field.name
+                : undefined,
+        });
+      }
+      visit(item, depth + 1);
+    });
   };
   visit(payload, 0);
   return found;
@@ -63,16 +83,20 @@ async function ensureGroup(token: string) {
 }
 
 async function ensureProfileFields(token: string) {
-  const list = await senderFetch(token, "/fields");
+  const list = await senderFetch(token, "/fields?limit=100");
   if (!list.ok) throw new Error(`Sender field lookup failed with ${list.status}`);
   const knownFields = itemsFrom(await list.json());
   const fieldNames: Partial<Record<keyof typeof PROFILE_FIELDS, string>> = {};
   const diagnostics: Array<{ key: string; status: number; details: string }> = [];
 
   for (const [key, definition] of Object.entries(PROFILE_FIELDS) as Array<[keyof typeof PROFILE_FIELDS, (typeof PROFILE_FIELDS)[keyof typeof PROFILE_FIELDS]]>) {
-    const existing = knownFields.find((item) => item.title === definition.title);
-    if (existing?.field_name) {
-      fieldNames[key] = existing.field_name;
+    const existing = knownFields.find(
+      (item) => (item.title || item.name)?.trim().toLowerCase() === definition.title.toLowerCase(),
+    );
+    const existingFieldName = existing?.field_name ||
+      (existing?.name?.startsWith("{$") ? existing.name : undefined);
+    if (existingFieldName) {
+      fieldNames[key] = existingFieldName;
       continue;
     }
 
@@ -82,6 +106,20 @@ async function ensureProfileFields(token: string) {
     });
     if (!created.ok) {
       const details = (await created.text()).slice(0, 300);
+      if (created.status === 400 && details.includes("already exists")) {
+        const refreshed = await senderFetch(token, "/fields?limit=100");
+        const recovered = refreshed.ok
+          ? itemsFrom(await refreshed.json()).find(
+              (item) => (item.title || item.name)?.trim().toLowerCase() === definition.title.toLowerCase(),
+            )
+          : undefined;
+        const recoveredFieldName = recovered?.field_name ||
+          (recovered?.name?.startsWith("{$") ? recovered.name : undefined);
+        if (recoveredFieldName) {
+          fieldNames[key] = recoveredFieldName;
+          continue;
+        }
+      }
       console.error(`Sender profile field failed: ${key} (${created.status})`, details);
       diagnostics.push({ key, status: created.status, details });
       continue;
@@ -160,7 +198,10 @@ export async function POST(request: Request) {
       }),
     });
     if (!eventResponse.ok) throw new Error(`Sender waitlist event failed with ${eventResponse.status}`);
-    return NextResponse.json({ ok: true, profileFieldsStored: Object.keys(fields).length, fieldDiagnostics: diagnostics });
+    if (diagnostics.length || Object.keys(fields).length !== Object.keys(PROFILE_FIELDS).length) {
+      throw new Error(`Sender profile fields incomplete (${Object.keys(fields).length}/${Object.keys(PROFILE_FIELDS).length})`);
+    }
+    return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Waitlist submission failed", error instanceof Error ? error.message : "Unknown Sender error");
     return NextResponse.json({ message: "We could not add you right now. Please try again in a moment." }, { status: 502 });
