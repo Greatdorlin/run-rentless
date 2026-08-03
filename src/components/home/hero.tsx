@@ -8,7 +8,7 @@ export function Hero() {
       <div className="hero__glow" aria-hidden="true" />
       <div className="shell hero__layout">
         <div className="hero__copy reveal">
-          <p className="eyebrow"><span /> Private business software</p>
+          <p className="eyebrow"><span /> Subscription-free business software</p>
           <h1 id="hero-title">Stop renting the software your business depends on.</h1>
           <p className="hero__intro">
             Run Rentless gives your organisation private business software, prepared and launched for you—without compulsory per-user rent or a shared customer database.
