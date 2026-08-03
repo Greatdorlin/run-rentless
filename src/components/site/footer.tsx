@@ -17,7 +17,7 @@ export function Footer() {
       <div className="shell site-footer__top">
         <div>
           <Logo />
-          <p>Private business software prepared for your organisation.</p>
+          <p>Subscription-free business software prepared and deployed for your team.</p>
         </div>
         <nav aria-label="Footer navigation">
           {footerLinks.map(([label, href]) => (
@@ -26,7 +26,7 @@ export function Footer() {
         </nav>
       </div>
       <div className="shell site-footer__bottom">
-        <p>Private deployment. Predictable ownership. No compulsory per-user software rent.</p>
+        <p>Prepared for your team. Clear implementation price. No required per-user software subscription.</p>
         <p>© {new Date().getFullYear()} Run Rentless.</p>
       </div>
     </footer>

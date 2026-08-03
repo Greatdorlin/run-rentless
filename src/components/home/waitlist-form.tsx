@@ -60,7 +60,7 @@ export function WaitlistForm() {
       <label><span>Current software <em>Optional</em></span><input name="currentSoftware" placeholder="What are you using today?" /></label>
       <label className="consent-field">
         <input name="marketingConsent" type="checkbox" required />
-        <span>I agree that Run Rentless may use these details for waitlist updates, private demos, and launch opportunities. I can opt out at any time.</span>
+        <span>I agree that Run Rentless may use these details for waitlist updates, product demos, and launch opportunities. I can opt out at any time.</span>
       </label>
       <label className="honeypot-field" aria-hidden="true"><span>Website</span><input name="companyWebsite" tabIndex={-1} autoComplete="off" /></label>
       {status === "error" && <p className="form-error" role="alert">{error}</p>}

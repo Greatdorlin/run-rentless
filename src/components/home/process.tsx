@@ -7,9 +7,9 @@ export function Process() {
         <div className="section-heading split-heading">
           <div>
             <p className="eyebrow"><span /> How it works</p>
-            <h2 id="process-title">From decision to daily use, without the technical maze.</h2>
+            <h2 id="process-title">Choose your software. We prepare it for your team.</h2>
           </div>
-          <p>You tell us how the work should flow. We handle the preparation and help your team arrive at a confident launch.</p>
+          <p>The system is already built. We set up a dedicated version for your organisation, check it with you, and help your team start using it.</p>
         </div>
         <ol className="process-list">
           {processSteps.map(([title, body], index) => (

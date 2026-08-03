@@ -6,11 +6,11 @@ export function Difference() {
       <div className="shell">
         <div className="section-heading split-heading">
           <div>
-            <p className="eyebrow"><span /> A different cost curve</p>
-            <h2 id="difference-title">Growth should add opportunity—not automatic software rent.</h2>
+            <p className="eyebrow"><span /> A simpler way to buy software</p>
+            <h2 id="difference-title">Grow your team without growing a per-user software bill.</h2>
           </div>
           <p>
-            Instead of renting seats indefinitely, purchase a complete deployment that is prepared around your organisation and ready for your team.
+            Choose a ready-made system. We prepare and deploy it for your organisation for an agreed implementation price.
           </p>
         </div>
         <div className="difference-list">

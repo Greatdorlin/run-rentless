@@ -7,8 +7,8 @@ export function Ownership() {
         <div className="shell ownership__layout">
           <div className="ownership__sticky">
             <p className="eyebrow"><span /> Why Run Rentless</p>
-            <h2 id="ownership-title">Software that feels closer to an asset.</h2>
-            <p>You get a complete working system, a private place for your data, and a clearer path after launch.</p>
+            <h2 id="ownership-title">Software your team can keep using.</h2>
+            <p>You get a complete working system, a dedicated place for your data, and clear choices after launch.</p>
           </div>
           <ol className="reasons-list">
             {reasons.map((reason, index) => (
@@ -24,11 +24,11 @@ export function Ownership() {
           <div className="hosting__copy">
             <p className="eyebrow"><span /> What happens next</p>
             <h2 id="hosting-title">Your options stay open.</h2>
-            <p>After the included period, renew hosting, move to compatible infrastructure, or choose support. You do not repurchase the software merely because included hosting ends.</p>
+            <p>After the included period, renew hosting, move to compatible hosting, or choose optional support. You do not have to buy the software again because included hosting has ended.</p>
           </div>
           <div className="hosting__support">
             <span>OPTIONAL SUPPORT</span>
-            <p>Choose help with updates, migrations, recovery, or future improvements. The installed version is not disabled solely because support is inactive.</p>
+            <p>Choose help with updates, moving the system, recovery, or future improvements. The installed version is not switched off because you stop optional support.</p>
           </div>
         </div>
       </section>
@@ -36,8 +36,8 @@ export function Ownership() {
       <section className="section comparison" aria-labelledby="comparison-title">
         <div className="shell">
           <div className="section-heading split-heading">
-            <div><p className="eyebrow"><span /> A clearer comparison</p><h2 id="comparison-title">Renting access vs. preparing your own workspace.</h2></div>
-            <p>Run Rentless changes the software cost model while keeping real-world hosting, support, and third-party costs clear.</p>
+            <div><p className="eyebrow"><span /> A clearer comparison</p><h2 id="comparison-title">Per-user subscriptions vs. Run Rentless.</h2></div>
+            <p>The software is subscription-free. Hosting, optional support, and third-party services remain separate costs.</p>
           </div>
           <div className="comparison-table" role="table" aria-label="Traditional SaaS and Run Rentless comparison">
             <div className="comparison-row comparison-row--header" role="row"><span role="columnheader">The question</span><span role="columnheader">Traditional SaaS</span><span role="columnheader">Run Rentless</span></div>

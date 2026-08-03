@@ -8,12 +8,12 @@ export default function ContactPage() {
     <section className="contact-page shell">
       <div>
         <p className="eyebrow"><span /> Start simply</p>
-        <h1>Tell us what your team should stop wrestling with.</h1>
+        <h1>Choose what your team needs help with.</h1>
       </div>
       <div className="contact-page__card">
-        <p>Run Rentless is preparing its private launch. The best next step is to save your early-access details and choose the product area you care about.</p>
+        <p>Join the early-access list and choose the type of ready-made business software your team needs.</p>
         <Link className="button button--dark" href="/#waitlist">Go to the waitlist <span aria-hidden="true">↗</span></Link>
-        <small>The current form is a transparent client-side preview and does not yet transmit entries.</small>
+        <small>We will only contact you about relevant Run Rentless products, demos, and launch opportunities.</small>
       </div>
     </section>
   );

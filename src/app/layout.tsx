@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 import { Footer } from "@/components/site/footer";
+import { FloatingWaitlist } from "@/components/site/floating-waitlist";
 import { Header } from "@/components/site/header";
 import "./globals.css";
 
@@ -9,21 +9,21 @@ const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-disp
 const body = Instrument_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://run-rentless-zeta.vercel.app"),
-  title: { default: "Run Rentless | Private Business Software", template: "%s | Run Rentless" },
-  description: "Private business software prepared for your organisation—done-for-you setup, predictable costs, and no compulsory per-user software rent.",
+  metadataBase: new URL("https://www.runrentless.com"),
+  title: { default: "Run Rentless | Subscription-Free Business Software", template: "%s | Run Rentless" },
+  description: "Ready-made business software prepared and deployed for your team, without compulsory per-user subscription fees.",
   applicationName: "Run Rentless",
-  keywords: ["private business software", "CRM", "lead management", "no per-user pricing", "business tools"],
+  keywords: ["subscription-free business software", "CRM", "lead management", "no per-user pricing", "business tools"],
   authors: [{ name: "Run Rentless" }],
   creator: "Run Rentless",
   openGraph: {
     title: "Stop Renting the Software Your Business Depends On",
-    description: "Private business software prepared and launched for your organisation.",
+    description: "Ready-made business software prepared and deployed for your team, without compulsory per-user subscription fees.",
     type: "website",
     locale: "en_NG",
     siteName: "Run Rentless",
   },
-  twitter: { card: "summary_large_image", title: "Run Rentless", description: "Private business software prepared for your organisation." },
+  twitter: { card: "summary_large_image", title: "Run Rentless", description: "Subscription-free business software prepared and deployed for your team." },
 };
 
 export const viewport: Viewport = { themeColor: "#031e19", colorScheme: "dark" };
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a className="skip-link" href="#main-content">Skip to content</a>
         <Header />
         <main id="main-content">{children}</main>
-        <Link className="floating-waitlist" href="/#waitlist">Join the Waitlist <span aria-hidden="true">↗</span></Link>
+        <FloatingWaitlist />
         <Footer />
       </body>
     </html>

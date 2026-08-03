@@ -11,13 +11,13 @@ export function Hero() {
           <p className="eyebrow"><span /> Subscription-free business software</p>
           <h1 id="hero-title">Stop renting the software your business depends on.</h1>
           <p className="hero__intro">
-            Run Rentless gives your organisation private business software, prepared and launched for you—without the headache of climbing subscription fees as you grow.
+            Run Rentless gives your organisation subscription-free business software that is already built, then prepared and deployed for your team—without compulsory per-user fees as you grow.
           </p>
           <div className="hero__actions">
             <Link className="button" href="#waitlist">Join the Waitlist <span aria-hidden="true">↗</span></Link>
             <Link className="text-link" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></Link>
           </div>
-          <p className="hero__note">Private deployment <i /> 24 months hosting included <i /> Continued use of the installed version</p>
+          <p className="hero__note">Ready-made system <i /> Prepared for your team <i /> 24 months hosting included</p>
         </div>
 
         <div className="hero-visual reveal reveal--delay">

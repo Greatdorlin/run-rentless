@@ -10,13 +10,13 @@ export function Product() {
           <p className="eyebrow eyebrow--dark"><span /> Featured product 01</p>
           <div className="product__title-row">
             <h2 id="product-title">Leads Desk</h2>
-            <p>Private lead management without per-user CRM pricing.</p>
+            <p>Lead management without a required CRM subscription for every user.</p>
           </div>
         </div>
         <div className="product__body">
           <LeadsDeskPreview compact />
           <div className="product__details">
-            <p className="product__lead">Keep leads, next actions, ownership, and opportunity value in one private workspace your team can actually use.</p>
+            <p className="product__lead">Keep leads, next actions, ownership, and opportunity value in one dedicated workspace your team can actually use.</p>
             <div className="capability-grid">
               {leadsDeskCapabilities.map((capability) => <span key={capability}>{capability}</span>)}
             </div>
