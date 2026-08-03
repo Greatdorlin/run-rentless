@@ -11,7 +11,7 @@ export function Hero() {
           <p className="eyebrow"><span /> Subscription-free business software</p>
           <h1 id="hero-title">Stop renting the software your business depends on.</h1>
           <p className="hero__intro">
-            Run Rentless gives your organisation private business software, prepared and launched for you—without compulsory per-user rent or a shared customer database.
+            Run Rentless gives your organisation private business software, prepared and launched for you—without the headaches of climbing subscription fees as you grow.
           </p>
           <div className="hero__actions">
             <Link className="button" href="#waitlist">Join the Waitlist <span aria-hidden="true">↗</span></Link>
