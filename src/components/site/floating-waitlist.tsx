@@ -25,11 +25,11 @@ export function FloatingWaitlist() {
   return (
     <Link
       className={`floating-waitlist${visible ? " floating-waitlist--visible" : ""}`}
-      href="/#waitlist"
+      href="/#audit"
       aria-hidden={!visible}
       tabIndex={visible ? undefined : -1}
     >
-      Join the Waitlist <span aria-hidden="true">↗</span>
+      Start Free Audit <span aria-hidden="true">↗</span>
     </Link>
   );
 }

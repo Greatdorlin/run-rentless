@@ -1,9 +1,8 @@
 export const navigation = [
   { label: "Home", href: "/" },
-  { label: "Products", href: "/#products" },
+  { label: "Free Audit", href: "/#audit" },
   { label: "How It Works", href: "/#how-it-works" },
-  { label: "Why Run Rentless", href: "/#why-run-rentless" },
-  { label: "FAQ", href: "/#faq" },
+  { label: "The Report", href: "/#report" },
 ];
 
 export const trustPoints = [

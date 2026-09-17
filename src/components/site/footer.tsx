@@ -2,10 +2,9 @@ import Link from "next/link";
 import { Logo } from "./logo";
 
 const footerLinks = [
-  ["Products", "/#products"],
+  ["Free Audit", "/#audit"],
   ["How It Works", "/#how-it-works"],
-  ["FAQ", "/#faq"],
-  ["Waitlist", "/#waitlist"],
+  ["The Report", "/#report"],
   ["Privacy", "/privacy"],
   ["Terms", "/terms"],
   ["Contact", "/contact"],
@@ -17,7 +16,7 @@ export function Footer() {
       <div className="shell site-footer__top">
         <div>
           <Logo />
-          <p>Subscription-free business software prepared and deployed for your team.</p>
+          <p>See what your software costs—and which workflows may be worth owning.</p>
         </div>
         <nav aria-label="Footer navigation">
           {footerLinks.map(([label, href]) => (

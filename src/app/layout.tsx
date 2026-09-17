@@ -10,15 +10,15 @@ const body = Instrument_Sans({ subsets: ["latin"], variable: "--font-body", disp
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.runrentless.com"),
-  title: { default: "Run Rentless | Subscription-Free Business Software", template: "%s | Run Rentless" },
-  description: "Ready-made business software prepared and deployed for your team, without compulsory per-user subscription fees.",
+  title: { default: "Free Software Rent Audit | Run Rentless", template: "%s | Run Rentless" },
+  description: "Add the tools your company pays for and see what may be worth keeping, owning or extending—using your real numbers, not fabricated savings.",
   applicationName: "Run Rentless",
   keywords: ["subscription-free business software", "CRM", "lead management", "no per-user pricing", "business tools"],
   authors: [{ name: "Run Rentless" }],
   creator: "Run Rentless",
   openGraph: {
-    title: "Stop Renting the Software Your Business Depends On",
-    description: "Ready-made business software prepared and deployed for your team, without compulsory per-user subscription fees.",
+    title: "Free Software Rent Audit | Run Rentless",
+    description: "See what you spend, what probably makes sense to keep, and which workflows may be worth owning instead.",
     type: "website",
     locale: "en_NG",
     siteName: "Run Rentless",

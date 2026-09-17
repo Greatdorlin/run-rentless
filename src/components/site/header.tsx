@@ -45,8 +45,8 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <Link className="button button--small" href="/#waitlist" onClick={() => setOpen(false)}>
-            Join the Waitlist
+          <Link className="button button--small" href="/#audit" onClick={() => setOpen(false)}>
+            Start Free Audit
           </Link>
         </nav>
       </div>
