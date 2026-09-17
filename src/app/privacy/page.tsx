@@ -8,11 +8,11 @@ export default function PrivacyPage() {
     <article className="legal-page shell">
       <p className="eyebrow"><span /> Website information</p>
       <h1>Privacy, in plain language.</h1>
-      <p className="legal-page__lede">When you join the waitlist, Run Rentless receives the details you submit so we can contact you about relevant products, product demos, and launch opportunities.</p>
-      <section><h2>What we collect</h2><p>We collect your name, work email, company, team size, software interests, and any current software you choose to share. Please do not submit confidential customer records or sensitive operational data.</p></section>
-      <section><h2>How we use it</h2><p>We use the information only for Run Rentless products, demos, launch opportunities, and related conversations you request. Sender securely processes waitlist submissions and communications on our behalf.</p></section>
+      <p className="legal-page__lede">You can see your audit results without giving us an email address. When you ask for a report, we receive the contact details and audit answers you choose to submit.</p>
+      <section><h2>What we collect</h2><p>We collect your first and last names, email, company, team size, software names, costs, usage, workflow answers and any investment or engagement preferences you provide. Please do not include customer records, passwords or other sensitive information in free-text answers.</p></section>
+      <section><h2>How we use it</h2><p>We use your submission to prepare and send your audit report and respond to enquiries. Sender processes and stores the submitted contact details, audit results and preferences on our behalf. Relevant service follow-up is optional and requires the separate permission offered on the form. Waitlist submissions are used for the products, demos and launch updates requested.</p></section>
       <section><h2>Your choices</h2><p>You can unsubscribe from marketing messages at any time using the link in an email, or contact Run Rentless to ask about access, correction, or deletion of your details.</p></section>
-      <p><Link className="text-link" href="/#waitlist">Return to the waitlist →</Link></p>
+      <p><Link className="text-link" href="/#audit">Start the free audit →</Link></p>
     </article>
   );
 }

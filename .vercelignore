@@ -1,0 +1,5 @@
+artifacts
+.env*
+.git
+.next
+node_modules

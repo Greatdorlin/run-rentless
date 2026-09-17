@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     locale: "en_NG",
     siteName: "Run Rentless",
   },
-  twitter: { card: "summary_large_image", title: "Run Rentless", description: "Subscription-free business software prepared and deployed for your team." },
+  twitter: { card: "summary_large_image", title: "Run Rentless", description: "See what your software costs, what is worth keeping, and which workflows deserve a closer look." },
 };
 
 export const viewport: Viewport = { themeColor: "#031e19", colorScheme: "dark" };

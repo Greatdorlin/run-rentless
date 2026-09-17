@@ -4,6 +4,7 @@ export const navigation = [
   { label: "Leads Desk", href: "/#leads-desk" },
   { label: "For Companies", href: "/#for-companies" },
   { label: "About", href: "/#assessment" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export const trustPoints = [

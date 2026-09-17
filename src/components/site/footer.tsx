@@ -18,7 +18,7 @@ export function Footer() {
       <div className="shell site-footer__top">
         <div>
           <Logo />
-          <p>See what your software costs—and which workflows may be worth owning.</p>
+          <p>See what your software costs and which workflows may be worth owning.</p>
         </div>
         <nav aria-label="Footer navigation">
           {footerLinks.map(([label, href]) => (
