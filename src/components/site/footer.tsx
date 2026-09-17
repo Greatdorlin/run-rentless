@@ -4,7 +4,9 @@ import { Logo } from "./logo";
 const footerLinks = [
   ["Free Audit", "/#audit"],
   ["How It Works", "/#how-it-works"],
-  ["The Report", "/#report"],
+  ["Leads Desk", "/#leads-desk"],
+  ["For Companies", "/#for-companies"],
+  ["About", "/#assessment"],
   ["Privacy", "/privacy"],
   ["Terms", "/terms"],
   ["Contact", "/contact"],
@@ -25,7 +27,7 @@ export function Footer() {
         </nav>
       </div>
       <div className="shell site-footer__bottom">
-        <p>Prepared for your team. Clear implementation price. No required per-user software subscription.</p>
+        <p>Keep what works. Investigate what does not. Own what makes sense.</p>
         <p>© {new Date().getFullYear()} Run Rentless.</p>
       </div>
     </footer>

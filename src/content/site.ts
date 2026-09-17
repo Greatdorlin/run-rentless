@@ -1,8 +1,9 @@
 export const navigation = [
-  { label: "Home", href: "/" },
   { label: "Free Audit", href: "/#audit" },
   { label: "How It Works", href: "/#how-it-works" },
-  { label: "The Report", href: "/#report" },
+  { label: "Leads Desk", href: "/#leads-desk" },
+  { label: "For Companies", href: "/#for-companies" },
+  { label: "About", href: "/#assessment" },
 ];
 
 export const trustPoints = [
