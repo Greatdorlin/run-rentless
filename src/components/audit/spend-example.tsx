@@ -14,8 +14,8 @@ export function SpendExample() {
     return () => window.clearInterval(timer);
   }, [paused]);
   return <div className="audit-hero__preview">
-    <span>Software costs add up.</span>
-    <strong aria-label="Illustrative monthly software spend">${amount.toLocaleString("en-US")}</strong>
+    <span>Small subscriptions add up.</span>
+    <strong aria-label="Illustrative monthly tool costs">${amount.toLocaleString("en-US")}</strong>
     <small>Example monthly bill. Not your audit total.</small>
     <p className="example-three-year">That is <b>${(amount * 36).toLocaleString("en-US")}</b> over three years.</p>
     <button type="button" className="example-pause" aria-pressed={paused} onClick={() => setPaused((value) => !value)}>{paused ? "Resume example" : "Pause example"}</button>

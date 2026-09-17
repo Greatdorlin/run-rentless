@@ -6,7 +6,7 @@ const footerLinks = [
   ["How It Works", "/#how-it-works"],
   ["Leads Desk", "/#leads-desk"],
   ["For Companies", "/#for-companies"],
-  ["About", "/#assessment"],
+  ["About", "/#about"],
   ["Privacy Policy", "/privacy"],
   ["Terms", "/terms"],
   ["Contact", "/contact"],
@@ -18,7 +18,7 @@ export function Footer() {
       <div className="shell site-footer__top">
         <div>
           <Logo />
-          <p>See what your software costs and which workflows may be worth owning.</p>
+          <p>Review your business tools. Cut wasted subscriptions. Build what is missing.</p>
         </div>
         <nav aria-label="Footer navigation">
           {footerLinks.map(([label, href]) => (
