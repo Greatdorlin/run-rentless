@@ -23,19 +23,33 @@ export function money(value: number, currency: string) {
   return `${prefix}${value.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }
 
+export const hasRequest = (tool: AuditTool) => Boolean(tool.wish.trim()) && !/^(none|nothing|no|n\/?a|not sure|all good|nothing really)[.!\s]*$/i.test(tool.wish.trim());
+export const hasWorkflowAnswer = (tool: AuditTool) => hasRequest(tool) || ["Rarely", "Sometimes", "Constantly"].includes(tool.workaround);
+
 export function verdict(tool: AuditTool): Verdict {
-  const friction = tool.wish.trim() !== "" || tool.workaround === "Constantly";
-  if (tool.category === "Automation") return friction ? "BUILD AROUND" : "KEEP";
-  if (friction) return "LOOK CLOSER";
-  if (tool.workaround === "Sometimes") return "BUILD AROUND";
+  const friction = hasRequest(tool) || ["Sometimes", "Constantly"].includes(tool.workaround);
+  // Rebuilding a connector network or core business infrastructure needs more evidence.
+  if (["Automation", "Finance", "Documents", "Marketing & Email"].includes(tool.category)) return friction ? "BUILD AROUND" : "KEEP";
+  if (tool.workaround === "Constantly") return "LOOK CLOSER";
+  if (friction) return "BUILD AROUND";
   return "KEEP";
 }
 
 export function explanation(tool: AuditTool) {
-  if (tool.category === "Automation") return "Its value is connecting other products. Recreating that connector network is unlikely to make sense. Building around a specific gap or consolidating other tools may reduce its workload.";
-  if (verdict(tool) === "LOOK CLOSER") return "You identified a missing capability or frequent workarounds. That gives us a reason to investigate this workflow, but it does not yet establish that replacing the tool is worthwhile.";
-  if (verdict(tool) === "BUILD AROUND") return "You sometimes work around this tool. A focused extension may solve that problem while keeping the parts that already work.";
-  return "Your answers do not yet show a clear reason to replace this tool. Keep it for now. We have not assessed its value, alternatives or replacement cost in detail.";
+  if (!hasWorkflowAnswer(tool)) return "Not enough detail yet. You have not told us whether this tool meets your needs. Keep it in place while you review it; this is not a recommendation against replacement.";
+  const result = verdict(tool);
+  if (tool.category === "Scheduling") {
+    if (result === "LOOK CLOSER") return "You constantly work around your booking tool. Compare a better setup, another service and a custom booking workflow. Check calendar connections, reminders and running costs before choosing.";
+    if (result === "BUILD AROUND") return "Start by fixing the booking step that causes trouble. Settings, an integration or a small add-on may be enough. Consider replacement only if those cannot meet your needs.";
+    return "You rarely work around this booking tool and named no missing feature. Keep it for now. Before building your own, compare its actual bill with the cost of calendar connections, reminders and support.";
+  }
+  if (result === "LOOK CLOSER") return "You told us your team constantly works around this tool. Compare improving the setup, switching tools and owning this workflow. We need to check your data, integrations and running costs before recommending replacement.";
+  if (result === "BUILD AROUND") {
+    const reason = tool.workaround === "Constantly" ? "Your team constantly works around this tool." : hasRequest(tool) ? "You named something this tool could do better." : "Your team sometimes works around this tool.";
+    const caution = tool.category === "Automation" ? "Keep the existing connections where useful; focus on the step that is failing." : ["Finance", "Documents", "Marketing & Email"].includes(tool.category) ? "Check the services, data and obligations you rely on before replacing the whole platform." : "If that cannot solve it, assess a replacement.";
+    return `${reason} First check settings, integrations or a small add-on. ${caution}`;
+  }
+  return "You rarely work around this tool and named no missing feature. Keep it for now. We have not checked alternatives or the cost of replacing it.";
 }
 
 export function summarizeAudit(tools: AuditTool[], currentTeam = "", futureTeam = "") {

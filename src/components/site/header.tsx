@@ -14,9 +14,12 @@ export function Header() {
       if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", closeOnEscape);
+    const closeOnNavigate = () => setOpen(false);
+    window.addEventListener("runrentless:navigate", closeOnNavigate);
     return () => {
       delete document.body.dataset.menuOpen;
       window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("runrentless:navigate", closeOnNavigate);
     };
   }, [open]);
 

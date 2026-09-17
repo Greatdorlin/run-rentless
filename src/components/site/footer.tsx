@@ -7,7 +7,7 @@ const footerLinks = [
   ["Leads Desk", "/#leads-desk"],
   ["For Companies", "/#for-companies"],
   ["About", "/#assessment"],
-  ["Privacy", "/privacy"],
+  ["Privacy Policy", "/privacy"],
   ["Terms", "/terms"],
   ["Contact", "/contact"],
 ];
