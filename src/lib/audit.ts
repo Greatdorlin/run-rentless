@@ -1,5 +1,7 @@
 export type Billing = "Monthly" | "Quarterly" | "Yearly";
 export type Verdict = "KEEP" | "LOOK CLOSER" | "BUILD AROUND";
+export const verdictLabels: Record<Verdict, string> = { KEEP: "R · Retain", "BUILD AROUND": "U · Upgrade", "LOOK CLOSER": "N · New options" };
+export const savingsChoices = ["Yes, show me how", "Maybe, I’d need to see the numbers", "Not right now"];
 export type AuditCharge = { id: number; label: string; type: string; rate: string; quantity: string; billing: Billing };
 export type AuditTool = {
   id: number; name: string; category: string; currency: string;

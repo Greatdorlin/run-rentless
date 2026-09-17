@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseAudit, reportEmail, auditSummary as summarizeReport } from "@/lib/audit-report";
-import { budgetRanges, deliveryPreferences, verdict } from "@/lib/audit";
+import { budgetRanges, deliveryPreferences, savingsChoices, verdict } from "@/lib/audit";
 
 export const maxDuration = 60;
 
@@ -187,6 +187,7 @@ export async function POST(request: Request) {
   const currentSoftware = clean(body.currentSoftware, 160);
   const budgetRange = budgetRanges.includes(clean(body.budgetRange, 80)) ? clean(body.budgetRange, 80) : "Not provided";
   const deliveryPreference = deliveryPreferences.includes(clean(body.deliveryPreference, 80)) ? clean(body.deliveryPreference, 80) : "Not provided";
+  const savingsInterest = savingsChoices.includes(clean(body.savingsInterest, 100)) ? clean(body.savingsInterest, 100) : "Not provided";
   const audit = parseAudit(body.audit);
   const consent = body.marketingConsent === "on" || body.marketingConsent === true;
   const reportConsent = body.reportConsent === "on" || body.reportConsent === true;
@@ -204,7 +205,7 @@ export async function POST(request: Request) {
     const [groupId, profileFieldSetup] = await Promise.all([ensureGroup(token, audit ? "Run Rentless Software Audits" : GROUP_TITLE), ensureProfileFields(token)]);
     const { fieldNames, diagnostics } = profileFieldSetup;
     const submittedAt = new Date().toISOString();
-    const auditSummary = audit ? summarizeReport(audit) : "Not provided";
+    const auditSummary = audit ? `${summarizeReport(audit)} Savings interest: ${savingsInterest}.` : "Not provided";
     const fields = Object.fromEntries([
       fieldNames.company && [fieldNames.company, company],
       fieldNames.interest && [fieldNames.interest, interest],
@@ -249,6 +250,7 @@ export async function POST(request: Request) {
           software_interest: interest,
           team_size: teamSize,
           current_software: currentSoftware || "Not provided",
+          savings_interest: savingsInterest,
           investment_range: budgetRange,
           preferred_engagement: deliveryPreference,
           audit_summary: auditSummary,

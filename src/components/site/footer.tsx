@@ -27,7 +27,7 @@ export function Footer() {
         </nav>
       </div>
       <div className="shell site-footer__bottom">
-        <p>Keep what works. Investigate what does not. Own what makes sense.</p>
+        <p>Retain what works. Upgrade what falls short. Explore new options.</p>
         <p>© {new Date().getFullYear()} Run Rentless.</p>
       </div>
     </footer>
