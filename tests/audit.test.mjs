@@ -5,13 +5,13 @@ import { verdict, explanation, summarizeAudit } from '../src/lib/audit.ts';
 const tool = (patch = {}) => ({ id: 1, name: 'Calendly', category: 'Scheduling', currency: 'USD', costMode: 'actual', amount: '20', billing: 'Monthly', billBasis: 'Flat fee', charges: [], features: [], workaround: 'Not answered', users: 'Not answered', data: 'Not answered', criticality: 'Not answered', wish: '', ...patch });
 
 test('unanswered tools explicitly lack enough evidence, not a confident keep recommendation', () => {
-  assert.match(explanation(tool()), /Not enough detail/);
+  assert.match(explanation(tool()), /We need to know/);
 });
 test('Calendly recommendations change with workflow evidence', () => {
   assert.equal(verdict(tool({ workaround: 'Rarely' })), 'KEEP');
   assert.equal(verdict(tool({ workaround: 'Sometimes', wish: 'Route bookings by location' })), 'BUILD AROUND');
   assert.equal(verdict(tool({ workaround: 'Constantly' })), 'LOOK CLOSER');
-  assert.match(explanation(tool({ workaround: 'Constantly' })), /custom booking workflow/);
+  assert.match(explanation(tool({ workaround: 'Constantly' })), /one built for your business/);
 });
 test('negative free text does not invent a missing requirement', () => {
   for (const wish of ['none', 'Nothing.', 'N/A', 'no', 'all good']) assert.equal(verdict(tool({ workaround: 'Rarely', wish })), 'KEEP');

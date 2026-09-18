@@ -38,20 +38,20 @@ export function verdict(tool: AuditTool): Verdict {
 }
 
 export function explanation(tool: AuditTool) {
-  if (!hasWorkflowAnswer(tool)) return "Not enough detail yet. You have not told us whether this tool meets your needs. Keep it in place while you review it; this is not a recommendation against replacement.";
+  if (!hasWorkflowAnswer(tool)) return "We need to know what works and what frustrates your team before suggesting a change.";
   const result = verdict(tool);
   if (tool.category === "Scheduling") {
-    if (result === "LOOK CLOSER") return "You constantly work around your booking tool. Compare a better setup, another service and a custom booking workflow. Check calendar connections, reminders and running costs before choosing.";
-    if (result === "BUILD AROUND") return "Start by fixing the booking step that causes trouble. Settings, an integration or a small add-on may be enough. Consider replacement only if those cannot meet your needs.";
-    return "You rarely work around this booking tool and named no missing feature. Keep it for now. Before building your own, compare its actual bill with the cost of calendar connections, reminders and support.";
+    if (result === "LOOK CLOSER") return "Your booking tool keeps getting in the way. First check if its settings can fix the problem. If not, compare another booking tool with one built for your business.";
+    if (result === "BUILD AROUND") return "Start with the booking problem you named. Changing the settings or connecting another tool may solve it without replacing everything.";
+    return "Your booking tool seems to do what you need. Keep it for now. Check that you still use everything you pay for.";
   }
-  if (result === "LOOK CLOSER") return "You told us your team constantly works around this tool. Compare improving the setup, switching tools and owning this workflow. We need to check your data, integrations and running costs before recommending replacement.";
+  if (result === "LOOK CLOSER") return "This tool keeps getting in your team's way. Check whether a better setup could help. If not, compare another tool with one built for your business.";
   if (result === "BUILD AROUND") {
-    const reason = tool.workaround === "Constantly" ? "Your team constantly works around this tool." : hasRequest(tool) ? "You named something this tool could do better." : "Your team sometimes works around this tool.";
-    const caution = tool.category === "Automation" ? "Keep the existing connections where useful; focus on the step that is failing." : ["Finance", "Documents", "Marketing & Email"].includes(tool.category) ? "Check the services, data and obligations you rely on before replacing the whole platform." : "If that cannot solve it, assess a replacement.";
-    return `${reason} First check settings, integrations or a small add-on. ${caution}`;
+    const reason = tool.workaround === "Constantly" ? "Your team often has to find ways around this tool." : hasRequest(tool) ? "You named something this tool could do better." : "This tool sometimes makes work harder than it should.";
+    const caution = tool.category === "Automation" ? "Keep the connections that work. Fix the step that causes trouble first." : ["Finance", "Documents", "Marketing & Email"].includes(tool.category) ? "Before switching, check that your records and the features you rely on can move with you." : "If that does not help, compare other options.";
+    return `${reason} Try a settings change, connect another tool or add the missing feature. ${caution}`;
   }
-  return "You rarely work around this tool and named no missing feature. Keep it for now. We have not checked alternatives or the cost of replacing it.";
+  return "This tool seems to do what you need. Keep it for now and check that you still use everything you pay for.";
 }
 
 export function summarizeAudit(tools: AuditTool[], currentTeam = "", futureTeam = "") {

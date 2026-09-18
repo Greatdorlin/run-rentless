@@ -14,7 +14,7 @@ export function ReportRequest({ interest, interested, sending, error, submit, do
     if (step < 3) { event.preventDefault(); setStep(step + 1); } else submit(event);
   };
   return <form id="report-request" className="report-form report-form--guided" onSubmit={advance}>
-    <div><p className="eyebrow eyebrow--dark"><span /> Keep your action plan</p><h2>{interested ? "Let’s talk through your results." : "Take your next steps with you."}</h2><p>Get your cost breakdown, the reasons behind each recommendation and what to check before making a change.</p><p className="question-count">Step {step + 1} of 4</p></div>
+    <div><p className="eyebrow eyebrow--dark"><span /> Keep your action plan</p><h2>{interested ? "Let’s talk through your results." : "Take your next steps with you."}</h2><p>Keep your costs, advice for each tool and next steps in one email.</p><p className="question-count">Step {step + 1} of 4</p></div>
     <div className="report-fields">
       {Object.entries(values).map(([key, value]) => <input key={key} type="hidden" name={key} value={(key === "company" || key === "companySize") && !value ? "Not provided" : key === "budgetRange" && !interested ? "" : value} />)}
       <input type="hidden" name="savingsInterest" value={interest} />
@@ -27,7 +27,7 @@ export function ReportRequest({ interest, interested, sending, error, submit, do
           {interested && <fieldset className="choice-field"><legend>Possible project budget in USD</legend><p>A guide, not a commitment.</p>{budgetRanges.map((value) => <button type="button" key={value} aria-pressed={values.budgetRange === value} className={values.budgetRange === value ? "selected" : ""} onClick={() => set("budgetRange", values.budgetRange === value ? "" : value)}>{value}</button>)}</fieldset>}
           <fieldset className="choice-field"><legend>How would you like help?</legend>{deliveryPreferences.map((value) => <button type="button" key={value} aria-pressed={values.deliveryPreference === value} className={values.deliveryPreference === value ? "selected" : ""} onClick={() => set("deliveryPreference", values.deliveryPreference === value ? "" : value)}>{value}</button>)}</fieldset>
         </details>
-        <label className="consent-field"><input required type="checkbox" name="reportConsent" /><span>{interested ? "Use my details to send my plan and contact me about these results." : "Use my details to prepare and email my plan through Sender."} <a href="/privacy">Privacy Policy</a></span></label>
+        <label className="consent-field"><input required type="checkbox" name="reportConsent" /><span>{interested ? "Use my details to send my plan and contact me about these results." : "Use my details to email my plan."} <a href="/privacy">Privacy Policy</a></span></label>
         <label className="consent-field"><input type="checkbox" name="marketingConsent" /><span>Also send me relevant Run Rentless updates. Optional. I can unsubscribe.</span></label>
       </>}
       <input className="honeypot-field" name="companyWebsite" tabIndex={-1} autoComplete="off" aria-hidden="true" />
