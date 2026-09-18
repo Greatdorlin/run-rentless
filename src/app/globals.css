@@ -436,6 +436,13 @@ body[data-audit-active="true"] .floating-waitlist { display: none; }
 .story-example .story-note { color: #36554e; }
 .story-control h3 { font-size: 24px; line-height: 1.3; margin: 0 0 12px; }
 .story-control h3:not(:first-child) { margin-top: 32px; }
+.story-cohort { border-block: 1px solid var(--line); }
+.cohort-detail { margin-top: 44px; }
+.cohort-detail h3 { font-size: 24px; line-height: 1.3; }
+.cohort-detail p { color: var(--paper-muted); line-height: 1.65; }
+.actual-cost > details { grid-column: 1 / -1; margin-bottom: 0; }
+.actual-cost > details button { margin-top: 20px; }
+.audit-panel .audit-actions { flex-wrap: wrap; gap: 16px; }
 @media (max-width: 720px) { .story-before-after { grid-template-columns: 1fr; } }
 .story-questions details { border-top: 1px solid var(--line); padding: 22px 0; }
 .story-questions summary { cursor: pointer; min-height: 44px; font-size: 20px; font-weight: 600; }

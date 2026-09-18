@@ -11,7 +11,7 @@ export type AuditTool = {
 };
 
 export const budgetRanges = ["Under $2,500", "$2,500 to $5,000", "$5,000 to $10,000", "$10,000 to $25,000", "$25,000+", "Not sure yet"];
-export const deliveryPreferences = ["Done with you", "Done for you", "Assessment only", "Not sure yet"];
+export const deliveryPreferences = ["AI-building cohort (done with you)", "Done with you", "Done for you", "Assessment only", "Not sure yet"];
 export const factor = (billing: Billing) => billing === "Yearly" ? 1 / 12 : billing === "Quarterly" ? 1 / 3 : 1;
 const numeric = (value: string) => value.trim() !== "" && Number.isFinite(Number(value)) && Number(value) >= 0 ? Number(value) : null;
 export const chargeMonthly = (charge: AuditCharge) => (numeric(charge.rate) ?? 0) * (numeric(charge.quantity) ?? 0) * factor(charge.billing);
