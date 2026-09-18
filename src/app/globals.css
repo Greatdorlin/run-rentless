@@ -728,6 +728,28 @@ body[data-audit-active="true"] .floating-waitlist { display: none; }
 }
 
 /* Touch controls act on the first tap, without a hover-only intermediate state. */
+.guided-question fieldset, .guided-name { border: 0; padding: 0; margin: 0; min-width: 0; }
+.guided-question legend { padding: 0; }
+.question-count { font-size: 13px; color: #52665f; margin: 12px 0 24px; }
+.guided-options { display: grid; gap: 12px; margin: 28px 0; }
+.guided-options button { text-align: left; min-height: 58px; padding: 16px 20px; border: 1px solid #93a69c; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.guided-options button.selected { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.guided-question .audit-actions { flex-wrap: wrap; gap: 16px; }
+.guided-finish { margin-top: 24px; font-size: 13px; }
+.optional-context { margin: 20px 0; border-block: 1px solid #bac4b8; padding: 12px 0; }
+.optional-context summary { cursor: pointer; padding: 12px 0; line-height: 1.5; }
+.optional-context[open] > :not(summary) { margin-top: 20px; }
+.guided-name { display: grid; gap: 20px; }
+.guided-name legend { margin-bottom: 20px; font-weight: 600; }
+.report-form--guided .report-fields { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.report-fields small { display: block; font-size: 13px; line-height: 1.5; margin-top: 10px; }
+.action-plan-intro { margin: 28px 0 36px; }
+.action-plan-intro > h2 { font-size: clamp(24px, 3vw, 34px); line-height: 1.15; }
+.plan-signals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 16px; margin-top: 24px; }
+.plan-signals article { padding: 22px; border: 1px solid #bac4b8; }
+.plan-signals h3 { font-size: 18px; margin: 0 0 12px; }
+.plan-signals small { display: block; line-height: 1.6; color: #52665f; }
+.report-form--guided input:focus, .guided-options button:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 button, a, input, select, textarea { touch-action: manipulation; }
 button, a, input, select, textarea { scroll-margin-top: calc(var(--header-height) + 20px); }
 .selected-tools button, .example-pause { min-width: 44px; min-height: 44px; }
