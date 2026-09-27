@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export function FloatingWaitlist() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -21,6 +23,8 @@ export function FloatingWaitlist() {
     observer.observe(hero);
     return () => observer.disconnect();
   }, []);
+
+  if (pathname === "/webinar") return null;
 
   return (
     <Link

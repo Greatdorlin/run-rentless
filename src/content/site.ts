@@ -1,5 +1,6 @@
 export const navigation = [
   { label: "Free Audit", href: "/#audit" },
+  { label: "Webinar", href: "/webinar" },
   { label: "How It Works", href: "/#how-it-works" },
   { label: "Leads Desk", href: "/#leads-desk" },
   { label: "For Companies", href: "/#for-companies" },

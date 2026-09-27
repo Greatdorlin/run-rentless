@@ -3,6 +3,7 @@ import { Logo } from "./logo";
 
 const footerLinks = [
   ["Free Audit", "/#audit"],
+  ["Live Webinar", "/webinar"],
   ["How It Works", "/#how-it-works"],
   ["Leads Desk", "/#leads-desk"],
   ["For Companies", "/#for-companies"],
