@@ -30,7 +30,6 @@ export function WebinarCountdown() {
   const values = now === null ? [null, null, null, null] : parts(WEBINAR_START - now);
   return (
     <div className="webinar-countdown" aria-label="Time until the webinar begins">
-      <span className="webinar-countdown__label">We start in</span>
       <div className="webinar-countdown__digits" aria-live="off">
         {values.map((value, index) => (
           <span className="webinar-countdown__unit" key={index}>

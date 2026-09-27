@@ -57,8 +57,8 @@ export function RegistrationForm() {
   if (status === "success" || status === "partial" || status === "duplicate") return (
     <div className="webinar-form__success" role="status">
       <span className="webinar-form__success-mark" aria-hidden="true">✓</span>
-      <h3>{status === "duplicate" ? `${firstName}, you’re already registered.` : `${firstName}, your spot is saved.`}</h3>
-      <p>{status === "success" ? "We sent your confirmation email. We will share joining details before the webinar." : status === "duplicate" ? "Your email is already on the webinar list. If you need your details again, contact us." : "Your registration was saved, but we could not confirm email delivery. Please contact us if you do not receive the details."}</p>
+      <h3>{status === "success" ? "Your spot is confirmed." : status === "duplicate" ? `${firstName}, you’re already registered.` : "Your spot is saved."}</h3>
+      <p>{status === "success" ? "We’ve just sent your confirmation email. Check Spam or Promotions if you do not see it. Move it to your inbox and mark it as important so you do not miss the webinar details." : status === "duplicate" ? "Your email is already on the webinar list. If you need your details again, contact us." : "Your registration is saved, but the confirmation email could not be sent. Please contact us if you need the joining details."}</p>
       <strong>Saturday, 10 October 2026 · 6PM GMT+1</strong>
       <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>
@@ -66,7 +66,7 @@ export function RegistrationForm() {
 
   return (
     <form className="webinar-form" onSubmit={submit}>
-      <div className="webinar-form__heading"><span>Free live webinar</span><h3>Get a spot for your team.</h3><p>It takes less than a minute.</p></div>
+      <div className="webinar-form__heading"><span>Free live webinar</span><h3>Get a spot.</h3><p>It takes less than a minute.</p></div>
       <div className="webinar-form__fields">
         <label>First name<input name="firstName" autoComplete="given-name" maxLength={80} required placeholder="Your first name" /></label>
         <label>Work email<input name="email" type="email" autoComplete="email" maxLength={160} required placeholder="you@company.com" /></label>

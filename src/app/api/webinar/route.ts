@@ -5,7 +5,13 @@ export const maxDuration = 60;
 
 const API = "https://api.sender.net/v2";
 const FIELD_TITLES = ["Webinar attending as", "Webinar company", "Webinar phone", "Webinar registered at"] as const;
-type SenderField = { title: string; field_name: string };
+const FIELD_NAMES: Record<(typeof FIELD_TITLES)[number], string> = {
+  "Webinar attending as": "{{webinar_attending_as}}",
+  "Webinar company": "{{webinar_company}}",
+  "Webinar phone": "{{webinar_phone}}",
+  "Webinar registered at": "{{webinar_registered_at}}",
+};
+type SenderField = { title: string; field_name?: string; name?: string };
 type SenderGroup = { id: string; title: string };
 type SenderSubscriber = { subscriber_tags?: Array<{ id?: string; title?: string }>; columns?: Array<{ title?: string; value?: unknown }> };
 function asItems<T>(data: T | T[] | undefined): T[] { return Array.isArray(data) ? data : data ? [data] : []; }
@@ -16,15 +22,15 @@ function fieldItems(payload: unknown): SenderField[] {
     if (Array.isArray(value)) { value.forEach((item) => visit(item, depth + 1)); return; }
     if (typeof value !== "object") return;
     const record = value as Record<string, unknown>;
-    if (typeof record.field_name === "string" && (typeof record.title === "string" || typeof record.name === "string")) {
-      found.push({ title: String(record.title || record.name), field_name: record.field_name });
+    if (typeof record.title === "string") {
+      found.push({ title: record.title, field_name: typeof record.field_name === "string" ? record.field_name : typeof record.name === "string" ? record.name : undefined });
       return;
     }
     Object.entries(record).forEach(([key, item]) => {
-      if (/^\{\$[^}]+\}$/.test(key) && typeof item === "string") found.push({ title: item, field_name: key });
-      else if (/^\{\$[^}]+\}$/.test(key) && item && typeof item === "object") {
+      if (/^\{\{[^}]+\}\}$/.test(key) && typeof item === "string") found.push({ title: item, field_name: key });
+      else if (/^\{\{[^}]+\}\}$/.test(key) && item && typeof item === "object") {
         const nested = item as Record<string, unknown>;
-        if (typeof nested.title === "string" || typeof nested.name === "string") found.push({ title: String(nested.title || nested.name), field_name: key });
+        if (typeof nested.title === "string") found.push({ title: nested.title, field_name: key });
       }
       else visit(item, depth + 1);
     });
@@ -36,6 +42,7 @@ function createdFieldName(payload: unknown): string | undefined {
   if (!payload || typeof payload !== "object") return undefined;
   const record = payload as Record<string, unknown>;
   if (typeof record.field_name === "string") return record.field_name;
+  if (typeof record.name === "string" && /^\{\{[^}]+\}\}$/.test(record.name)) return record.name;
   return Object.values(record).map(createdFieldName).find((name): name is string => Boolean(name));
 }
 
@@ -79,11 +86,11 @@ async function fields(token: string) {
     if (typeof payload.meta?.last_page === "number" ? page >= payload.meta.last_page : payload.has_more_resources !== true || pageFields.length === 0) break;
   }
   for (const title of FIELD_TITLES) {
-    if (found.some((field) => field.title === title && field.field_name)) continue;
+    if (found.some((field) => field.title === title)) continue;
     const response = await sender(token, "/fields", { method: "POST", body: JSON.stringify({ title, type: "text" }) });
     if (!response.ok) {
       const retry = await sender(token, "/fields?limit=100");
-      const recovered = retry.ok ? fieldItems(await retry.json()).find((field) => field.title === title && field.field_name) : undefined;
+      const recovered = retry.ok ? fieldItems(await retry.json()).find((field) => field.title === title) : undefined;
       if (recovered) { found.push(recovered); continue; }
       throw new Error(`Field creation ${title} ${response.status}`);
     }
@@ -94,10 +101,9 @@ async function fields(token: string) {
     // from the authoritative field list before writing subscriber data.
     const reread = await sender(token, "/fields?limit=100");
     const recovered = reread.ok ? fieldItems(await reread.json()).find((item) => item.title === title && item.field_name) : undefined;
-    if (!recovered) throw new Error(`Field name missing: ${title}`);
-    found.push(recovered);
+    found.push(recovered || { title, field_name: FIELD_NAMES[title] });
   }
-  return Object.fromEntries(FIELD_TITLES.map((title) => [title, found.find((field) => field.title === title)?.field_name])) as Record<(typeof FIELD_TITLES)[number], string>;
+  return Object.fromEntries(FIELD_TITLES.map((title) => [title, found.find((field) => field.title === title)?.field_name || FIELD_NAMES[title]])) as Record<(typeof FIELD_TITLES)[number], string>;
 }
 
 function confirmation(firstName: string) {
