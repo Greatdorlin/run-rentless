@@ -18,10 +18,10 @@ export const metadata: Metadata = {
 };
 
 const lessons = [
-  { title: "See what is costing you time and money", copy: "Look at the tools you pay for and the manual work your team still does. You’ll see what is worth fixing first." },
-  { title: "Find work AI can help with", copy: "Spot repeated admin, copied data and missed follow-ups that AI can help reduce." },
-  { title: "Know what to keep, connect or build", copy: "Learn when to keep a tool, connect the tools you already use or create a custom solution for your business." },
-  { title: "Start without a technical background", copy: "You do not need to know how to code. We’ll show you a simple way to think through your first practical AI solution." },
+  { title: "Real AI use cases for everyday business work", copy: "See practical examples for sales, follow-ups, admin, reporting, customer service and operations, then learn how to spot similar opportunities in your own business." },
+  { title: "How to turn a business problem into a useful AI solution", copy: "Start with one repetitive, slow or costly process and learn how to think through a solution that actually helps." },
+  { title: "What to automate, connect or build", copy: "Know when AI can improve what you already use, when your tools should work together and when a custom solution makes more sense." },
+  { title: "What you can start implementing after the webinar", copy: "Leave with practical ideas you can test in your business without needing to know how to code." },
 ];
 
 const familiarTools = [
@@ -87,7 +87,7 @@ export default function WebinarPage() {
       </section>
 
       <section id="what-you-will-learn" className="webinar-learning" aria-labelledby="webinar-learning-title">
-        <div className="shell"><div className="webinar-learning__heading"><p className="webinar-section-label">What you’ll learn</p><h2 id="webinar-learning-title">See what to fix and where AI can help.</h2><p>We’ll use plain business language. No coding knowledge or technical background is needed.</p></div><div className="webinar-learning__list">{lessons.map((item) => <article key={item.title}><span className="webinar-learning__marker" aria-hidden="true" /><div><h3>{item.title}</h3><p>{item.copy}</p></div><span aria-hidden="true">↗</span></article>)}</div><div className="webinar-learning__test"><strong>No technical background needed.</strong><p>Start with a real business problem. We’ll show you how to work out what AI can help with, what a custom solution could look like and what to check before you build.</p></div></div>
+        <div className="shell"><div className="webinar-learning__heading"><p className="webinar-section-label">What you’ll learn</p><h2 id="webinar-learning-title">Real AI use cases you can actually implement.</h2><p>No coding knowledge or technical background is needed.</p></div><div className="webinar-learning__list">{lessons.map((item) => <article key={item.title}><span className="webinar-learning__marker" aria-hidden="true" /><div><h3>{item.title}</h3><p>{item.copy}</p></div><span aria-hidden="true">↗</span></article>)}</div><div className="webinar-learning__test"><strong>Useful AI, not AI for show.</strong><p>No fancy prompts just for the sake of it. No shiny demos that look impressive but solve nothing. We’ll focus on practical AI use cases you can take back to your business and put to work.</p></div></div>
       </section>
 
       <section className="webinar-examples" aria-labelledby="webinar-examples-title">
