@@ -14,6 +14,20 @@ export const metadata: Metadata = {
     description: "A free practical webinar on using AI to cut manual work, reduce wasted software spend and build custom solutions for your business. No technical background needed. Saturday, 10th October 2026 at 6PM GMT+1.",
     url: "https://www.runrentless.com/webinar",
     type: "website",
+    images: [
+      {
+        url: "https://www.runrentless.com/webinar-featured.jpg",
+        width: 400,
+        height: 500,
+        alt: "Making AI Make Business Sense — Navrademy × Run Rentless live webinar",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Making AI Make Business Sense | Live Webinar",
+    description: "A free practical webinar on using AI to cut manual work, reduce wasted software spend and build custom solutions for your business. No technical background needed.",
+    images: ["https://www.runrentless.com/webinar-featured.jpg"],
   },
 };
 
