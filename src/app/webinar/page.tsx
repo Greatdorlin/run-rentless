@@ -55,7 +55,7 @@ export default function WebinarPage() {
           <div className="webinar-hero__copy">
             <p className="webinar-kicker"><span /> Navrademy × Run Rentless present <em>Live webinar</em></p>
             <h1 id="webinar-title">Making AI make <span>business sense.</span></h1>
-            <p className="webinar-hero__lead">Join this free live webinar and see where AI can cut manual work, reduce wasted software spend and help you build simpler tools around how your business actually works.</p>
+            <p className="webinar-hero__lead">Join this free live webinar and learn how to use AI to cut manual work, reduce wasted software spend and build custom solutions around your business, no technical background required.</p>
             <div className="webinar-hero__event"><strong>Saturday, 10th October 2026</strong><span>6PM GMT+1 · Live online</span></div>
             <div className="webinar-hero__actions"><Link className="webinar-cta" href="#webinar-form">Register free <span aria-hidden="true">↗</span></Link><Link className="webinar-hero__secondary" href="#what-you-will-learn">See what you’ll learn <span aria-hidden="true">↓</span></Link></div>
           </div>
