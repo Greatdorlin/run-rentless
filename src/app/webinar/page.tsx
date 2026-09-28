@@ -84,9 +84,31 @@ export default function WebinarPage() {
       </section>
 
       <section className="webinar-problem" aria-labelledby="webinar-problem-title">
-        <div className="shell webinar-problem__grid">
-          <div><p className="webinar-section-label">Does this sound familiar?</p><h2 id="webinar-problem-title">More tools.<br /><span>Still more work.</span></h2></div>
-          <div className="webinar-problem__story"><p>A customer fills in a form. Someone copies the details into a spreadsheet. Someone else adds them to the sales tool. Then the team still has to chase the follow-up.</p><p>You are paying for the tools and paying with your team’s time.</p><strong>In this webinar, we will show you how to find the work your tools should already make easier.</strong></div>
+        <div className="shell">
+          <div className="webinar-problem__opening">
+            <div>
+              <p className="webinar-section-label">The point of this webinar</p>
+              <h2 id="webinar-problem-title"><span>You’re not leaving with another list of AI tools.</span><span>You’re leaving knowing what to do with AI in your own business.</span></h2>
+            </div>
+            <div className="webinar-problem__intro">
+              <p>You’ve probably seen enough AI webinars that leave you with ten new tools to try, five more subscriptions to consider, and a “top 10 prompts” list for Claude, ChatGPT or whatever else is trending that week.</p>
+              <p className="webinar-problem__turn">We’re not doing that.</p>
+            </div>
+          </div>
+          <div className="webinar-problem__questions">
+            <p className="webinar-problem__questions-lead">We’re starting with <strong>your business as it is today.</strong></p>
+            <ul>
+              <li>What are you already paying for?</li>
+              <li>What still takes too much time?</li>
+              <li>Where are your team members doing work manually even though you’re already paying for software?</li>
+              <li>And where could AI help you do the same work better, spend less, or even create new ways to make money?</li>
+            </ul>
+          </div>
+          <div className="webinar-problem__closing">
+            <p className="webinar-problem__answer">That’s what we’ll help you figure out.</p>
+            <p>So instead of leaving with another app to test, you leave knowing what makes sense to <strong>keep, improve, automate or build differently</strong> for your own business.</p>
+            <div className="webinar-problem__final"><p>Because the goal isn’t to use more AI. <strong>It’s to make better business decisions with it.</strong></p><WebinarAnchor className="webinar-cta" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor></div>
+          </div>
         </div>
       </section>
 
