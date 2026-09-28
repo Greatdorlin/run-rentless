@@ -52,21 +52,21 @@ export function RegistrationForm() {
     }
   }
 
-  if (phase === "ended") return <div className="webinar-form__closed"><h3>Registration has closed.</h3><p>The live event ended at 8PM GMT+1 on 10 October 2026. You can still explore Run Rentless.</p><Link href="/">Go to the homepage <span aria-hidden="true">↗</span></Link></div>;
+  if (phase === "ended") return <div className="webinar-form__closed"><h3>Registration has closed.</h3><p>The live event ended at 8PM GMT+1 on 10th October 2026. You can still explore Run Rentless.</p><Link href="/">Go to the homepage <span aria-hidden="true">↗</span></Link></div>;
 
   if (status === "success" || status === "partial" || status === "duplicate") return (
     <div className="webinar-form__success" role="status">
       <span className="webinar-form__success-mark" aria-hidden="true">✓</span>
       <h3>{status === "success" ? "Your spot is confirmed." : status === "duplicate" ? `${firstName}, you’re already registered.` : "Your spot is saved."}</h3>
       <p>{status === "success" ? "We’ve just sent your confirmation email. Check Spam or Promotions if you do not see it. Move it to your inbox and mark it as important so you do not miss the webinar details." : status === "duplicate" ? "Your email is already on the webinar list. If you need your details again, contact us." : "Your registration is saved, but the confirmation email could not be sent. Please contact us if you need the joining details."}</p>
-      <strong>Saturday, 10 October 2026 · 6PM GMT+1</strong>
+      <strong>Saturday, 10th October 2026 · 6PM GMT+1</strong>
       <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>
   );
 
   return (
     <form className="webinar-form" onSubmit={submit}>
-      <div className="webinar-form__heading"><span>Free live webinar</span><h3>Get a spot.</h3><p>It takes less than a minute.</p></div>
+      <div className="webinar-form__heading"><span>Free live webinar</span><h3>Register for your spot.</h3><p>It takes less than a minute.</p></div>
       <div className="webinar-form__fields">
         <label>First name<input name="firstName" autoComplete="given-name" maxLength={80} required placeholder="Your first name" /></label>
         <label>Work email<input name="email" type="email" autoComplete="email" maxLength={160} required placeholder="you@company.com" /></label>
@@ -80,8 +80,8 @@ export function RegistrationForm() {
         <label className="webinar-form__trap" aria-hidden="true">Website<input name="website" autoComplete="off" tabIndex={-1} /></label>
       </div>
       {error && <p className="webinar-form__error" role="alert">{error}</p>}
-      <button className="webinar-form__submit" type="submit" disabled={status === "sending"}>{status === "sending" ? "Saving your spot…" : "Get my spot"}<span aria-hidden="true">↗</span></button>
-      <p className="webinar-form__footnote">No payment needed. Joining details will be sent before the event.</p>
+      <button className="webinar-form__submit" type="submit" disabled={status === "sending"}>{status === "sending" ? "Saving your spot…" : "Register free"}<span aria-hidden="true">↗</span></button>
+      <p className="webinar-form__footnote">Free to attend. We’ll email your joining details before the event.</p>
     </form>
   );
 }
