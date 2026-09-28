@@ -6,20 +6,24 @@ import { WebinarCountdown } from "@/components/webinar/countdown";
 import { RegistrationForm } from "@/components/webinar/registration-form";
 import "./webinar.css";
 
+const webinarShareDescription = "Everyone is showing you what AI can do. Let’s shift the conversation to where it could help your business cut costs and grow revenue.";
+const webinarShareImage = "https://www.runrentless.com/webinar/making-ai-make-business-sense-share-2026.jpg";
+
 export const metadata: Metadata = {
   title: "Making AI Make Business Sense | Live Webinar",
-  description: "Join Navrademy and Run Rentless on 10th October 2026 at 6PM GMT+1. Bring one costly tool or slow task and learn where AI could make work easier and reduce unnecessary software costs.",
+  description: webinarShareDescription,
   alternates: { canonical: "/webinar" },
   openGraph: {
     title: "Making AI Make Business Sense | Live Webinar",
-    description: "Bring one costly tool or slow task. Learn what AI could help your business keep, improve or build. Saturday, 10th October 2026 at 6PM GMT+1.",
+    description: webinarShareDescription,
     url: "https://www.runrentless.com/webinar",
     type: "website",
     images: [
       {
-        url: "https://www.runrentless.com/webinar/making-ai-make-business-sense.png",
-        width: 1731,
-        height: 909,
+        url: webinarShareImage,
+        width: 1200,
+        height: 630,
+        type: "image/jpeg",
         alt: "Making AI Make Business Sense live webinar, presented by Navrademy and Run Rentless",
       },
     ],
@@ -27,8 +31,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Making AI Make Business Sense | Live Webinar",
-    description: "Bring one costly tool or slow task. Learn what AI could help your business keep, improve or build.",
-    images: ["https://www.runrentless.com/webinar/making-ai-make-business-sense.png"],
+    description: webinarShareDescription,
+    images: [webinarShareImage],
   },
 };
 
