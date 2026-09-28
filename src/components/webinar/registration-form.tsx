@@ -66,7 +66,7 @@ export function RegistrationForm() {
 
   return (
     <form className="webinar-form" onSubmit={submit}>
-      <div className="webinar-form__heading"><span>Free live webinar</span><h3>Register for your spot.</h3><p>It takes less than a minute.</p></div>
+      <div className="webinar-form__heading"><span>Free live webinar</span><h3>Register for your spot.</h3><p>It takes less than a minute. No technical background needed.</p></div>
       <div className="webinar-form__fields">
         <label>First name<input name="firstName" autoComplete="given-name" maxLength={80} required placeholder="Your first name" /></label>
         <label>Work email<input name="email" type="email" autoComplete="email" maxLength={160} required placeholder="you@company.com" /></label>
