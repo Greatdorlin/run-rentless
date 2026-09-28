@@ -25,7 +25,7 @@ export function WebinarCountdown() {
 
   const phase = now === null ? "upcoming" : webinarPhase(now);
   if (phase === "ended") return <div className="webinar-countdown webinar-countdown--status" role="status">The live webinar has ended.</div>;
-  if (phase === "live") return <div className="webinar-countdown webinar-countdown--status" role="status"><span className="webinar-countdown__dot" /> Live now <small>Until 8PM GMT+1 on 10 October</small></div>;
+  if (phase === "live") return <div className="webinar-countdown webinar-countdown--status" role="status"><span className="webinar-countdown__dot" /> Live now <small>Until 8PM GMT+1 on 10th October</small></div>;
 
   const values = now === null ? [null, null, null, null] : parts(WEBINAR_START - now);
   return (
