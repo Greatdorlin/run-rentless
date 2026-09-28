@@ -118,7 +118,13 @@ export default function WebinarPage() {
 
       <section className="webinar-tools" aria-labelledby="webinar-tools-title">
         <div className="shell webinar-tools__grid">
-          <div className="webinar-tools__copy"><p className="webinar-section-label">Look at your current tools</p><h2 id="webinar-tools-title">How many tools does one job need?</h2><p>One for sales. One for email. One for bookings. Another to pass information between them. Each may be useful, but you could still be paying for extra steps.</p><div className="webinar-tools__question"><strong>What if you built only the part your business needs?</strong><span>Could that cut some of your software costs by 40% or more? It depends on your setup. We will show you what to compare before you decide.</span></div><WebinarAnchor className="webinar-tools__link" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor></div>
+          <div className="webinar-tools__copy">
+            <h2 id="webinar-tools-title">Some of the tools you pay for, you may not need anymore.</h2>
+            <p>Not because the tools are bad.</p>
+            <p>But because AI can now help you <strong>build some of the things you pay those tools to do, around the way your own business works.</strong></p>
+            <div className="webinar-tools__question"><strong>That means lower costs, less wasted time, and a simpler way to run your business more efficiently and profitably.</strong></div>
+            <WebinarAnchor className="webinar-tools__link" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor>
+          </div>
           <div className="webinar-tools__list" aria-label="Examples of business software tools">{familiarTools.map(({ name, icon, job }) => <div className="webinar-tools__item" key={name}><span className="webinar-tools__icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={icon.path} fill={`#${icon.hex}`} /></svg></span><span className="webinar-tools__name">{name}<small>{job}</small></span></div>)}</div>
         </div>
         <p className="shell webinar-tools__note">Brand marks are shown only as familiar examples. Run Rentless is not affiliated with these companies.</p>
