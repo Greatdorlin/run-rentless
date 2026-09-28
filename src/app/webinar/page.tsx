@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import { WebinarAnchor } from "@/components/webinar/webinar-anchor";
 import { siAirtable, siAsana, siCalendly, siHubspot, siMailchimp, siZapier } from "simple-icons";
 import { WebinarCountdown } from "@/components/webinar/countdown";
 import { RegistrationForm } from "@/components/webinar/registration-form";
@@ -13,9 +13,22 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Making AI Make Business Sense | Live Webinar",
     description: "Bring one costly tool or slow task. Learn what AI could help your business keep, improve or build. Saturday, 10th October 2026 at 6PM GMT+1.",
-    images: [{ url: "/webinar/making-ai-make-business-sense.png", width: 1731, height: 909, alt: "Making AI Make Business Sense live webinar, presented by Navrademy and Run Rentless" }],
     url: "https://www.runrentless.com/webinar",
     type: "website",
+    images: [
+      {
+        url: "https://www.runrentless.com/webinar/making-ai-make-business-sense.png",
+        width: 1731,
+        height: 909,
+        alt: "Making AI Make Business Sense live webinar, presented by Navrademy and Run Rentless",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Making AI Make Business Sense | Live Webinar",
+    description: "Bring one costly tool or slow task. Learn what AI could help your business keep, improve or build.",
+    images: ["https://www.runrentless.com/webinar/making-ai-make-business-sense.png"],
   },
 };
 
@@ -59,7 +72,7 @@ export default function WebinarPage() {
             <h1 id="webinar-title">Making AI make <span>business sense.</span></h1>
             <p className="webinar-hero__lead">Bring one costly tool or slow task. See how AI could make that work easier, and whether a better solution could save you money.</p>
             <div className="webinar-hero__event"><strong>Saturday, 10th October 2026</strong><span>6PM GMT+1 · Live online</span></div>
-            <div className="webinar-hero__actions"><Link className="webinar-cta" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></Link><Link className="webinar-hero__secondary" href="#what-you-will-learn">See what you’ll learn <span aria-hidden="true">↓</span></Link></div>
+            <div className="webinar-hero__actions"><WebinarAnchor className="webinar-cta" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor><WebinarAnchor className="webinar-hero__secondary" href="#what-you-will-learn">See what you’ll learn <span aria-hidden="true">↓</span></WebinarAnchor></div>
             <p className="webinar-hero__takeaway">You do not need a technical background. You need a problem worth solving.</p>
           </div>
           <div className="webinar-hero__visual">
@@ -83,14 +96,14 @@ export default function WebinarPage() {
 
       <section className="webinar-tools" aria-labelledby="webinar-tools-title">
         <div className="shell webinar-tools__grid">
-          <div className="webinar-tools__copy"><p className="webinar-section-label">Look at your current tools</p><h2 id="webinar-tools-title">How many tools does one job need?</h2><p>One for sales. One for email. One for bookings. Another to pass information between them. Each may be useful, but you could still be paying for extra steps.</p><div className="webinar-tools__question"><strong>What if you built only the part your business needs?</strong><span>Could that cut some of your software costs by 40% or more? It depends on your setup. We will show you what to compare before you decide.</span></div><Link className="webinar-tools__link" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></Link></div>
+          <div className="webinar-tools__copy"><p className="webinar-section-label">Look at your current tools</p><h2 id="webinar-tools-title">How many tools does one job need?</h2><p>One for sales. One for email. One for bookings. Another to pass information between them. Each may be useful, but you could still be paying for extra steps.</p><div className="webinar-tools__question"><strong>What if you built only the part your business needs?</strong><span>Could that cut some of your software costs by 40% or more? It depends on your setup. We will show you what to compare before you decide.</span></div><WebinarAnchor className="webinar-tools__link" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor></div>
           <div className="webinar-tools__list" aria-label="Examples of business software tools">{familiarTools.map(({ name, icon, job }) => <div className="webinar-tools__item" key={name}><span className="webinar-tools__icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={icon.path} fill={`#${icon.hex}`} /></svg></span><span className="webinar-tools__name">{name}<small>{job}</small></span></div>)}</div>
         </div>
         <p className="shell webinar-tools__note">Brand marks are shown only as familiar examples. Run Rentless is not affiliated with these companies.</p>
       </section>
 
       <section className="webinar-promise" aria-labelledby="webinar-promise-title">
-        <div className="shell"><p className="webinar-section-label">Why this webinar is different</p><h2 id="webinar-promise-title">Your business first.<br /><span>AI second.</span></h2><p className="webinar-promise__intro">Most AI classes show you what a new tool can do. We start with what your team pays for and the work it still does manually. Then we look at where AI could help, what you can leave alone and how to judge the cost.</p><div className="webinar-promise__outcomes"><span>Keep what works</span><span>Fix repeated work</span><span>Build what is missing</span><span>Know what it costs</span></div><Link className="webinar-cta webinar-cta--dark" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></Link></div>
+        <div className="shell"><p className="webinar-section-label">Why this webinar is different</p><h2 id="webinar-promise-title">Your business first.<br /><span>AI second.</span></h2><p className="webinar-promise__intro">Most AI classes show you what a new tool can do. We start with what your team pays for and the work it still does manually. Then we look at where AI could help, what you can leave alone and how to judge the cost.</p><div className="webinar-promise__outcomes"><span>Keep what works</span><span>Fix repeated work</span><span>Build what is missing</span><span>Know what it costs</span></div><WebinarAnchor className="webinar-cta webinar-cta--dark" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor></div>
       </section>
 
       <section id="what-you-will-learn" className="webinar-learning" aria-labelledby="webinar-learning-title">

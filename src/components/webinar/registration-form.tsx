@@ -80,8 +80,8 @@ export function RegistrationForm() {
         <label className="webinar-form__trap" aria-hidden="true">Website<input name="website" autoComplete="off" tabIndex={-1} /></label>
       </div>
       {error && <p className="webinar-form__error" role="alert">{error}</p>}
-      <button className="webinar-form__submit" type="submit" disabled={status === "sending"}>{status === "sending" ? "Saving your spot…" : "Get my spot"}<span aria-hidden="true">↗</span></button>
-      <p className="webinar-form__footnote">No payment needed. Joining details will be sent before the event.</p>
+      <button className="webinar-form__submit" type="submit" disabled={status === "sending"}>{status === "sending" ? "Saving your spot…" : "Register free"}<span aria-hidden="true">↗</span></button>
+      <p className="webinar-form__footnote">Free to attend. We’ll email your joining details before the event.</p>
     </form>
   );
 }
