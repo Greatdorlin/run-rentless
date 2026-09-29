@@ -8,7 +8,7 @@ type AttendingAs = "individual" | "company";
 
 export function RegistrationForm() {
   const [attendingAs, setAttendingAs] = useState<AttendingAs>("individual");
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "partial" | "duplicate">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "duplicate">("idle");
   const [error, setError] = useState("");
   const [firstName, setFirstName] = useState("");
   const [phase, setPhase] = useState<ReturnType<typeof webinarPhase>>("upcoming");
@@ -45,7 +45,8 @@ export function RegistrationForm() {
       const result = await response.json() as { ok?: boolean; emailSent?: boolean; alreadyRegistered?: boolean; message?: string };
       if (!result.ok) throw new Error(result.message || "Please try again.");
       setFirstName(String(data.get("firstName") || ""));
-      setStatus(result.alreadyRegistered ? "duplicate" : result.emailSent ? "success" : "partial");
+      if (!result.emailSent && !result.alreadyRegistered) throw new Error("Your spot is saved, but the email could not be sent. Please try again.");
+      setStatus(result.alreadyRegistered ? "duplicate" : "success");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Please try again.");
       setStatus("idle");
@@ -54,11 +55,11 @@ export function RegistrationForm() {
 
   if (phase === "ended") return <div className="webinar-form__closed"><h3>Registration has closed.</h3><p>The live event ended at 8PM GMT+1 on 10th October 2026. You can still explore Run Rentless.</p><Link href="/">Go to the homepage <span aria-hidden="true">↗</span></Link></div>;
 
-  if (status === "success" || status === "partial" || status === "duplicate") return (
+  if (status === "success" || status === "duplicate") return (
     <div className="webinar-form__success" role="status">
       <span className="webinar-form__success-mark" aria-hidden="true">✓</span>
-      <h3>{status === "success" ? "Your spot is confirmed." : status === "duplicate" ? `${firstName}, you’re already registered.` : "Your spot is saved."}</h3>
-      <p>{status === "success" ? "We’ve just sent your confirmation email. Check Spam or Promotions if you do not see it. Move it to your inbox and mark it as important so you do not miss the webinar details." : status === "duplicate" ? "Your email is already on the webinar list. If you need your details again, contact us." : "Your registration is saved, but the confirmation email could not be sent. Please contact us if you need the joining details."}</p>
+      <h3>{status === "success" ? "Your spot is confirmed." : `${firstName}, you’re already registered.`}</h3>
+      <p>{status === "success" ? "We’ve just sent your confirmation email. Check Spam or Promotions if you do not see it. Move it to your inbox and mark it as important so you do not miss the webinar details." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
       <strong>Saturday, 10th October 2026 · 6PM GMT+1</strong>
       <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>

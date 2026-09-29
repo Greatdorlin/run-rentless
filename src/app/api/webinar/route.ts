@@ -4,12 +4,15 @@ import { WEBINAR_END, WEBINAR_GROUP } from "@/lib/webinar";
 export const maxDuration = 60;
 
 const API = "https://api.sender.net/v2";
-const FIELD_TITLES = ["Webinar attending as", "Webinar company", "Webinar phone", "Webinar registered at"] as const;
+const PROFILE_FIELD_TITLES = ["Webinar attending as", "Webinar company", "Webinar phone", "Webinar registered at"] as const;
+const CONFIRMATION_FIELD_TITLE = "Webinar confirmation accepted at";
+const FIELD_TITLES = [...PROFILE_FIELD_TITLES, CONFIRMATION_FIELD_TITLE] as const;
 const FIELD_NAMES: Record<(typeof FIELD_TITLES)[number], string> = {
   "Webinar attending as": "{{webinar_attending_as}}",
   "Webinar company": "{{webinar_company}}",
   "Webinar phone": "{{webinar_phone}}",
   "Webinar registered at": "{{webinar_registered_at}}",
+  "Webinar confirmation accepted at": "{{webinar_confirmation_accepted_at}}",
 };
 type SenderField = { title: string; field_name?: string; name?: string };
 type SenderGroup = { id: string; title: string };
@@ -144,7 +147,9 @@ export async function POST(request: Request) {
     const lookup = await sender(token, subscriberPath);
     if (!lookup.ok && lookup.status !== 404) throw new Error(`Subscriber lookup ${lookup.status}`);
     const existing = lookup.ok ? (await lookup.json() as { data?: SenderSubscriber }).data : undefined;
-    if (existing?.subscriber_tags?.some((group) => group.id === webinarGroupId || group.title === WEBINAR_GROUP)) {
+    const alreadyInGroup = existing?.subscriber_tags?.some((group) => group.id === webinarGroupId || group.title === WEBINAR_GROUP);
+    const confirmationAccepted = existing?.columns?.some((column) => column.title === CONFIRMATION_FIELD_TITLE && Boolean(column.value));
+    if (alreadyInGroup && confirmationAccepted) {
       return NextResponse.json({ ok: true, emailSent: false, alreadyRegistered: true });
     }
 
@@ -155,31 +160,49 @@ export async function POST(request: Request) {
       "Webinar phone": phoneNumber,
       "Webinar registered at": registeredAt,
     };
-    const profileFields = Object.fromEntries(FIELD_TITLES.map((title) => [fieldNames[title], expected[title]]));
+    const profileFields = Object.fromEntries(PROFILE_FIELD_TITLES.map((title) => [fieldNames[title], expected[title]]));
+    const groups = existing
+      ? [...new Set([...(existing.subscriber_tags || []).map((group) => group.id).filter((id): id is string => Boolean(id)), webinarGroupId])]
+      : [webinarGroupId];
     const saved = await sender(token, existing ? subscriberPath : "/subscribers", {
       method: existing ? "PATCH" : "POST",
-      body: JSON.stringify({ email, firstname: firstName, fields: profileFields, trigger_automation: false }),
+      body: JSON.stringify({ email, firstname: firstName, groups, fields: profileFields, trigger_automation: false }),
     });
     if (!saved.ok) throw new Error(`Subscriber save ${saved.status}`);
-    const added = await sender(token, `/subscribers/groups/${encodeURIComponent(webinarGroupId)}`, { method: "POST", body: JSON.stringify({ subscribers: [email], trigger_automation: false }) });
-    if (!added.ok) throw new Error(`Group membership ${added.status}`);
-
-    const verified = await sender(token, subscriberPath);
-    if (!verified.ok) throw new Error(`Subscriber verification ${verified.status}`);
-    const record = (await verified.json() as { data?: SenderSubscriber }).data;
-    const inGroup = record?.subscriber_tags?.some((group) => group.id === webinarGroupId || group.title === WEBINAR_GROUP);
-    const storedFields = FIELD_TITLES.every((title) => record?.columns?.some((column) => column.title === title && String(column.value) === expected[title]));
-    if (!inGroup || !storedFields) throw new Error("Subscriber fields or group were not retained");
-
-    // Event properties make the registration easy to find even outside the profile view.
-    const event = await sender(token, "/events", { method: "POST", body: JSON.stringify({ subscriber: { email }, type: "run_rentless_october_webinar_registration", properties: { first_name: firstName, attending_as: attendingAs, company_name: expected["Webinar company"], phone_number: expected["Webinar phone"], registered_at: registeredAt, event_consent: true } }) });
-    if (!event.ok) console.error("Webinar registration event failed", event.status);
+    let verifiedRecord: SenderSubscriber | undefined;
+    for (const delay of [0, 250, 700]) {
+      if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+      const verified = await sender(token, subscriberPath);
+      if (!verified.ok) throw new Error(`Subscriber verification ${verified.status}`);
+      const record = (await verified.json() as { data?: SenderSubscriber }).data;
+      const inGroup = record?.subscriber_tags?.some((group) => group.id === webinarGroupId || group.title === WEBINAR_GROUP);
+      const storedFields = PROFILE_FIELD_TITLES.every((title) => record?.columns?.some((column) => column.title === title && String(column.value) === expected[title]));
+      if (inGroup && storedFields) { verifiedRecord = record; break; }
+    }
+    if (!verifiedRecord) throw new Error("Subscriber fields or group were not retained");
 
     const message = confirmation(firstName);
-    const sent = await sender(token, "/message/send", { method: "POST", body: JSON.stringify({ from: { email: process.env.SENDER_FROM_EMAIL || "info@runrentless.com", name: "Run Rentless" }, to: { email, name: firstName }, ...message, headers: { charset: "utf-8" } }) });
-    if (!sent.ok) { console.error("Webinar confirmation rejected", sent.status); return NextResponse.json({ ok: true, emailSent: false }, { status: 202 }); }
-    const delivery = await sent.json() as { success?: boolean; emailId?: string };
-    if (!delivery.success || !delivery.emailId) return NextResponse.json({ ok: true, emailSent: false }, { status: 202 });
+    let sent: Response;
+    try {
+      sent = await sender(token, "/message/send", { method: "POST", body: JSON.stringify({ from: { email: process.env.SENDER_FROM_EMAIL || "info@runrentless.com", name: "Run Rentless" }, to: { email, name: firstName }, ...message, headers: { charset: "utf-8" } }) });
+    } catch {
+      console.error("Webinar confirmation request failed");
+      return NextResponse.json({ message: "Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive." }, { status: 503 });
+    }
+    if (!sent.ok) { console.error("Webinar confirmation rejected", sent.status); return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 }); }
+    let delivery: { success?: boolean; emailId?: string };
+    try { delivery = await sent.json() as { success?: boolean; emailId?: string }; }
+    catch { return NextResponse.json({ message: "Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive." }, { status: 503 }); }
+    if (!delivery.success || !delivery.emailId) return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 });
+    try {
+      const marked = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ fields: { [fieldNames[CONFIRMATION_FIELD_TITLE]]: new Date().toISOString() }, trigger_automation: false }) });
+      if (!marked.ok) console.error("Webinar confirmation marker failed", marked.status);
+    } catch { console.error("Webinar confirmation marker failed"); }
+    // Event properties make the registration easy to find outside the profile view.
+    try {
+      const event = await sender(token, "/events", { method: "POST", body: JSON.stringify({ subscriber: { email }, type: "run_rentless_october_webinar_registration", properties: { first_name: firstName, attending_as: attendingAs, company_name: expected["Webinar company"], phone_number: expected["Webinar phone"], registered_at: registeredAt, event_consent: true } }) });
+      if (!event.ok) console.error("Webinar registration event failed", event.status);
+    } catch { console.error("Webinar registration event failed"); }
     console.info("Webinar registration confirmed", { group: WEBINAR_GROUP, attendingAs, emailAccepted: true });
     return NextResponse.json({ ok: true, emailSent: true });
   } catch (error) {
