@@ -164,6 +164,13 @@
 .webinar-form__success p,.webinar-form__closed p { color:#3f5c52; }
 .webinar-form__success strong { display:block; margin:24px 0; }
 .webinar-form__success a,.webinar-form__closed a { display:inline-flex; gap:12px; padding-bottom:5px; border-bottom:1px solid var(--ink); font-size:14px; font-weight:800; }
+.webinar-form__group { margin:30px 0 23px; padding:clamp(22px,3vw,30px); background:var(--ink); color:var(--event-paper); }
+.webinar-form__group > span { display:block; color:var(--lime); font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+.webinar-form__group h4 { margin:10px 0 10px; font-size:clamp(24px,2.4vw,31px); line-height:1.12; }
+.webinar-form__group p { margin:0 0 22px; color:#d1dfd9; line-height:1.5; }
+.webinar-form__success .webinar-form__group a { display:flex; align-items:center; justify-content:space-between; gap:18px; width:100%; min-height:54px; padding:13px 16px; border:0; background:var(--lime); color:var(--ink); font-size:15px; text-decoration:none; }
+.webinar-form__success .webinar-form__group a:hover { background:#dcff69; }
+.webinar-form__success .webinar-form__group a:focus-visible { outline:3px solid var(--event-paper); outline-offset:4px; }
 
 @media (max-width:980px) {
   .webinar-hero__grid { grid-template-columns:1fr; }

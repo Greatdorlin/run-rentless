@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
-import { webinarPhase } from "@/lib/webinar";
+import { WEBINAR_WHATSAPP_URL, webinarPhase } from "@/lib/webinar";
 
 type AttendingAs = "individual" | "company";
 
@@ -59,7 +59,13 @@ export function RegistrationForm() {
     <div className="webinar-form__success" role="status">
       <span className="webinar-form__success-mark" aria-hidden="true">✓</span>
       <h3>{status === "success" ? "Your spot is confirmed." : `${firstName}, you’re already registered.`}</h3>
-      <p>{status === "success" ? "We’ve just sent your confirmation email. Check Spam or Promotions if you do not see it. Move it to your inbox and mark it as important so you do not miss the webinar details." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
+      <div className="webinar-form__group">
+        <span>One more step</span>
+        <h4>Be ready when we go live.</h4>
+        <p>Join the event WhatsApp group for the joining link, reminders and any last-minute updates.</p>
+        <a href={WEBINAR_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join the WhatsApp group <span aria-hidden="true">↗</span></a>
+      </div>
+      <p>{status === "success" ? "Your confirmation email is on its way. Check Spam or Promotions if you do not see it." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
       <strong>Saturday, 10th October 2026 · 6PM GMT+1</strong>
       <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>
