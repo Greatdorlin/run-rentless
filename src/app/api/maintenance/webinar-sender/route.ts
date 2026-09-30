@@ -13,7 +13,7 @@ type Subscriber = {
   firstname?: string | null;
   subscriber_tags?: Group[];
   columns?: Array<{ title?: string; value?: unknown }>;
-  status?: { temail?: string };
+  status?: { temail?: string; sms?: string };
 };
 
 function authorized(request: Request) {
@@ -77,6 +77,7 @@ function profile(subscriber: Subscriber) {
     skipped: current ? "standard-phone-already-set" : !custom ? "no-webinar-phone" : !normalized ? "invalid-or-ambiguous-country-code" : null,
     confirmationAccepted: Boolean(subscriber.columns?.find((column) => column.title === "Webinar confirmation accepted at")?.value),
     transactionalEmailStatus: subscriber.status?.temail || null,
+    smsStatus: subscriber.status?.sms || null,
   };
 }
 
@@ -111,15 +112,15 @@ export async function POST(request: Request) {
     for (const subscriber of subscribers) {
       const email = subscriber.email!;
       const normalized = normalizeInternationalPhoneNumber(customPhone(subscriber));
-      if (subscriber.phone || !normalized) {
-        results.push({ email, status: subscriber.phone ? "already-set" : "skipped-invalid-or-missing" });
+      if (subscriber.phone || !normalized || subscriber.status?.sms === "active") {
+        results.push({ email, status: subscriber.phone ? "already-set" : subscriber.status?.sms === "active" ? "skipped-sms-status-conflict" : "skipped-invalid-or-missing" });
         continue;
       }
       const path = `/subscribers/${encodeURIComponent(email)}`;
       try {
-        await sender(path, { method: "PATCH", body: JSON.stringify({ phone: normalized, trigger_automation: false }) });
+        await sender(path, { method: "PATCH", body: JSON.stringify({ phone: normalized, sms_status: "UNSUBSCRIBED", trigger_automation: false }) });
         const verified = await sender(path) as { data?: Subscriber };
-        results.push({ email, status: verified.data?.phone === normalized ? "synced-and-verified" : "verification-failed" });
+        results.push({ email, status: verified.data?.phone === normalized && verified.data?.status?.sms !== "active" ? "synced-and-verified" : "verification-failed" });
       } catch (error) {
         results.push({ email, status: error instanceof Error ? error.message : "update-failed" });
       }
