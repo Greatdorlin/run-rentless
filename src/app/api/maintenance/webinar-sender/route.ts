@@ -84,6 +84,17 @@ export async function GET(request: Request) {
   if (!authorized(request)) return new NextResponse(null, { status: 404 });
   try {
     const subscribers = await webinarSubscribers();
+    if (new URL(request.url).searchParams.get("diagnostics") === "1") {
+      const campaigns = await sender("/transactional?limit=100") as { data?: Array<{ id: string; title?: string; subject?: string }> };
+      return NextResponse.json({
+        campaigns: campaigns.data?.map(({ id, title, subject }) => ({ id, title, subject })),
+        phones: subscribers.map((subscriber) => ({
+          email: subscriber.email,
+          fields: subscriber.columns?.filter((column) => /phone/i.test(column.title || "")),
+          titles: subscriber.columns?.map((column) => column.title),
+        })),
+      }, { headers: { "Cache-Control": "no-store" } });
+    }
     return NextResponse.json({ group: WEBINAR_GROUP, count: subscribers.length, profiles: subscribers.map(profile) }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Sender audit failed" }, { status: 502 });
