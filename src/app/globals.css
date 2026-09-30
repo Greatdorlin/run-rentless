@@ -765,6 +765,8 @@ body[data-audit-active="true"] .floating-waitlist { display: none; }
 .guided-name { display: grid; gap: 20px; }
 .guided-name legend { margin-bottom: 20px; font-weight: 600; }
 .report-form--guided .report-fields { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.report-business-fields { display: grid; gap: 16px; }
+.report-business-fields label { display: grid; gap: 6px; min-width: 0; }
 .report-fields small { display: block; font-size: 13px; line-height: 1.5; margin-top: 10px; }
 .action-plan-intro { margin: 28px 0 36px; }
 .action-plan-intro > h2 { font-size: clamp(24px, 3vw, 34px); line-height: 1.15; }

@@ -2,13 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import { budgetRanges, deliveryPreferences } from "@/lib/audit";
+import { businessSectors, normalizeBusinessSector, positions } from "@/lib/business-profile";
 
 export function ReportRequest({ interest, interested, sending, error, submit, download }: {
   interest: string; interested: boolean; sending: boolean; error: string;
   submit: (event: FormEvent<HTMLFormElement>) => void; download: () => void;
 }) {
   const [step, setStep] = useState(0);
-  const [values, setValues] = useState({ email: "", firstName: "", lastName: "", company: "", companySize: "", budgetRange: "", deliveryPreference: "" });
+  const [values, setValues] = useState({ email: "", firstName: "", lastName: "", company: "", position: "", businessSector: "", companySize: "", budgetRange: "", deliveryPreference: "" });
   const set = (key: keyof typeof values, value: string) => setValues((old) => ({ ...old, [key]: value }));
   const advance = (event: FormEvent<HTMLFormElement>) => {
     if (step < 3) { event.preventDefault(); setStep(step + 1); } else submit(event);
@@ -16,11 +17,18 @@ export function ReportRequest({ interest, interested, sending, error, submit, do
   return <form id="report-request" className="report-form report-form--guided" onSubmit={advance}>
     <div><p className="eyebrow eyebrow--dark"><span /> Keep your action plan</p><h2>{interested ? "Let’s talk through your results." : "Take your next steps with you."}</h2><p>Keep your costs, advice for each tool and next steps in one email.</p><p className="question-count">Step {step + 1} of 4</p></div>
     <div className="report-fields">
-      {Object.entries(values).map(([key, value]) => <input key={key} type="hidden" name={key} value={(key === "company" || key === "companySize") && !value ? "Not provided" : key === "budgetRange" && !interested ? "" : value} />)}
+      {Object.entries(values).map(([key, value]) => <input key={key} type="hidden" name={key} value={key === "businessSector" ? normalizeBusinessSector(value) || "Not provided" : (key === "company" || key === "companySize" || key === "position") && !value ? "Not provided" : key === "budgetRange" && !interested ? "" : value} />)}
+      <input type="hidden" name="businessSectorInput" value={values.businessSector.trim() || "Not provided"} />
       <input type="hidden" name="savingsInterest" value={interest} />
       {step === 0 && <label><span>Where should we send your plan?</span><input required type="email" autoComplete="email" value={values.email} onChange={(event) => set("email", event.target.value)} placeholder="Your email address" /><small>No phone number. No account to create.</small></label>}
       {step === 1 && <fieldset className="guided-name"><legend>What should we call you?</legend><label><span>First name</span><input autoFocus required autoComplete="given-name" value={values.firstName} onChange={(event) => set("firstName", event.target.value)} /></label><label><span>Last name</span><input required autoComplete="family-name" value={values.lastName} onChange={(event) => set("lastName", event.target.value)} /></label></fieldset>}
-      {step === 2 && <label><span>Which company is this for? (optional)</span><input autoFocus autoComplete="organization" value={values.company} onChange={(event) => set("company", event.target.value)} placeholder="Company name" /><small>You can leave this blank.</small></label>}
+      {step === 2 && <div className="report-business-fields">
+        <label><span>Which company is this for? (optional)</span><input autoFocus autoComplete="organization" value={values.company} onChange={(event) => set("company", event.target.value)} placeholder="Company name" /></label>
+        <label><span>What is your role? (optional)</span><input list="report-position-options" autoComplete="organization-title" maxLength={80} value={values.position} onChange={(event) => set("position", event.target.value)} placeholder="e.g. Founder or Marketing Manager" /></label>
+        <datalist id="report-position-options">{positions.map((position) => <option key={position} value={position} />)}</datalist>
+        <label><span>What kind of business is it? (optional)</span><input list="report-sector-options" maxLength={100} value={values.businessSector} onChange={(event) => set("businessSector", event.target.value)} placeholder="Search a sector, e.g. SaaS or Healthtech" /><small>Type to search or write your own. SaaS is grouped under Software; Healthtech under Health.</small></label>
+        <datalist id="report-sector-options">{businessSectors.map((sector) => <option key={sector} value={sector} />)}<option value="SaaS" /><option value="Healthtech" /><option value="Fintech" /><option value="Edtech" /></datalist>
+      </div>}
       {step === 3 && <>
         <p>Your plan will go to <strong>{values.email}</strong>.</p>
         <details className="optional-context"><summary>Add a little context (optional)</summary><label><span>Team size</span><select value={values.companySize} onChange={(event) => set("companySize", event.target.value)}><option value="">Prefer not to say</option>{["1 to 10", "11 to 25", "26 to 50", "51 to 100", "100+"].map((value) => <option key={value}>{value}</option>)}</select></label>
