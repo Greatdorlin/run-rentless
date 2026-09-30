@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { WEBINAR_WHATSAPP_URL, webinarPhase } from "@/lib/webinar";
 import { businessSectors, normalizeBusinessSector, positions } from "@/lib/business-profile";
+import { WebinarShare } from "@/components/webinar/webinar-share";
 
 type AttendingAs = "individual" | "company";
 
@@ -24,7 +25,7 @@ function SearchableChoice({ id, label, name, options, value, onChange, placehold
     <label htmlFor={id}>{label}</label>
     <div className="webinar-form__search-control">
       <input id={id} name={name} type="text" autoComplete={name === "position" ? "organization-title" : "off"} maxLength={maxLength} required value={value} onChange={(event) => { onChange(event.target.value); setOpen(true); }} onFocus={() => setOpen(true)} placeholder={placeholder} />
-      <button type="button" aria-label={`${open ? "Hide" : "Show"} ${label.toLowerCase()} options`} aria-expanded={open} aria-controls={`${id}-options`} onClick={() => setOpen(!open)}><span aria-hidden="true">⌄</span></button>
+      <button type="button" aria-label={`${open ? "Hide" : "Show"} ${label.toLowerCase()} options`} aria-expanded={open} aria-controls={`${id}-options`} onClick={() => setOpen(!open)}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 9 7 7 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
     </div>
     {open && <div id={`${id}-options`} className="webinar-form__option-list" aria-label={`${label} options`}>
       {matches.map((option) => <button key={option} type="button" onClick={() => { onChange(option); setOpen(false); }}>{option}</button>)}
@@ -100,6 +101,7 @@ export function RegistrationForm() {
       </div>
       <p>{status === "success" ? "Your confirmation email is on its way. Check Spam or Promotions if you do not see it." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
       <strong>Saturday, 10th October 2026 · 6PM GMT+1</strong>
+      <WebinarShare compact />
       <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>
   );

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { WebinarAnchor } from "@/components/webinar/webinar-anchor";
-import { siAirtable, siAsana, siCalendly, siHubspot, siMailchimp, siZapier } from "simple-icons";
+import { siAirtable, siAsana, siCalendly, siClickup, siDropbox, siFigma, siGooglesheets, siHubspot, siJira, siMailchimp, siNotion, siQuickbooks, siShopify, siZapier, siZendesk, siZoom } from "simple-icons";
 import { WebinarCountdown } from "@/components/webinar/countdown";
 import { RegistrationForm } from "@/components/webinar/registration-form";
+import { WebinarShare } from "@/components/webinar/webinar-share";
 import "./webinar.css";
 
 const webinarShareDescription = "Everyone is showing you what AI can do. Let’s shift the conversation to where it could help your business cut costs and grow revenue.";
@@ -50,6 +51,16 @@ const familiarTools = [
   { name: "Airtable", icon: siAirtable, job: "Data" },
   { name: "Zapier", icon: siZapier, job: "Automation" },
   { name: "Calendly", icon: siCalendly, job: "Bookings" },
+  { name: "Notion", icon: siNotion, job: "Workspace" },
+  { name: "Zoom", icon: siZoom, job: "Meetings" },
+  { name: "Shopify", icon: siShopify, job: "Stores" },
+  { name: "QuickBooks", icon: siQuickbooks, job: "Finance" },
+  { name: "Google Sheets", icon: siGooglesheets, job: "Spreadsheets" },
+  { name: "Jira", icon: siJira, job: "Projects" },
+  { name: "Dropbox", icon: siDropbox, job: "Files" },
+  { name: "Figma", icon: siFigma, job: "Design" },
+  { name: "ClickUp", icon: siClickup, job: "Projects" },
+  { name: "Zendesk", icon: siZendesk, job: "Support" },
 ];
 
 const examples = [
@@ -86,6 +97,8 @@ export default function WebinarPage() {
           </div>
         </div>
       </section>
+
+      <section className="webinar-share-band" aria-label="Invite someone to the webinar"><div className="shell"><WebinarShare /></div></section>
 
       <section className="webinar-problem" aria-labelledby="webinar-problem-title">
         <div className="shell">
@@ -129,7 +142,7 @@ export default function WebinarPage() {
             <div className="webinar-tools__question"><strong>That means lower costs, less wasted time, and a simpler way to run your business more efficiently and profitably.</strong></div>
             <WebinarAnchor className="webinar-tools__link" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor>
           </div>
-          <div className="webinar-tools__list" aria-label="Examples of business software tools">{familiarTools.map(({ name, icon, job }) => <div className="webinar-tools__item" key={name}><span className="webinar-tools__icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={icon.path} fill={`#${icon.hex}`} /></svg></span><span className="webinar-tools__name">{name}<small>{job}</small></span></div>)}</div>
+          <div className="webinar-tools__visual"><ul className="webinar-tools__list" aria-label="Examples of business software tools" tabIndex={0}>{familiarTools.map(({ name, icon, job }) => <li className="webinar-tools__item" key={name}><span className="webinar-tools__icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={icon.path} fill={name === "Mailchimp" ? "#031e19" : `#${icon.hex}`} /></svg></span><span className="webinar-tools__name">{name}<small>{job}</small></span></li>)}</ul><p className="webinar-tools__hint">Swipe or scroll to see more <span aria-hidden="true">→</span></p></div>
         </div>
         <p className="shell webinar-tools__note">Brand marks are shown only as familiar examples. Run Rentless is not affiliated with these companies.</p>
       </section>
