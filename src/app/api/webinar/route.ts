@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { WEBINAR_END, WEBINAR_GROUP, WEBINAR_WHATSAPP_URL } from "@/lib/webinar";
 import { businessSectors, positions } from "@/lib/business-profile";
+import { normalizeInternationalPhoneNumber } from "@/lib/phone";
 
 export const maxDuration = 60;
 
@@ -20,7 +21,7 @@ const FIELD_NAMES: Record<(typeof FIELD_TITLES)[number], string> = {
 };
 type SenderField = { title: string; field_name?: string; name?: string };
 type SenderGroup = { id: string; title: string };
-type SenderSubscriber = { firstname?: string | null; lastname?: string | null; subscriber_tags?: Array<{ id?: string; title?: string }>; columns?: Array<{ title?: string; value?: unknown }> };
+type SenderSubscriber = { firstname?: string | null; lastname?: string | null; phone?: string | null; subscriber_tags?: Array<{ id?: string; title?: string }>; columns?: Array<{ title?: string; value?: unknown }> };
 function asItems<T>(data: T | T[] | undefined): T[] { return Array.isArray(data) ? data : data ? [data] : []; }
 function fieldItems(payload: unknown): SenderField[] {
   const found: SenderField[] = [];
@@ -150,10 +151,10 @@ export async function POST(request: Request) {
   const selectedSector = clean(body.businessSector, 100);
   const sectorEntered = selectedSector.toLowerCase() === "other" ? clean(body.businessSectorOther, 100) : selectedSector;
   const businessSector = selectedSector === "Other" ? "Other" : selectedSector;
-  const phoneNumber = clean(body.phoneNumber, 32);
+  const phoneNumber = normalizeInternationalPhoneNumber(body.phoneNumber);
   const companyValid = attendingAs !== "company" || companyName.length >= 2;
-  const phoneValid = /^[+()\d\s.-]{7,32}$/.test(phoneNumber) && phoneNumber.replace(/\D/g, "").length >= 7;
-  if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["individual", "company"].includes(attendingAs) || !companyValid || !positions.includes(selectedPosition as (typeof positions)[number]) || !businessSectors.includes(selectedSector as (typeof businessSectors)[number]) || !position || !sectorEntered || !businessSector || !phoneValid || body.eventConsent !== true) {
+  if (!phoneNumber) return NextResponse.json({ message: "Enter a valid phone number starting with + and your country code." }, { status: 400 });
+  if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["individual", "company"].includes(attendingAs) || !companyValid || !positions.includes(selectedPosition as (typeof positions)[number]) || !businessSectors.includes(selectedSector as (typeof businessSectors)[number]) || !position || !sectorEntered || !businessSector || body.eventConsent !== true) {
     return NextResponse.json({ message: "Please complete the required fields and confirm you can receive webinar emails." }, { status: 400 });
   }
   const token = process.env.SENDER_API;
@@ -176,13 +177,13 @@ export async function POST(request: Request) {
         "Webinar business sector": businessSector,
         "Webinar sector entered": sectorEntered,
       };
-      const needsUpdate = !identityStored(existing, firstName, lastName) || Object.entries(updatedFields).some(([title, value]) => !existing?.columns?.some((column) => column.title === title && String(column.value) === value));
+      const needsUpdate = !identityStored(existing, firstName, lastName) || existing?.phone !== phoneNumber || Object.entries(updatedFields).some(([title, value]) => !existing?.columns?.some((column) => column.title === title && String(column.value) === value));
       if (needsUpdate) {
-        const update = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, fields: Object.fromEntries(Object.entries(updatedFields).map(([title, value]) => [fieldNames[title as keyof typeof FIELD_NAMES], value])), trigger_automation: false }) });
+        const update = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, fields: Object.fromEntries(Object.entries(updatedFields).map(([title, value]) => [fieldNames[title as keyof typeof FIELD_NAMES], value])), trigger_automation: false }) });
         if (!update.ok) throw new Error(`Existing subscriber update ${update.status}`);
         const check = await sender(token, subscriberPath);
         const record = check.ok ? (await check.json() as { data?: SenderSubscriber }).data : undefined;
-        if (!identityStored(record, firstName, lastName) || !Object.entries(updatedFields).every(([title, value]) => record?.columns?.some((column) => column.title === title && String(column.value) === value))) throw new Error("Existing subscriber profile verification failed");
+        if (!identityStored(record, firstName, lastName) || record?.phone !== phoneNumber || !Object.entries(updatedFields).every(([title, value]) => record?.columns?.some((column) => column.title === title && String(column.value) === value))) throw new Error("Existing subscriber profile verification failed");
       }
       return NextResponse.json({ ok: true, emailSent: false, alreadyRegistered: true });
     }
@@ -203,12 +204,12 @@ export async function POST(request: Request) {
       : [webinarGroupId];
     const saved = await sender(token, existing ? subscriberPath : "/subscribers", {
       method: existing ? "PATCH" : "POST",
-      body: JSON.stringify({ email, firstname: firstName, lastname: lastName, groups, fields: profileFields, trigger_automation: false }),
+      body: JSON.stringify({ email, firstname: firstName, lastname: lastName, phone: phoneNumber, groups, fields: profileFields, trigger_automation: false }),
     });
     if (!saved.ok) throw new Error(`Subscriber save ${saved.status}`);
     // Sender has accepted profile writes without retaining its standard name
     // columns. A separate update and a read-back guard prevent silent gaps.
-    const identityUpdate = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, trigger_automation: false }) });
+    const identityUpdate = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, trigger_automation: false }) });
     if (!identityUpdate.ok) throw new Error(`Subscriber identity update ${identityUpdate.status}`);
     let verifiedRecord: SenderSubscriber | undefined;
     for (const delay of [0, 250, 700]) {
@@ -218,7 +219,7 @@ export async function POST(request: Request) {
       const record = (await verified.json() as { data?: SenderSubscriber }).data;
       const inGroup = record?.subscriber_tags?.some((group) => group.id === webinarGroupId || group.title === WEBINAR_GROUP);
       const storedFields = PROFILE_FIELD_TITLES.every((title) => record?.columns?.some((column) => column.title === title && String(column.value) === expected[title]));
-      if (inGroup && storedFields && identityStored(record, firstName, lastName)) { verifiedRecord = record; break; }
+      if (inGroup && storedFields && identityStored(record, firstName, lastName) && record?.phone === phoneNumber) { verifiedRecord = record; break; }
     }
     if (!verifiedRecord) throw new Error("Subscriber fields or group were not retained");
 

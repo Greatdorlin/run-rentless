@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { WEBINAR_WHATSAPP_URL, webinarPhase } from "@/lib/webinar";
 import { businessSectors, normalizeBusinessSector, positions } from "@/lib/business-profile";
+import { normalizeInternationalPhoneNumber } from "@/lib/phone";
 import { WebinarShare } from "@/components/webinar/webinar-share";
 
 type AttendingAs = "individual" | "company";
@@ -70,6 +71,12 @@ export function RegistrationForm() {
     }
     if (!form.reportValidity()) return;
     const data = new FormData(form);
+    const phoneNumber = normalizeInternationalPhoneNumber(data.get("phoneNumber"));
+    if (!phoneNumber) {
+      setError("Enter a valid phone number starting with + and your country code, such as +234 903 350 4689.");
+      form.querySelector<HTMLInputElement>('input[name="phoneNumber"]')?.focus();
+      return;
+    }
     setError("");
     setStatus("sending");
     try {
@@ -86,7 +93,7 @@ export function RegistrationForm() {
           positionOther: data.get("positionOther"),
           businessSector: data.get("businessSector"),
           businessSectorOther: data.get("businessSectorOther"),
-          phoneNumber: data.get("phoneNumber"),
+          phoneNumber,
           eventConsent: data.get("eventConsent") === "on",
           website: data.get("website"),
         }),
@@ -137,7 +144,7 @@ export function RegistrationForm() {
         {position.trim().toLowerCase() === "other" && <label>What is your role?<input name="positionOther" maxLength={80} required placeholder="Type your role" /></label>}
         <SearchableChoice id="webinar-sector" label="Business sector" name="businessSector" options={businessSectors} value={businessSector} onChange={setBusinessSector} maxLength={100} placeholder="Search or choose your sector" />
         {businessSector.trim().toLowerCase() === "other" && <label>What is your sector?<input name="businessSectorOther" maxLength={100} required placeholder="Type your sector" /></label>}
-        <label>Phone number<input name="phoneNumber" type="tel" autoComplete="tel" maxLength={32} required placeholder="Include your country code" /></label>
+        <label>Phone number<input name="phoneNumber" type="tel" inputMode="tel" autoComplete="tel" maxLength={32} required placeholder="+234 903 350 4689" aria-describedby="webinar-phone-help" /><small id="webinar-phone-help">Start with + and your country code.</small></label>
         <label className="webinar-form__consent"><input type="checkbox" name="eventConsent" required /><span>I agree to receive my confirmation and webinar updates by email. See our <Link href="/privacy">Privacy Policy</Link>.</span></label>
         <label className="webinar-form__trap" aria-hidden="true">Website<input name="website" autoComplete="off" tabIndex={-1} /></label>
       </div>
