@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseAudit, reportEmail, auditSummary as summarizeReport } from "@/lib/audit-report";
 import { budgetRanges, deliveryPreferences, savingsChoices, verdict } from "@/lib/audit";
-import { normalizeBusinessSector } from "@/lib/business-profile";
 
 export const maxDuration = 60;
 
@@ -9,8 +8,6 @@ const SENDER_BASE_URL = "https://api.sender.net/v2";
 const GROUP_TITLE = "Run Rentless Waitlist";
 const PROFILE_FIELDS = {
   company: { title: "Company", type: "text", fieldName: "{$company}" },
-  position: { title: "Position", type: "text", fieldName: "{$position}" },
-  businessSector: { title: "Business sector", type: "text", fieldName: "{$business_sector}" },
   interest: { title: "Software interest", type: "text", fieldName: "{$software_interest}" },
   teamSize: { title: "Team size", type: "text", fieldName: "{$team_size}" },
   currentSoftware: { title: "Current software", type: "text", fieldName: "{$current_software}" },
@@ -185,9 +182,6 @@ export async function POST(request: Request) {
   const lastName = clean(body.lastName, 80);
   const email = clean(body.email, 160).toLowerCase();
   const company = clean(body.company, 120);
-  const position = clean(body.position, 80) || "Not provided";
-  const businessSectorInput = clean(body.businessSectorInput, 100) || clean(body.businessSector, 100);
-  const businessSector = normalizeBusinessSector(businessSectorInput) || "Not provided";
   const interest = clean(body.interest, 120);
   const teamSize = clean(body.teamSize, 30);
   const currentSoftware = clean(body.currentSoftware, 160);
@@ -214,8 +208,6 @@ export async function POST(request: Request) {
     const auditSummary = audit ? `${summarizeReport(audit)} Savings interest: ${savingsInterest}.` : "Not provided";
     const fields = Object.fromEntries([
       fieldNames.company && [fieldNames.company, company],
-      fieldNames.position && [fieldNames.position, position],
-      fieldNames.businessSector && [fieldNames.businessSector, businessSector],
       fieldNames.interest && [fieldNames.interest, interest],
       fieldNames.teamSize && [fieldNames.teamSize, teamSize],
       fieldNames.currentSoftware && [fieldNames.currentSoftware, currentSoftware || "Not provided"],
@@ -243,7 +235,7 @@ export async function POST(request: Request) {
     const storedResponse = await senderFetch(token, `/subscribers/${encodeURIComponent(email)}`);
     if (!storedResponse.ok) throw new Error("Sender profile verification failed");
     const stored = await storedResponse.json() as { data?: { columns?: Array<{ title?: string; value?: unknown }> } };
-    const expected = { company, position, businessSector, interest, teamSize, currentSoftware: currentSoftware || "Not provided", consent: consent ? "Yes" : "No", budgetRange, deliveryPreference, auditSummary, auditPriority: audit?.priority?.name || "No clear opportunity yet" };
+    const expected = { company, interest, teamSize, currentSoftware: currentSoftware || "Not provided", consent: consent ? "Yes" : "No", budgetRange, deliveryPreference, auditSummary, auditPriority: audit?.priority?.name || "No clear opportunity yet" };
     const confirmed = Object.entries(expected).filter(([key, value]) => stored.data?.columns?.some((column) => column.title === PROFILE_FIELDS[key as keyof typeof PROFILE_FIELDS].title && String(column.value) === value));
     if (confirmed.length !== Object.keys(expected).length) throw new Error(`Sender profile verification incomplete (${confirmed.length}/${Object.keys(expected).length})`);
     console.info("Sender profile persistence verified", { fieldCount: confirmed.length });
@@ -255,9 +247,6 @@ export async function POST(request: Request) {
         type: audit ? "run_rentless_audit_submission" : "run_rentless_waitlist_submission",
         properties: {
           company,
-          position,
-          business_sector: businessSector,
-          business_sector_input: businessSectorInput || "Not provided",
           software_interest: interest,
           team_size: teamSize,
           current_software: currentSoftware || "Not provided",

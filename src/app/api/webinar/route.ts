@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 import { WEBINAR_END, WEBINAR_GROUP, WEBINAR_WHATSAPP_URL } from "@/lib/webinar";
+import { normalizeBusinessSector } from "@/lib/business-profile";
 
 export const maxDuration = 60;
 
 const API = "https://api.sender.net/v2";
-const PROFILE_FIELD_TITLES = ["Webinar attending as", "Webinar company", "Webinar phone", "Webinar registered at"] as const;
+const PROFILE_FIELD_TITLES = ["Webinar attending as", "Webinar company", "Webinar phone", "Webinar position", "Webinar business sector", "Webinar sector entered", "Webinar registered at"] as const;
 const CONFIRMATION_FIELD_TITLE = "Webinar confirmation accepted at";
 const FIELD_TITLES = [...PROFILE_FIELD_TITLES, CONFIRMATION_FIELD_TITLE] as const;
 const FIELD_NAMES: Record<(typeof FIELD_TITLES)[number], string> = {
   "Webinar attending as": "{{webinar_attending_as}}",
   "Webinar company": "{{webinar_company}}",
   "Webinar phone": "{{webinar_phone}}",
+  "Webinar position": "{{webinar_position}}",
+  "Webinar business sector": "{{webinar_business_sector}}",
+  "Webinar sector entered": "{{webinar_sector_entered}}",
   "Webinar registered at": "{{webinar_registered_at}}",
   "Webinar confirmation accepted at": "{{webinar_confirmation_accepted_at}}",
 };
@@ -132,10 +136,13 @@ export async function POST(request: Request) {
   const email = clean(body.email, 160).toLowerCase();
   const attendingAs = clean(body.attendingAs, 20);
   const companyName = clean(body.companyName, 120);
+  const position = clean(body.position, 80);
+  const sectorEntered = clean(body.businessSector, 100);
+  const businessSector = normalizeBusinessSector(sectorEntered);
   const phoneNumber = clean(body.phoneNumber, 32);
   const companyValid = attendingAs !== "company" || companyName.length >= 2;
   const phoneValid = /^[+()\d\s.-]{7,32}$/.test(phoneNumber) && phoneNumber.replace(/\D/g, "").length >= 7;
-  if (!firstName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["individual", "company"].includes(attendingAs) || !companyValid || !phoneValid || body.eventConsent !== true) {
+  if (!firstName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["individual", "company"].includes(attendingAs) || !companyValid || !position || !businessSector || !phoneValid || body.eventConsent !== true) {
     return NextResponse.json({ message: "Please complete the required fields and confirm you can receive webinar emails." }, { status: 400 });
   }
   const token = process.env.SENDER_API;
@@ -150,6 +157,19 @@ export async function POST(request: Request) {
     const alreadyInGroup = existing?.subscriber_tags?.some((group) => group.id === webinarGroupId || group.title === WEBINAR_GROUP);
     const confirmationAccepted = existing?.columns?.some((column) => column.title === CONFIRMATION_FIELD_TITLE && Boolean(column.value));
     if (alreadyInGroup && confirmationAccepted) {
+      const updatedFields = {
+        "Webinar position": position,
+        "Webinar business sector": businessSector,
+        "Webinar sector entered": sectorEntered,
+      };
+      const needsUpdate = Object.entries(updatedFields).some(([title, value]) => !existing?.columns?.some((column) => column.title === title && String(column.value) === value));
+      if (needsUpdate) {
+        const update = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ fields: Object.fromEntries(Object.entries(updatedFields).map(([title, value]) => [fieldNames[title as keyof typeof FIELD_NAMES], value])), trigger_automation: false }) });
+        if (!update.ok) throw new Error(`Existing subscriber update ${update.status}`);
+        const check = await sender(token, subscriberPath);
+        const columns = check.ok ? (await check.json() as { data?: SenderSubscriber }).data?.columns : undefined;
+        if (!Object.entries(updatedFields).every(([title, value]) => columns?.some((column) => column.title === title && String(column.value) === value))) throw new Error("Existing subscriber profile verification failed");
+      }
       return NextResponse.json({ ok: true, emailSent: false, alreadyRegistered: true });
     }
 
@@ -158,6 +178,9 @@ export async function POST(request: Request) {
       "Webinar attending as": attendingAs === "company" ? "Company" : "Individual",
       "Webinar company": attendingAs === "company" ? companyName : "Not applicable",
       "Webinar phone": phoneNumber,
+      "Webinar position": position,
+      "Webinar business sector": businessSector,
+      "Webinar sector entered": sectorEntered,
       "Webinar registered at": registeredAt,
     };
     const profileFields = Object.fromEntries(PROFILE_FIELD_TITLES.map((title) => [fieldNames[title], expected[title]]));
@@ -200,7 +223,7 @@ export async function POST(request: Request) {
     } catch { console.error("Webinar confirmation marker failed"); }
     // Event properties make the registration easy to find outside the profile view.
     try {
-      const event = await sender(token, "/events", { method: "POST", body: JSON.stringify({ subscriber: { email }, type: "run_rentless_october_webinar_registration", properties: { first_name: firstName, attending_as: attendingAs, company_name: expected["Webinar company"], phone_number: expected["Webinar phone"], registered_at: registeredAt, event_consent: true } }) });
+      const event = await sender(token, "/events", { method: "POST", body: JSON.stringify({ subscriber: { email }, type: "run_rentless_october_webinar_registration", properties: { first_name: firstName, attending_as: attendingAs, company_name: expected["Webinar company"], phone_number: expected["Webinar phone"], position, business_sector: businessSector, sector_entered: sectorEntered, registered_at: registeredAt, event_consent: true } }) });
       if (!event.ok) console.error("Webinar registration event failed", event.status);
     } catch { console.error("Webinar registration event failed"); }
     console.info("Webinar registration confirmed", { group: WEBINAR_GROUP, attendingAs, emailAccepted: true });

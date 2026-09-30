@@ -138,6 +138,7 @@
 .webinar-form__fields label:not(.webinar-form__consent):not(.webinar-form__trap) { display:grid; gap:7px; font-size:12px; font-weight:800; }
 .webinar-form input:not([type=radio]):not([type=checkbox]) { width:100%; min-height:52px; padding:10px 14px; border:1px solid rgba(3,30,25,.25); border-radius:0; background:white; color:var(--ink); font-size:15px; font-weight:500; }
 .webinar-form input::placeholder { color:#6c7f76; }
+.webinar-form__sector-hint { color:#416056; font-size:12px; font-weight:600; }
 .webinar-form input:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 .webinar-form__choice { min-width:0; margin:0; padding:0; border:0; }
 .webinar-form__choice legend { margin-bottom:8px; font-size:12px; font-weight:800; }

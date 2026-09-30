@@ -1,7 +1,8 @@
 export const positions = [
   "Founder / Owner", "CEO / Managing Director", "Business Manager", "Operations Manager",
   "Brand Manager", "Marketing Manager", "Sales Manager", "Finance Manager",
-  "HR Manager", "Product Manager", "Technology Lead", "Consultant", "Other",
+  "HR Manager", "Product Manager", "Technology Lead", "Consultant",
+  "Freelancer", "Student", "Other",
 ] as const;
 
 export const businessSectors = [

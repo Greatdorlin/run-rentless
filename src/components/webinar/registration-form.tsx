@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { WEBINAR_WHATSAPP_URL, webinarPhase } from "@/lib/webinar";
+import { businessSectors, normalizeBusinessSector, positions } from "@/lib/business-profile";
 
 type AttendingAs = "individual" | "company";
 
@@ -11,6 +12,7 @@ export function RegistrationForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "duplicate">("idle");
   const [error, setError] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [businessSector, setBusinessSector] = useState("");
   const [phase, setPhase] = useState<ReturnType<typeof webinarPhase>>("upcoming");
 
   useEffect(() => {
@@ -37,6 +39,8 @@ export function RegistrationForm() {
           email: data.get("email"),
           attendingAs: data.get("attendingAs"),
           companyName: data.get("companyName"),
+          position: data.get("position"),
+          businessSector: data.get("businessSector"),
           phoneNumber: data.get("phoneNumber"),
           eventConsent: data.get("eventConsent") === "on",
           website: data.get("website"),
@@ -82,6 +86,10 @@ export function RegistrationForm() {
           <label><input type="radio" name="attendingAs" value="company" checked={attendingAs === "company"} onChange={() => setAttendingAs("company")} /><span>A company</span></label>
         </div></fieldset>
         {attendingAs === "company" && <label>Company name<input name="companyName" autoComplete="organization" maxLength={120} required placeholder="Your company" /></label>}
+        <label>Your role<input name="position" list="webinar-positions" autoComplete="organization-title" maxLength={80} required placeholder="Search or type your role" /></label>
+        <datalist id="webinar-positions">{positions.map((position) => <option key={position} value={position} />)}</datalist>
+        <label>Business sector<input name="businessSector" list="webinar-sectors" maxLength={100} required value={businessSector} onChange={(event) => setBusinessSector(event.target.value)} placeholder="Search or type your sector" />{businessSector && normalizeBusinessSector(businessSector) !== businessSector.trim() && <small className="webinar-form__sector-hint">Grouped under {normalizeBusinessSector(businessSector)}</small>}</label>
+        <datalist id="webinar-sectors">{businessSectors.map((sector) => <option key={sector} value={sector} />)}<option value="SaaS" /><option value="Healthtech" /><option value="Fintech" /><option value="Edtech" /></datalist>
         <label>Phone number<input name="phoneNumber" type="tel" autoComplete="tel" maxLength={32} required placeholder="Include your country code" /></label>
         <label className="webinar-form__consent"><input type="checkbox" name="eventConsent" required /><span>I agree to receive my confirmation and webinar updates by email. See our <Link href="/privacy">Privacy Policy</Link>.</span></label>
         <label className="webinar-form__trap" aria-hidden="true">Website<input name="website" autoComplete="off" tabIndex={-1} /></label>
