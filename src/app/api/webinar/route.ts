@@ -20,7 +20,7 @@ const FIELD_NAMES: Record<(typeof FIELD_TITLES)[number], string> = {
 };
 type SenderField = { title: string; field_name?: string; name?: string };
 type SenderGroup = { id: string; title: string };
-type SenderSubscriber = { subscriber_tags?: Array<{ id?: string; title?: string }>; columns?: Array<{ title?: string; value?: unknown }> };
+type SenderSubscriber = { firstname?: string | null; lastname?: string | null; subscriber_tags?: Array<{ id?: string; title?: string }>; columns?: Array<{ title?: string; value?: unknown }> };
 function asItems<T>(data: T | T[] | undefined): T[] { return Array.isArray(data) ? data : data ? [data] : []; }
 function fieldItems(payload: unknown): SenderField[] {
   const found: SenderField[] = [];
@@ -54,6 +54,14 @@ function createdFieldName(payload: unknown): string | undefined {
 }
 
 function clean(value: unknown, max: number) { return typeof value === "string" ? value.trim().slice(0, max) : ""; }
+function profileValue(record: SenderSubscriber | undefined, title: string) {
+  return String(record?.columns?.find((column) => column.title?.toLowerCase() === title.toLowerCase())?.value || "").trim();
+}
+function identityStored(record: SenderSubscriber | undefined, firstName: string, lastName: string) {
+  const first = record?.firstname || profileValue(record, "First name");
+  const last = record?.lastname || profileValue(record, "Last name");
+  return first === firstName && last === lastName;
+}
 function escapeHtml(value: string) { return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] || char); }
 async function sender(token: string, path: string, init: RequestInit = {}) {
   return fetch(`${API}${path}`, {
@@ -133,6 +141,7 @@ export async function POST(request: Request) {
   if (clean(body.website, 100)) return NextResponse.json({ ok: true, emailSent: false });
 
   const firstName = clean(body.firstName, 80);
+  const lastName = clean(body.lastName, 80);
   const email = clean(body.email, 160).toLowerCase();
   const attendingAs = clean(body.attendingAs, 20);
   const companyName = clean(body.companyName, 120);
@@ -144,7 +153,7 @@ export async function POST(request: Request) {
   const phoneNumber = clean(body.phoneNumber, 32);
   const companyValid = attendingAs !== "company" || companyName.length >= 2;
   const phoneValid = /^[+()\d\s.-]{7,32}$/.test(phoneNumber) && phoneNumber.replace(/\D/g, "").length >= 7;
-  if (!firstName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["individual", "company"].includes(attendingAs) || !companyValid || !positions.includes(selectedPosition as (typeof positions)[number]) || !businessSectors.includes(selectedSector as (typeof businessSectors)[number]) || !position || !sectorEntered || !businessSector || !phoneValid || body.eventConsent !== true) {
+  if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["individual", "company"].includes(attendingAs) || !companyValid || !positions.includes(selectedPosition as (typeof positions)[number]) || !businessSectors.includes(selectedSector as (typeof businessSectors)[number]) || !position || !sectorEntered || !businessSector || !phoneValid || body.eventConsent !== true) {
     return NextResponse.json({ message: "Please complete the required fields and confirm you can receive webinar emails." }, { status: 400 });
   }
   const token = process.env.SENDER_API;
@@ -160,17 +169,20 @@ export async function POST(request: Request) {
     const confirmationAccepted = existing?.columns?.some((column) => column.title === CONFIRMATION_FIELD_TITLE && Boolean(column.value));
     if (alreadyInGroup && confirmationAccepted) {
       const updatedFields = {
+        "Webinar attending as": attendingAs === "company" ? "Company" : "Individual",
+        "Webinar company": attendingAs === "company" ? companyName : "Not applicable",
+        "Webinar phone": phoneNumber,
         "Webinar position": position,
         "Webinar business sector": businessSector,
         "Webinar sector entered": sectorEntered,
       };
-      const needsUpdate = Object.entries(updatedFields).some(([title, value]) => !existing?.columns?.some((column) => column.title === title && String(column.value) === value));
+      const needsUpdate = !identityStored(existing, firstName, lastName) || Object.entries(updatedFields).some(([title, value]) => !existing?.columns?.some((column) => column.title === title && String(column.value) === value));
       if (needsUpdate) {
-        const update = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ fields: Object.fromEntries(Object.entries(updatedFields).map(([title, value]) => [fieldNames[title as keyof typeof FIELD_NAMES], value])), trigger_automation: false }) });
+        const update = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, fields: Object.fromEntries(Object.entries(updatedFields).map(([title, value]) => [fieldNames[title as keyof typeof FIELD_NAMES], value])), trigger_automation: false }) });
         if (!update.ok) throw new Error(`Existing subscriber update ${update.status}`);
         const check = await sender(token, subscriberPath);
-        const columns = check.ok ? (await check.json() as { data?: SenderSubscriber }).data?.columns : undefined;
-        if (!Object.entries(updatedFields).every(([title, value]) => columns?.some((column) => column.title === title && String(column.value) === value))) throw new Error("Existing subscriber profile verification failed");
+        const record = check.ok ? (await check.json() as { data?: SenderSubscriber }).data : undefined;
+        if (!identityStored(record, firstName, lastName) || !Object.entries(updatedFields).every(([title, value]) => record?.columns?.some((column) => column.title === title && String(column.value) === value))) throw new Error("Existing subscriber profile verification failed");
       }
       return NextResponse.json({ ok: true, emailSent: false, alreadyRegistered: true });
     }
@@ -191,9 +203,13 @@ export async function POST(request: Request) {
       : [webinarGroupId];
     const saved = await sender(token, existing ? subscriberPath : "/subscribers", {
       method: existing ? "PATCH" : "POST",
-      body: JSON.stringify({ email, firstname: firstName, groups, fields: profileFields, trigger_automation: false }),
+      body: JSON.stringify({ email, firstname: firstName, lastname: lastName, groups, fields: profileFields, trigger_automation: false }),
     });
     if (!saved.ok) throw new Error(`Subscriber save ${saved.status}`);
+    // Sender has accepted profile writes without retaining its standard name
+    // columns. A separate update and a read-back guard prevent silent gaps.
+    const identityUpdate = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, trigger_automation: false }) });
+    if (!identityUpdate.ok) throw new Error(`Subscriber identity update ${identityUpdate.status}`);
     let verifiedRecord: SenderSubscriber | undefined;
     for (const delay of [0, 250, 700]) {
       if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
@@ -202,7 +218,7 @@ export async function POST(request: Request) {
       const record = (await verified.json() as { data?: SenderSubscriber }).data;
       const inGroup = record?.subscriber_tags?.some((group) => group.id === webinarGroupId || group.title === WEBINAR_GROUP);
       const storedFields = PROFILE_FIELD_TITLES.every((title) => record?.columns?.some((column) => column.title === title && String(column.value) === expected[title]));
-      if (inGroup && storedFields) { verifiedRecord = record; break; }
+      if (inGroup && storedFields && identityStored(record, firstName, lastName)) { verifiedRecord = record; break; }
     }
     if (!verifiedRecord) throw new Error("Subscriber fields or group were not retained");
 
@@ -225,7 +241,7 @@ export async function POST(request: Request) {
     } catch { console.error("Webinar confirmation marker failed"); }
     // Event properties make the registration easy to find outside the profile view.
     try {
-      const event = await sender(token, "/events", { method: "POST", body: JSON.stringify({ subscriber: { email }, type: "run_rentless_october_webinar_registration", properties: { first_name: firstName, attending_as: attendingAs, company_name: expected["Webinar company"], phone_number: expected["Webinar phone"], position, business_sector: businessSector, sector_entered: sectorEntered, registered_at: registeredAt, event_consent: true } }) });
+      const event = await sender(token, "/events", { method: "POST", body: JSON.stringify({ subscriber: { email }, type: "run_rentless_october_webinar_registration", properties: { first_name: firstName, last_name: lastName, attending_as: attendingAs, company_name: expected["Webinar company"], phone_number: expected["Webinar phone"], position, business_sector: businessSector, sector_entered: sectorEntered, registered_at: registeredAt, event_consent: true } }) });
       if (!event.ok) console.error("Webinar registration event failed", event.status);
     } catch { console.error("Webinar registration event failed"); }
     console.info("Webinar registration confirmed", { group: WEBINAR_GROUP, attendingAs, emailAccepted: true });
