@@ -99,9 +99,9 @@ export function RegistrationForm() {
         <p>Join the event WhatsApp group for the joining link, reminders and any last-minute updates.</p>
         <a href={WEBINAR_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join the WhatsApp group <span aria-hidden="true">↗</span></a>
       </div>
+      <WebinarShare compact />
       <p>{status === "success" ? "Your confirmation email is on its way. Check Spam or Promotions if you do not see it." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
       <strong>Saturday, 10th October 2026 · 6PM GMT+1</strong>
-      <WebinarShare compact />
       <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>
   );
