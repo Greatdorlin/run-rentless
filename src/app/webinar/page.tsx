@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { WebinarAnchor } from "@/components/webinar/webinar-anchor";
-import { siAirtable, siAsana, siCalendly, siClickup, siFigma, siGooglesheets, siHubspot, siJira, siMailchimp, siNotion, siQuickbooks, siSemrush, siShopify, siStripe, siZapier, siZendesk } from "simple-icons";
+import { siAirtable, siAsana, siCalendly, siClickup, siFigma, siGooglesheets, siHootsuite, siHubspot, siJira, siMailchimp, siNotion, siQuickbooks, siSemrush, siShopify, siZapier, siZendesk } from "simple-icons";
 import { WebinarCountdown } from "@/components/webinar/countdown";
 import { RegistrationForm } from "@/components/webinar/registration-form";
 import { WebinarShare } from "@/components/webinar/webinar-share";
@@ -57,7 +57,7 @@ const familiarTools = [
   { name: "QuickBooks", icon: siQuickbooks, job: "Finance" },
   { name: "Google Sheets", icon: siGooglesheets, job: "Spreadsheets" },
   { name: "Jira", icon: siJira, job: "Projects" },
-  { name: "Stripe", icon: siStripe, job: "Payments" },
+  { name: "Hootsuite", icon: siHootsuite, job: "Social media" },
   { name: "Figma", icon: siFigma, job: "Design" },
   { name: "ClickUp", icon: siClickup, job: "Projects" },
   { name: "Zendesk", icon: siZendesk, job: "Support" },
