@@ -7,6 +7,32 @@ import { businessSectors, normalizeBusinessSector, positions } from "@/lib/busin
 
 type AttendingAs = "individual" | "company";
 
+function SearchableChoice({ id, label, name, options, value, onChange, placeholder, maxLength }: {
+  id: string;
+  label: string;
+  name: string;
+  options: readonly string[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  maxLength: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const query = value.trim().toLowerCase();
+  const matches = options.filter((option) => option.toLowerCase().includes(query) || (name === "businessSector" && normalizeBusinessSector(value) === option));
+  return <div className="webinar-form__search-choice">
+    <label htmlFor={id}>{label}</label>
+    <div className="webinar-form__search-control">
+      <input id={id} name={name} type="text" autoComplete={name === "position" ? "organization-title" : "off"} maxLength={maxLength} required value={value} onChange={(event) => { onChange(event.target.value); setOpen(true); }} onFocus={() => setOpen(true)} placeholder={placeholder} />
+      <button type="button" aria-label={`${open ? "Hide" : "Show"} ${label.toLowerCase()} options`} aria-expanded={open} aria-controls={`${id}-options`} onClick={() => setOpen(!open)}><span aria-hidden="true">⌄</span></button>
+    </div>
+    {open && <div id={`${id}-options`} className="webinar-form__option-list" aria-label={`${label} options`}>
+      {matches.map((option) => <button key={option} type="button" onClick={() => { onChange(option); setOpen(false); }}>{option}</button>)}
+      {matches.length === 0 && <button type="button" onClick={() => setOpen(false)}>Use “{value}”</button>}
+    </div>}
+  </div>;
+}
+
 export function RegistrationForm() {
   const [attendingAs, setAttendingAs] = useState<AttendingAs>("individual");
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "duplicate">("idle");
@@ -89,11 +115,9 @@ export function RegistrationForm() {
           <label><input type="radio" name="attendingAs" value="company" checked={attendingAs === "company"} onChange={() => setAttendingAs("company")} /><span>A company</span></label>
         </div></fieldset>
         {attendingAs === "company" && <label>Company name<input name="companyName" autoComplete="organization" maxLength={120} required placeholder="Your company" /></label>}
-        <label>Your role<input name="position" list="webinar-positions" autoComplete="organization-title" maxLength={80} required value={position} onChange={(event) => setPosition(event.target.value)} placeholder="Search or type your role" /></label>
-        <datalist id="webinar-positions">{positions.map((position) => <option key={position} value={position} />)}</datalist>
+        <SearchableChoice id="webinar-position" label="Your role" name="position" options={positions} value={position} onChange={setPosition} maxLength={80} placeholder="Search or choose your role" />
         {position.trim().toLowerCase() === "other" && <label>What is your role?<input name="positionOther" maxLength={80} required placeholder="Type your role" /></label>}
-        <label>Business sector<input name="businessSector" list="webinar-sectors" maxLength={100} required value={businessSector} onChange={(event) => setBusinessSector(event.target.value)} placeholder="Search or type your sector" />{businessSector && businessSector.trim().toLowerCase() !== "other" && normalizeBusinessSector(businessSector) !== businessSector.trim() && <small className="webinar-form__sector-hint">Grouped under {normalizeBusinessSector(businessSector)}</small>}</label>
-        <datalist id="webinar-sectors">{businessSectors.map((sector) => <option key={sector} value={sector} />)}<option value="SaaS" /><option value="Healthtech" /><option value="Fintech" /><option value="Edtech" /></datalist>
+        <SearchableChoice id="webinar-sector" label="Business sector" name="businessSector" options={businessSectors} value={businessSector} onChange={setBusinessSector} maxLength={100} placeholder="Search or choose your sector" />
         {businessSector.trim().toLowerCase() === "other" && <label>What is your sector?<input name="businessSectorOther" maxLength={100} required placeholder="Type your sector" /></label>}
         <label>Phone number<input name="phoneNumber" type="tel" autoComplete="tel" maxLength={32} required placeholder="Include your country code" /></label>
         <label className="webinar-form__consent"><input type="checkbox" name="eventConsent" required /><span>I agree to receive my confirmation and webinar updates by email. See our <Link href="/privacy">Privacy Policy</Link>.</span></label>
