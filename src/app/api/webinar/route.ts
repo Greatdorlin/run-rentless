@@ -186,13 +186,13 @@ export async function POST(request: Request) {
         "Webinar business sector": businessSector,
         "Webinar sector entered": sectorEntered,
       };
-      const needsUpdate = !identityStored(existing, firstName, lastName) || existing?.phone !== phoneNumber || Object.entries(updatedFields).some(([title, value]) => !existing?.columns?.some((column) => column.title === title && String(column.value) === value));
+      const needsUpdate = !identityStored(existing, firstName, lastName) || normalizeInternationalPhoneNumber(existing?.phone) !== phoneNumber || Object.entries(updatedFields).some(([title, value]) => !existing?.columns?.some((column) => column.title === title && String(column.value) === value));
       if (needsUpdate) {
         const update = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, fields: { ...retainedSubscriberFields(existing, fieldNames), ...Object.fromEntries(Object.entries(updatedFields).map(([title, value]) => [fieldNames[title as keyof typeof FIELD_NAMES], value])) }, trigger_automation: false }) });
         if (!update.ok) throw new Error(`Existing subscriber update ${update.status}`);
         const check = await sender(token, subscriberPath);
         const record = check.ok ? (await check.json() as { data?: SenderSubscriber }).data : undefined;
-        if (!identityStored(record, firstName, lastName) || record?.phone !== phoneNumber || !Object.entries(updatedFields).every(([title, value]) => record?.columns?.some((column) => column.title === title && String(column.value) === value))) throw new Error("Existing subscriber profile verification failed");
+        if (!identityStored(record, firstName, lastName) || normalizeInternationalPhoneNumber(record?.phone) !== phoneNumber || !Object.entries(updatedFields).every(([title, value]) => record?.columns?.some((column) => column.title === title && String(column.value) === value))) throw new Error("Existing subscriber profile verification failed");
       }
       return NextResponse.json({ ok: true, emailSent: false, alreadyRegistered: true });
     }
@@ -207,7 +207,7 @@ export async function POST(request: Request) {
       "Webinar sector entered": sectorEntered,
       "Webinar registered at": registeredAt,
     };
-    const profileFields = { ...retainedSubscriberFields(existing, fieldNames), ...Object.fromEntries(PROFILE_FIELD_TITLES.map((title) => [fieldNames[title], expected[title]])) };
+    const profileFields = { ...retainedSubscriberFields(existing, fieldNames), "{{firstname}}": firstName, "{{lastname}}": lastName, ...Object.fromEntries(PROFILE_FIELD_TITLES.map((title) => [fieldNames[title], expected[title]])) };
     const groups = existing
       ? [...new Set([...(existing.subscriber_tags || []).map((group) => group.id).filter((id): id is string => Boolean(id)), webinarGroupId])]
       : [webinarGroupId];
@@ -218,7 +218,7 @@ export async function POST(request: Request) {
     if (!saved.ok) throw new Error(`Subscriber save ${saved.status}`);
     // Sender has accepted profile writes without retaining its standard name
     // columns. A separate update and a read-back guard prevent silent gaps.
-    const identityUpdate = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, trigger_automation: false }) });
+    const identityUpdate = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, fields: profileFields, trigger_automation: false }) });
     if (!identityUpdate.ok) throw new Error(`Subscriber identity update ${identityUpdate.status}`);
     let verifiedRecord: SenderSubscriber | undefined;
     for (const delay of [0, 250, 700]) {
@@ -228,7 +228,7 @@ export async function POST(request: Request) {
       const record = (await verified.json() as { data?: SenderSubscriber }).data;
       const inGroup = record?.subscriber_tags?.some((group) => group.id === webinarGroupId || group.title === WEBINAR_GROUP);
       const storedFields = PROFILE_FIELD_TITLES.every((title) => record?.columns?.some((column) => column.title === title && String(column.value) === expected[title]));
-      if (inGroup && storedFields && identityStored(record, firstName, lastName) && record?.phone === phoneNumber) { verifiedRecord = record; break; }
+      if (inGroup && storedFields && identityStored(record, firstName, lastName) && normalizeInternationalPhoneNumber(record?.phone) === phoneNumber) { verifiedRecord = record; break; }
     }
     if (!verifiedRecord) throw new Error("Subscriber fields or group were not retained");
 
