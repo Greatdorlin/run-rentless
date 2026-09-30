@@ -7,11 +7,13 @@ test('common sector terms map to a clear Sender category', () => {
   assert.equal(normalizeBusinessSector(' healthtech '), 'Health');
   assert.equal(normalizeBusinessSector('Fintech'), 'Finance');
   assert.equal(normalizeBusinessSector('EDTECH'), 'Education');
+  assert.equal(normalizeBusinessSector('Event planning'), 'Events');
 });
 
 test('other sectors can be entered without losing the answer', () => {
   assert.equal(normalizeBusinessSector('Waste management'), 'Waste management');
   assert.equal(normalizeBusinessSector(''), '');
   assert.ok(businessSectors.includes('Software'));
+  assert.ok(businessSectors.includes('Events'));
   assert.ok(positions.includes('Marketing Manager'));
 });

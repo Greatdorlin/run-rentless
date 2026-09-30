@@ -136,13 +136,15 @@ export async function POST(request: Request) {
   const email = clean(body.email, 160).toLowerCase();
   const attendingAs = clean(body.attendingAs, 20);
   const companyName = clean(body.companyName, 120);
-  const position = clean(body.position, 80);
-  const sectorEntered = clean(body.businessSector, 100);
-  const businessSector = normalizeBusinessSector(sectorEntered);
+  const selectedPosition = clean(body.position, 80);
+  const position = selectedPosition.toLowerCase() === "other" ? clean(body.positionOther, 80) : selectedPosition;
+  const selectedSector = clean(body.businessSector, 100);
+  const sectorEntered = selectedSector.toLowerCase() === "other" ? clean(body.businessSectorOther, 100) : selectedSector;
+  const businessSector = selectedSector.toLowerCase() === "other" ? "Other" : normalizeBusinessSector(sectorEntered);
   const phoneNumber = clean(body.phoneNumber, 32);
   const companyValid = attendingAs !== "company" || companyName.length >= 2;
   const phoneValid = /^[+()\d\s.-]{7,32}$/.test(phoneNumber) && phoneNumber.replace(/\D/g, "").length >= 7;
-  if (!firstName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["individual", "company"].includes(attendingAs) || !companyValid || !position || !businessSector || !phoneValid || body.eventConsent !== true) {
+  if (!firstName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["individual", "company"].includes(attendingAs) || !companyValid || !position || !sectorEntered || !businessSector || !phoneValid || body.eventConsent !== true) {
     return NextResponse.json({ message: "Please complete the required fields and confirm you can receive webinar emails." }, { status: 400 });
   }
   const token = process.env.SENDER_API;

@@ -8,7 +8,7 @@ export const positions = [
 export const businessSectors = [
   "Agriculture", "Arts & Entertainment", "Automotive", "Beauty & Personal Care",
   "Construction & Property", "Consulting & Professional Services", "Education",
-  "Energy & Utilities", "Finance", "Food & Hospitality", "Government & Nonprofit",
+  "Energy & Utilities", "Events", "Finance", "Food & Hospitality", "Government & Nonprofit",
   "Health", "Logistics & Transport", "Manufacturing", "Marketing & Media",
   "Retail & E-commerce", "Software", "Telecommunications", "Travel & Tourism", "Other",
 ] as const;
@@ -24,6 +24,7 @@ const sectorAliases: Record<string, (typeof businessSectors)[number]> = {
   realestate: "Construction & Property", "real estate": "Construction & Property",
   agency: "Marketing & Media", advertising: "Marketing & Media",
   ngo: "Government & Nonprofit", nonprofit: "Government & Nonprofit",
+  "event planning": "Events", "event management": "Events", events: "Events",
 };
 
 export function normalizeBusinessSector(value: string) {
