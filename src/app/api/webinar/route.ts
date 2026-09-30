@@ -63,6 +63,12 @@ function identityStored(record: SenderSubscriber | undefined, firstName: string,
   const last = record?.lastname || profileValue(record, "Last name");
   return first === firstName && last === lastName;
 }
+function retainedSubscriberFields(record: SenderSubscriber | undefined, fieldNames: Record<string, string>) {
+  return Object.fromEntries((record?.columns || []).flatMap((column) => {
+    const name = column.title ? fieldNames[column.title] : undefined;
+    return name && column.value != null && String(column.value).trim() ? [[name, String(column.value)]] : [];
+  }));
+}
 function escapeHtml(value: string) { return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] || char); }
 async function sender(token: string, path: string, init: RequestInit = {}) {
   return fetch(`${API}${path}`, {
@@ -119,7 +125,10 @@ async function fields(token: string) {
     const recovered = reread.ok ? fieldItems(await reread.json()).find((item) => item.title === title && item.field_name) : undefined;
     found.push(recovered || { title, field_name: FIELD_NAMES[title] });
   }
-  return Object.fromEntries(FIELD_TITLES.map((title) => [title, found.find((field) => field.title === title)?.field_name || FIELD_NAMES[title]])) as Record<(typeof FIELD_TITLES)[number], string>;
+  return {
+    ...Object.fromEntries(found.filter((field) => field.field_name).map((field) => [field.title, field.field_name])),
+    ...Object.fromEntries(FIELD_TITLES.map((title) => [title, found.find((field) => field.title === title)?.field_name || FIELD_NAMES[title]])),
+  } as Record<(typeof FIELD_TITLES)[number], string> & Record<string, string>;
 }
 
 function confirmation(firstName: string) {
@@ -179,7 +188,7 @@ export async function POST(request: Request) {
       };
       const needsUpdate = !identityStored(existing, firstName, lastName) || existing?.phone !== phoneNumber || Object.entries(updatedFields).some(([title, value]) => !existing?.columns?.some((column) => column.title === title && String(column.value) === value));
       if (needsUpdate) {
-        const update = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, fields: Object.fromEntries(Object.entries(updatedFields).map(([title, value]) => [fieldNames[title as keyof typeof FIELD_NAMES], value])), trigger_automation: false }) });
+        const update = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, fields: { ...retainedSubscriberFields(existing, fieldNames), ...Object.fromEntries(Object.entries(updatedFields).map(([title, value]) => [fieldNames[title as keyof typeof FIELD_NAMES], value])) }, trigger_automation: false }) });
         if (!update.ok) throw new Error(`Existing subscriber update ${update.status}`);
         const check = await sender(token, subscriberPath);
         const record = check.ok ? (await check.json() as { data?: SenderSubscriber }).data : undefined;
@@ -198,7 +207,7 @@ export async function POST(request: Request) {
       "Webinar sector entered": sectorEntered,
       "Webinar registered at": registeredAt,
     };
-    const profileFields = Object.fromEntries(PROFILE_FIELD_TITLES.map((title) => [fieldNames[title], expected[title]]));
+    const profileFields = { ...retainedSubscriberFields(existing, fieldNames), ...Object.fromEntries(PROFILE_FIELD_TITLES.map((title) => [fieldNames[title], expected[title]])) };
     const groups = existing
       ? [...new Set([...(existing.subscriber_tags || []).map((group) => group.id).filter((id): id is string => Boolean(id)), webinarGroupId])]
       : [webinarGroupId];
@@ -237,7 +246,10 @@ export async function POST(request: Request) {
     catch { return NextResponse.json({ message: "Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive." }, { status: 503 }); }
     if (!delivery.success || !delivery.emailId) return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 });
     try {
-      const marked = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ fields: { [fieldNames[CONFIRMATION_FIELD_TITLE]]: new Date().toISOString() }, trigger_automation: false }) });
+      // Sender replaces the custom-field set on PATCH. Keep the entire webinar
+      // profile alongside the confirmation marker so registering does not
+      // silently erase the answers we just verified.
+      const marked = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ fields: { ...profileFields, [fieldNames[CONFIRMATION_FIELD_TITLE]]: new Date().toISOString() }, trigger_automation: false }) });
       if (!marked.ok) console.error("Webinar confirmation marker failed", marked.status);
     } catch { console.error("Webinar confirmation marker failed"); }
     // Event properties make the registration easy to find outside the profile view.
