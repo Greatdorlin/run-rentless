@@ -104,28 +104,25 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   if (!authorized(request)) return new NextResponse(null, { status: 404 });
-  const body = await request.json().catch(() => null) as { action?: string } | null;
-  if (body?.action !== "sync-valid-phones-v1") return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
+  const body = await request.json().catch(() => null) as { action?: string; email?: string } | null;
+  if (body?.action !== "sync-one-phone-v1" || !body.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+    return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
+  }
   try {
-    const subscribers = await webinarSubscribers();
-    const results: Array<{ email: string; status: string }> = [];
-    for (const subscriber of subscribers) {
-      const email = subscriber.email!;
-      const normalized = normalizeInternationalPhoneNumber(customPhone(subscriber));
-      if (subscriber.phone || !normalized || subscriber.status?.sms === "active") {
-        results.push({ email, status: subscriber.phone ? "already-set" : subscriber.status?.sms === "active" ? "skipped-sms-status-conflict" : "skipped-invalid-or-missing" });
-        continue;
-      }
-      const path = `/subscribers/${encodeURIComponent(email)}`;
-      try {
-        await sender(path, { method: "PATCH", body: JSON.stringify({ phone: normalized, sms_status: "UNSUBSCRIBED", trigger_automation: false }) });
-        const verified = await sender(path) as { data?: Subscriber };
-        results.push({ email, status: verified.data?.phone === normalized && verified.data?.status?.sms !== "active" ? "synced-and-verified" : "verification-failed" });
-      } catch (error) {
-        results.push({ email, status: error instanceof Error ? error.message : "update-failed" });
-      }
+    const email = body.email.toLowerCase();
+    const path = `/subscribers/${encodeURIComponent(email)}`;
+    const lookup = await sender(path) as { data?: Subscriber };
+    const subscriber = lookup.data;
+    if (!subscriber?.subscriber_tags?.some((group) => group.title === WEBINAR_GROUP)) {
+      return NextResponse.json({ error: "Not in the webinar group" }, { status: 400 });
     }
-    return NextResponse.json({ count: subscribers.length, results }, { headers: { "Cache-Control": "no-store" } });
+    const normalized = normalizeInternationalPhoneNumber(customPhone(subscriber));
+    if (subscriber.phone || !normalized || subscriber.status?.sms === "active") {
+      return NextResponse.json({ email, status: subscriber.phone ? "already-set" : subscriber.status?.sms === "active" ? "skipped-sms-status-conflict" : "skipped-invalid-or-missing" });
+    }
+    await sender(path, { method: "PATCH", body: JSON.stringify({ phone: normalized, sms_status: "UNSUBSCRIBED", trigger_automation: false }) });
+    const checked = await sender(path) as { data?: Subscriber };
+    return NextResponse.json({ email, status: checked.data?.phone === normalized && checked.data?.status?.sms !== "active" ? "synced-and-verified" : "verification-failed" }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Sender sync failed" }, { status: 502 });
   }
