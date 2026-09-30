@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { WebinarAnchor } from "@/components/webinar/webinar-anchor";
-import { siAirtable, siAsana, siCalendly, siClickup, siDropbox, siFigma, siGooglesheets, siHubspot, siJira, siMailchimp, siNotion, siQuickbooks, siShopify, siZapier, siZendesk, siZoom } from "simple-icons";
+import { siAirtable, siAsana, siCalendly, siClickup, siFigma, siGooglesheets, siHubspot, siJira, siMailchimp, siNotion, siQuickbooks, siSemrush, siShopify, siStripe, siZapier, siZendesk } from "simple-icons";
 import { WebinarCountdown } from "@/components/webinar/countdown";
 import { RegistrationForm } from "@/components/webinar/registration-form";
 import { WebinarShare } from "@/components/webinar/webinar-share";
@@ -52,12 +52,12 @@ const familiarTools = [
   { name: "Zapier", icon: siZapier, job: "Automation" },
   { name: "Calendly", icon: siCalendly, job: "Bookings" },
   { name: "Notion", icon: siNotion, job: "Workspace" },
-  { name: "Zoom", icon: siZoom, job: "Meetings" },
+  { name: "Semrush", icon: siSemrush, job: "Marketing" },
   { name: "Shopify", icon: siShopify, job: "Stores" },
   { name: "QuickBooks", icon: siQuickbooks, job: "Finance" },
   { name: "Google Sheets", icon: siGooglesheets, job: "Spreadsheets" },
   { name: "Jira", icon: siJira, job: "Projects" },
-  { name: "Dropbox", icon: siDropbox, job: "Files" },
+  { name: "Stripe", icon: siStripe, job: "Payments" },
   { name: "Figma", icon: siFigma, job: "Design" },
   { name: "ClickUp", icon: siClickup, job: "Projects" },
   { name: "Zendesk", icon: siZendesk, job: "Support" },
