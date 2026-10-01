@@ -49,6 +49,7 @@ export function RegistrationForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "duplicate">("idle");
   const [error, setError] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [emailPending, setEmailPending] = useState(false);
   const [position, setPosition] = useState("");
   const [businessSector, setBusinessSector] = useState("");
   const [phase, setPhase] = useState<ReturnType<typeof webinarPhase>>("upcoming");
@@ -98,10 +99,11 @@ export function RegistrationForm() {
           website: data.get("website"),
         }),
       });
-      const result = await response.json() as { ok?: boolean; emailSent?: boolean; alreadyRegistered?: boolean; message?: string };
+      const result = await response.json() as { ok?: boolean; emailSent?: boolean; emailPending?: boolean; alreadyRegistered?: boolean; message?: string };
       if (!result.ok) throw new Error(result.message || "Please try again.");
       setFirstName(String(data.get("firstName") || ""));
-      if (!result.emailSent && !result.alreadyRegistered) throw new Error("Your spot is saved, but the email could not be sent. Please try again.");
+      if (!result.emailSent && !result.emailPending && !result.alreadyRegistered) throw new Error("Your spot is saved, but the email could not be sent. Please try again.");
+      setEmailPending(result.emailPending === true);
       setStatus(result.alreadyRegistered ? "duplicate" : "success");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Please try again.");
@@ -122,7 +124,7 @@ export function RegistrationForm() {
         <a href={WEBINAR_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join the WhatsApp group <span aria-hidden="true">↗</span></a>
       </div>
       <WebinarShare compact />
-      <p>{status === "success" ? "Your confirmation email is on its way. Check Spam or Promotions if you do not see it." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
+      <p>{status === "success" ? emailPending ? "Your spot is saved. Please allow about 10 minutes for your confirmation email. Join the WhatsApp group now for updates." : "Your confirmation email is on its way. Check Spam or Promotions if you do not see it." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
       <strong>Saturday, 10th October 2026 · 6PM GMT+1</strong>
       <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>

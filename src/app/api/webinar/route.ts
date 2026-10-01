@@ -169,6 +169,8 @@ export async function POST(request: Request) {
   const token = process.env.SENDER_API;
   if (!token) return NextResponse.json({ message: "Registration is temporarily unavailable. Please try again shortly." }, { status: 503 });
 
+  let fallbackArmed = false;
+  const queuedConfirmation = () => NextResponse.json({ ok: true, emailSent: false, emailPending: true });
   try {
     const [webinarGroupId, fieldNames] = await Promise.all([groupId(token), fields(token)]);
     const subscriberPath = `/subscribers/${encodeURIComponent(email)}`;
@@ -213,9 +215,12 @@ export async function POST(request: Request) {
       : [webinarGroupId];
     const saved = await sender(token, existing ? subscriberPath : "/subscribers", {
       method: existing ? "PATCH" : "POST",
-      body: JSON.stringify({ email, firstname: firstName, lastname: lastName, phone: phoneNumber, groups, fields: profileFields, trigger_automation: false }),
+      // Enrol new group members in Sender's delayed, marker-guarded backup.
+      // Subsequent profile writes must not restart the workflow.
+      body: JSON.stringify({ email, firstname: firstName, lastname: lastName, phone: phoneNumber, groups, fields: profileFields, trigger_automation: !alreadyInGroup }),
     });
     if (!saved.ok) throw new Error(`Subscriber save ${saved.status}`);
+    fallbackArmed = !alreadyInGroup;
     // Sender has accepted profile writes without retaining its standard name
     // columns. A separate update and a read-back guard prevent silent gaps.
     const identityUpdate = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, fields: profileFields, trigger_automation: false }) });
@@ -238,13 +243,14 @@ export async function POST(request: Request) {
       sent = await sender(token, "/message/send", { method: "POST", body: JSON.stringify({ from: { email: process.env.SENDER_FROM_EMAIL || "info@runrentless.com", name: "Run Rentless" }, to: { email, name: firstName }, ...message, headers: { charset: "utf-8" } }) });
     } catch {
       console.error("Webinar confirmation request failed");
+      if (fallbackArmed) return queuedConfirmation();
       return NextResponse.json({ message: "Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive." }, { status: 503 });
     }
-    if (!sent.ok) { console.error("Webinar confirmation rejected", sent.status); return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 }); }
+    if (!sent.ok) { console.error("Webinar confirmation rejected", sent.status); if (fallbackArmed) return queuedConfirmation(); return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 }); }
     let delivery: { success?: boolean; emailId?: string };
     try { delivery = await sent.json() as { success?: boolean; emailId?: string }; }
-    catch { return NextResponse.json({ message: "Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive." }, { status: 503 }); }
-    if (!delivery.success || !delivery.emailId) return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 });
+    catch { if (fallbackArmed) return queuedConfirmation(); return NextResponse.json({ message: "Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive." }, { status: 503 }); }
+    if (!delivery.success || !delivery.emailId) { if (fallbackArmed) return queuedConfirmation(); return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 }); }
     try {
       // Sender replaces the custom-field set on PATCH. Keep the entire webinar
       // profile alongside the confirmation marker so registering does not
@@ -261,6 +267,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, emailSent: true });
   } catch (error) {
     console.error("Webinar registration failed", error instanceof Error ? error.message : "Unknown error");
+    // The backup is already held by Sender even if a later verification call
+    // is throttled. Never claim this when the initial subscriber save failed.
+    if (fallbackArmed) return queuedConfirmation();
     return NextResponse.json({ message: "We could not save your spot right now. Please try again shortly." }, { status: 502 });
   }
 }
