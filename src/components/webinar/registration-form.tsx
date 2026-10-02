@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { WEBINAR_WHATSAPP_URL, webinarPhase } from "@/lib/webinar";
 import { businessSectors, normalizeBusinessSector, positions } from "@/lib/business-profile";
 import { normalizeInternationalPhoneNumber } from "@/lib/phone";
@@ -21,15 +21,26 @@ function SearchableChoice({ id, label, name, options, value, onChange, placehold
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value);
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    function dismiss(event: PointerEvent) {
+      if (!root.current?.contains(event.target as Node)) { setOpen(false); setQuery(value); }
+    }
+    document.addEventListener("pointerdown", dismiss);
+    return () => document.removeEventListener("pointerdown", dismiss);
+  }, [open, value]);
   const search = (value ? "" : query).trim().toLowerCase();
   const matches = options.filter((option) => option.toLowerCase().includes(search) || (name === "businessSector" && normalizeBusinessSector(search) === option));
   function choose(option: string) { onChange(option); setQuery(option); setOpen(false); }
-  return <div className="webinar-form__search-choice" onBlur={(event) => {
-    if (!event.currentTarget.contains(event.relatedTarget)) { setOpen(false); setQuery(value); }
+  return <div ref={root} className="webinar-form__search-choice" onBlur={(event) => {
+    // Touch browsers can report null while transferring focus to an option.
+    // Outside pointer taps are handled separately, before blur can lose a tap.
+    if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) { setOpen(false); setQuery(value); }
   }}>
     <label htmlFor={id}>{label}</label>
     <div className="webinar-form__search-control">
-      <input id={id} type="text" role="combobox" aria-autocomplete="list" aria-expanded={open} aria-controls={`${id}-options`} autoComplete="off" maxLength={maxLength} required value={query} onChange={(event) => { onChange(""); setQuery(event.target.value); setOpen(true); }} onFocus={(event) => { if (value) event.currentTarget.select(); setOpen(true); }} onKeyDown={(event) => {
+      <input id={id} type="text" role="combobox" aria-autocomplete="list" aria-expanded={open} aria-controls={`${id}-options`} autoComplete="off" maxLength={maxLength} required value={query} onChange={(event) => { onChange(""); setQuery(event.target.value); setOpen(true); }} onFocus={() => { setOpen(true); }} onKeyDown={(event) => {
         if (value && (event.key === "Backspace" || event.key === "Delete")) { event.preventDefault(); onChange(""); setQuery(""); setOpen(true); }
         if (event.key === "Escape") setOpen(false);
         if (event.key === "ArrowDown" && open) { event.preventDefault(); document.getElementById(`${id}-options`)?.querySelector<HTMLButtonElement>("button")?.focus(); }
