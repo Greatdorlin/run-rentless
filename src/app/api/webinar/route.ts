@@ -3,6 +3,7 @@ import { WEBINAR_END, WEBINAR_GROUP, WEBINAR_WHATSAPP_URL } from "@/lib/webinar"
 import { businessSectors, positions } from "@/lib/business-profile";
 import { normalizeInternationalPhoneNumber } from "@/lib/phone";
 import { logSubmissionIssue, submissionError, submissionReference } from "@/lib/submission-error";
+import { readPublicForm } from "@/lib/public-form-request";
 
 export const maxDuration = 60;
 
@@ -145,13 +146,9 @@ export async function POST(request: Request) {
   const reference = submissionReference();
   let stage = "validation";
   if (Date.now() >= WEBINAR_END) return NextResponse.json({ message: "Registration for this live webinar has closed." }, { status: 410 });
-  if (Number(request.headers.get("content-length") || 0) > 5000) return NextResponse.json({ message: "Please check your details and try again." }, { status: 413 });
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ message: "This request could not be verified." }, { status: 403 });
-  let body: Record<string, unknown>;
-  try { body = await request.json() as Record<string, unknown>; }
-  catch { return NextResponse.json({ message: "Please check your details and try again." }, { status: 400 }); }
-  if (!body || typeof body !== "object" || Array.isArray(body)) return NextResponse.json({ message: "Please check your details and try again." }, { status: 400 });
+  const parsed = await readPublicForm(request, 5000);
+  if (parsed.status) return NextResponse.json({ message: parsed.message }, { status: parsed.status });
+  const body = parsed.body;
   if (clean(body.website, 100)) return NextResponse.json({ ok: true, emailSent: false });
 
   const firstName = clean(body.firstName, 80);

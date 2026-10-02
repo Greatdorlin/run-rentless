@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { parseAudit, reportEmail, auditSummary as summarizeReport } from "@/lib/audit-report";
 import { budgetRanges, deliveryPreferences, savingsChoices, verdict } from "@/lib/audit";
 import { logSubmissionIssue, submissionError, submissionReference } from "@/lib/submission-error";
+import { readPublicForm } from "@/lib/public-form-request";
 
 export const maxDuration = 60;
 
@@ -152,8 +153,8 @@ async function ensureProfileFields(token: string) {
         fieldNames[key] = definition.fieldName;
         continue;
       }
-      console.error(`Sender profile field failed: ${key} (${created.status})`, details);
-      diagnostics.push({ key, status: created.status, details });
+      console.error(`Sender profile field failed: ${key} (${created.status})`);
+      diagnostics.push({ key, status: created.status, details: "Provider rejected field setup" });
       continue;
     }
 
@@ -174,14 +175,9 @@ export async function POST(request: Request) {
   const reference = submissionReference();
   let stage = "validation";
   let profileSaved = false;
-  const origin = request.headers.get("origin");
-  if (Number(request.headers.get("content-length") || 0) > 100000) return NextResponse.json({ message: "This audit is too large. Please use up to 30 tools." }, { status: 413 });
-  if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ message: "This submission could not be verified." }, { status: 403 });
-  let body: Record<string, unknown>;
-  try { body = await request.json() as Record<string, unknown>; }
-  catch { return NextResponse.json({ message: "Please check the form and try again." }, { status: 400 }); }
-
-  if (!body || typeof body !== "object" || Array.isArray(body)) return NextResponse.json({ message: "Please check your details and try again." }, { status: 400 });
+  const parsed = await readPublicForm(request, 100000);
+  if (parsed.status) return NextResponse.json({ message: parsed.message }, { status: parsed.status });
+  const body = parsed.body;
   if (clean(body.companyWebsite, 200)) return NextResponse.json({ ok: true });
   const firstName = clean(body.firstName, 80);
   const lastName = clean(body.lastName, 80);
@@ -231,7 +227,7 @@ export async function POST(request: Request) {
     stage = "subscriber lookup";
     const lookup = await senderFetch(token, `/subscribers/${encodeURIComponent(email)}`);
     if (!lookup.ok && lookup.status !== 404) {
-      console.error("Sender subscriber lookup rejected", lookup.status, (await lookup.text()).slice(0, 300));
+      console.error("Sender subscriber lookup rejected", lookup.status);
       throw new Error("Sender subscriber lookup failed");
     }
     stage = "subscriber save";

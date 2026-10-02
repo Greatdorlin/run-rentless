@@ -1,13 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  useEffect(() => {
-    console.error("Run Rentless site error", error);
-  }, [error]);
-
   return (
     <html lang="en">
       <body style={{ margin: 0, minHeight: "100vh", padding: "clamp(24px, 8vw, 96px)", background: "#031e19", color: "#fdfff4", fontFamily: "Arial, sans-serif" }}>

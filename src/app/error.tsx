@@ -1,13 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  useEffect(() => {
-    console.error("Run Rentless page error", error);
-  }, [error]);
-
   return (
     <section className="not-found shell" role="alert">
       <p className="eyebrow"><span /> Something went wrong</p>

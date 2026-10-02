@@ -9,7 +9,9 @@ export function logSubmissionIssue(flow: "webinar" | "audit", stage: string, ref
     flow,
     stage,
     reference,
-    reason: reason instanceof Error ? reason.message : typeof reason === "number" ? `HTTP ${reason}` : "Unknown error",
+    // Provider errors can contain submitted values. Keep logs useful without
+    // recording names, email addresses, phone numbers or report answers.
+    reason: reason instanceof Error ? reason.name : typeof reason === "number" ? `HTTP ${reason}` : "Unknown error",
   });
 }
 
