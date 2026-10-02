@@ -71,12 +71,31 @@ export function RegistrationForm() {
   const [position, setPosition] = useState("");
   const [businessSector, setBusinessSector] = useState("");
   const [phase, setPhase] = useState<ReturnType<typeof webinarPhase>>("upcoming");
+  const phoneInput = useRef<HTMLInputElement>(null);
+  const phoneTouched = useRef(false);
 
   useEffect(() => {
     const update = () => setPhase(webinarPhase(Date.now()));
     const first = window.setTimeout(update, 0);
     const timer = window.setInterval(update, 60_000);
     return () => { window.clearTimeout(first); window.clearInterval(timer); };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void (async () => {
+      try {
+        const response = await fetch("/api/phone-country", { cache: "no-store", signal: controller.signal });
+        if (!response.ok) return;
+        const data = await response.json() as { dialCode?: unknown };
+        if (typeof data.dialCode !== "string" || !/^\+\d{1,3}$/.test(data.dialCode)) return;
+        const input = phoneInput.current;
+        if (input && !phoneTouched.current && !input.value.trim()) input.value = `${data.dialCode} `;
+      } catch {
+        // The form remains usable when location detection is unavailable.
+      }
+    })();
+    return () => controller.abort();
   }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -92,7 +111,7 @@ export function RegistrationForm() {
     const data = new FormData(form);
     const phoneNumber = normalizeInternationalPhoneNumber(data.get("phoneNumber"));
     if (!phoneNumber) {
-      setError("Enter a valid phone number starting with + and your country code, such as +234 903 350 4689.");
+      setError("Enter your full phone number, including + and your country code.");
       form.querySelector<HTMLInputElement>('input[name="phoneNumber"]')?.focus();
       return;
     }
@@ -167,7 +186,7 @@ export function RegistrationForm() {
         {position.trim().toLowerCase() === "other" && <label>What is your role?<input name="positionOther" maxLength={80} required placeholder="Type your role" /></label>}
         <SearchableChoice id="webinar-sector" label="Business sector" name="businessSector" options={businessSectors} value={businessSector} onChange={setBusinessSector} maxLength={100} placeholder="Search or choose your sector" />
         {businessSector.trim().toLowerCase() === "other" && <label>What is your sector?<input name="businessSectorOther" maxLength={100} required placeholder="Type your sector" /></label>}
-        <label>Phone number<input name="phoneNumber" type="tel" inputMode="tel" autoComplete="tel" maxLength={32} required placeholder="+234 903 350 4689" aria-describedby="webinar-phone-help" /><small id="webinar-phone-help">Start with + and your country code.</small></label>
+        <label>Phone number<input ref={phoneInput} name="phoneNumber" type="tel" inputMode="tel" autoComplete="tel" maxLength={32} required placeholder="Country code and phone number" aria-describedby="webinar-phone-help" onInput={() => { phoneTouched.current = true; }} /><small id="webinar-phone-help">Start with + and your country code. Change any suggested code if needed.</small></label>
         <label className="webinar-form__consent"><input type="checkbox" name="eventConsent" required /><span>I agree to receive my confirmation and webinar updates by email. See our <Link href="/privacy">Privacy Policy</Link>.</span></label>
         <label className="webinar-form__trap" aria-hidden="true">Website<input name="website" autoComplete="off" tabIndex={-1} /></label>
       </div>
