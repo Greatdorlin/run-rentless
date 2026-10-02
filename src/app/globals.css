@@ -48,6 +48,7 @@ button, summary { -webkit-tap-highlight-color: transparent; }
 .text-link { display: inline-flex; gap: 20px; align-items: center; border-bottom: 1px solid rgba(253,255,244,.5); padding-block: 8px; font-weight: 650; font-size: 14px; }
 .text-link span { color: var(--lime); }
 .text-button { border: 0; background: transparent; color: var(--ink); padding: 0 0 5px; border-bottom: 1px solid var(--ink); cursor: pointer; font-weight: 700; }
+.page-error__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 28px; margin-top: 28px; }
 .eyebrow { margin: 0 0 24px; display: flex; align-items: center; gap: 12px; color: var(--paper-muted); font-size: 11px; font-weight: 800; letter-spacing: .19em; text-transform: uppercase; }
 .eyebrow > span { width: 28px; height: 2px; background: var(--lime); }
 .eyebrow--dark { color: rgba(3,30,25,.72); }

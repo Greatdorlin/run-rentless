@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { WEBINAR_END, WEBINAR_GROUP, WEBINAR_WHATSAPP_URL } from "@/lib/webinar";
 import { businessSectors, positions } from "@/lib/business-profile";
 import { normalizeInternationalPhoneNumber } from "@/lib/phone";
+import { logSubmissionIssue, submissionError, submissionReference } from "@/lib/submission-error";
 
 export const maxDuration = 60;
 
@@ -141,6 +142,8 @@ function confirmation(firstName: string) {
 }
 
 export async function POST(request: Request) {
+  const reference = submissionReference();
+  let stage = "validation";
   if (Date.now() >= WEBINAR_END) return NextResponse.json({ message: "Registration for this live webinar has closed." }, { status: 410 });
   if (Number(request.headers.get("content-length") || 0) > 5000) return NextResponse.json({ message: "Please check your details and try again." }, { status: 413 });
   const origin = request.headers.get("origin");
@@ -168,12 +171,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Please complete the required fields and confirm you can receive webinar emails." }, { status: 400 });
   }
   const token = process.env.SENDER_API;
-  if (!token) return NextResponse.json({ message: "Registration is temporarily unavailable. Please try again shortly." }, { status: 503 });
+  if (!token) {
+    logSubmissionIssue("webinar", "configuration", reference, new Error("SENDER_API missing"));
+    return submissionError("Registration is temporarily unavailable. Please try again shortly.", 503, reference);
+  }
 
   let fallbackArmed = false;
-  const queuedConfirmation = () => NextResponse.json({ ok: true, emailSent: false, emailPending: true });
+  let profileVerified = false;
+  const queuedConfirmation = () => NextResponse.json({ ok: true, emailSent: false, emailPending: true, detailsUnverified: !profileVerified, ...(!profileVerified ? { reference } : {}) });
   try {
+    stage = "profile setup";
     const [webinarGroupId, fieldNames] = await Promise.all([groupId(token), fields(token)]);
+    stage = "subscriber lookup";
     const subscriberPath = `/subscribers/${encodeURIComponent(email)}`;
     const lookup = await sender(token, subscriberPath);
     if (!lookup.ok && lookup.status !== 404) throw new Error(`Subscriber lookup ${lookup.status}`);
@@ -222,6 +231,7 @@ export async function POST(request: Request) {
     });
     if (!saved.ok) throw new Error(`Subscriber save ${saved.status}`);
     fallbackArmed = !alreadyInGroup;
+    stage = "profile verification";
     // Sender has accepted profile writes without retaining its standard name
     // columns. A separate update and a read-back guard prevent silent gaps.
     const identityUpdate = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ firstname: firstName, lastname: lastName, phone: phoneNumber, fields: profileFields, trigger_automation: false }) });
@@ -237,40 +247,42 @@ export async function POST(request: Request) {
       if (inGroup && storedFields && identityStored(record, firstName, lastName) && normalizeInternationalPhoneNumber(record?.phone) === phoneNumber) { verifiedRecord = record; break; }
     }
     if (!verifiedRecord) throw new Error("Subscriber fields or group were not retained");
+    profileVerified = true;
 
+    stage = "confirmation email";
     const message = confirmation(firstName);
     let sent: Response;
     try {
       sent = await sender(token, "/message/send", { method: "POST", body: JSON.stringify({ from: { email: process.env.SENDER_FROM_EMAIL || "info@runrentless.com", name: "Run Rentless" }, to: { email, name: firstName }, ...message, headers: { charset: "utf-8" } }) });
-    } catch {
-      console.error("Webinar confirmation request failed");
+    } catch (error) {
+      logSubmissionIssue("webinar", stage, reference, error);
       if (fallbackArmed) return queuedConfirmation();
-      return NextResponse.json({ message: "Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive." }, { status: 503 });
+      return submissionError("Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive.", 503, reference);
     }
-    if (!sent.ok) { console.error("Webinar confirmation rejected", sent.status); if (fallbackArmed) return queuedConfirmation(); return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 }); }
+    if (!sent.ok) { logSubmissionIssue("webinar", stage, reference, sent.status); if (fallbackArmed) return queuedConfirmation(); return submissionError("Your spot is saved, but the email could not be sent. Please contact us if it does not arrive.", 503, reference); }
     let delivery: { success?: boolean; emailId?: string };
     try { delivery = await sent.json() as { success?: boolean; emailId?: string }; }
-    catch { if (fallbackArmed) return queuedConfirmation(); return NextResponse.json({ message: "Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive." }, { status: 503 }); }
-    if (!delivery.success || !delivery.emailId) { if (fallbackArmed) return queuedConfirmation(); return NextResponse.json({ message: "Your spot is saved, but the email could not be sent. Please try again." }, { status: 503 }); }
+    catch (error) { logSubmissionIssue("webinar", stage, reference, error); if (fallbackArmed) return queuedConfirmation(); return submissionError("Your spot is saved, but we could not confirm the email was sent. Please contact us if it does not arrive.", 503, reference); }
+    if (!delivery.success || !delivery.emailId) { logSubmissionIssue("webinar", stage, reference, new Error("Sender did not confirm message acceptance")); if (fallbackArmed) return queuedConfirmation(); return submissionError("Your spot is saved, but the email could not be sent. Please contact us if it does not arrive.", 503, reference); }
     try {
       // Sender replaces the custom-field set on PATCH. Keep the entire webinar
       // profile alongside the confirmation marker so registering does not
       // silently erase the answers we just verified.
       const marked = await sender(token, subscriberPath, { method: "PATCH", body: JSON.stringify({ fields: { ...profileFields, [fieldNames[CONFIRMATION_FIELD_TITLE]]: new Date().toISOString() }, trigger_automation: false }) });
-      if (!marked.ok) console.error("Webinar confirmation marker failed", marked.status);
-    } catch { console.error("Webinar confirmation marker failed"); }
+      if (!marked.ok) logSubmissionIssue("webinar", "confirmation marker", reference, marked.status);
+    } catch (error) { logSubmissionIssue("webinar", "confirmation marker", reference, error); }
     // Event properties make the registration easy to find outside the profile view.
     try {
       const event = await sender(token, "/events", { method: "POST", body: JSON.stringify({ subscriber: { email }, type: "run_rentless_october_webinar_registration", properties: { first_name: firstName, last_name: lastName, attending_as: attendingAs, company_name: expected["Webinar company"], phone_number: expected["Webinar phone"], position, business_sector: businessSector, sector_entered: sectorEntered, registered_at: registeredAt, event_consent: true } }) });
-      if (!event.ok) console.error("Webinar registration event failed", event.status);
-    } catch { console.error("Webinar registration event failed"); }
+      if (!event.ok) logSubmissionIssue("webinar", "event logging", reference, event.status);
+    } catch (error) { logSubmissionIssue("webinar", "event logging", reference, error); }
     console.info("Webinar registration confirmed", { group: WEBINAR_GROUP, attendingAs, emailAccepted: true });
     return NextResponse.json({ ok: true, emailSent: true });
   } catch (error) {
-    console.error("Webinar registration failed", error instanceof Error ? error.message : "Unknown error");
+    logSubmissionIssue("webinar", stage, reference, error);
     // The backup is already held by Sender even if a later verification call
     // is throttled. Never claim this when the initial subscriber save failed.
     if (fallbackArmed) return queuedConfirmation();
-    return NextResponse.json({ message: "We could not save your spot right now. Please try again shortly." }, { status: 502 });
+    return submissionError("We could not confirm your registration right now. Please try again shortly.", 502, reference);
   }
 }

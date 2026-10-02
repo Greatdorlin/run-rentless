@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { parseAudit, reportEmail, auditSummary as summarizeReport } from "@/lib/audit-report";
 import { budgetRanges, deliveryPreferences, savingsChoices, verdict } from "@/lib/audit";
+import { logSubmissionIssue, submissionError, submissionReference } from "@/lib/submission-error";
 
 export const maxDuration = 60;
 
@@ -170,6 +171,9 @@ async function ensureProfileFields(token: string) {
 }
 
 export async function POST(request: Request) {
+  const reference = submissionReference();
+  let stage = "validation";
+  let profileSaved = false;
   const origin = request.headers.get("origin");
   if (Number(request.headers.get("content-length") || 0) > 100000) return NextResponse.json({ message: "This audit is too large. Please use up to 30 tools." }, { status: 413 });
   if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ message: "This submission could not be verified." }, { status: 403 });
@@ -198,11 +202,12 @@ export async function POST(request: Request) {
 
   const token = process.env.SENDER_API;
   if (!token) {
-    console.error("Waitlist submission unavailable: SENDER_API is not configured.");
-    return NextResponse.json({ message: "The waitlist is temporarily unavailable. Please try again shortly." }, { status: 503 });
+    logSubmissionIssue("audit", "configuration", reference, new Error("SENDER_API missing"));
+    return submissionError("The report is temporarily unavailable. Please try again shortly.", 503, reference);
   }
 
   try {
+    stage = "profile setup";
     const [groupId, profileFieldSetup] = await Promise.all([ensureGroup(token, audit ? "Run Rentless Software Audits" : GROUP_TITLE), ensureProfileFields(token)]);
     const { fieldNames, diagnostics } = profileFieldSetup;
     const submittedAt = new Date().toISOString();
@@ -223,15 +228,19 @@ export async function POST(request: Request) {
       throw new Error("Sender profile fields could not be prepared");
     }
     const subscriber = { email, firstname: firstName, lastname: lastName, groups: [groupId], fields, trigger_automation: consent };
+    stage = "subscriber lookup";
     const lookup = await senderFetch(token, `/subscribers/${encodeURIComponent(email)}`);
     if (!lookup.ok && lookup.status !== 404) {
       console.error("Sender subscriber lookup rejected", lookup.status, (await lookup.text()).slice(0, 300));
       throw new Error("Sender subscriber lookup failed");
     }
+    stage = "subscriber save";
     const response = await senderFetch(token, lookup.ok ? `/subscribers/${encodeURIComponent(email)}` : "/subscribers", {
       method: lookup.ok ? "PATCH" : "POST", body: JSON.stringify(subscriber),
     });
     if (!response.ok) throw new Error(`Sender subscriber request failed with ${response.status}`);
+    profileSaved = true;
+    stage = "profile verification";
     // Confirm the provider actually retained the custom profile fields.
     const storedResponse = await senderFetch(token, `/subscribers/${encodeURIComponent(email)}`);
     if (!storedResponse.ok) throw new Error("Sender profile verification failed");
@@ -241,7 +250,9 @@ export async function POST(request: Request) {
     if (confirmed.length !== Object.keys(expected).length) throw new Error(`Sender profile verification incomplete (${confirmed.length}/${Object.keys(expected).length})`);
     console.info("Sender profile persistence verified", { fieldCount: confirmed.length });
 
-    const eventResponse = await senderFetch(token, "/events", {
+    stage = "event logging";
+    try {
+      const eventResponse = await senderFetch(token, "/events", {
       method: "POST",
       body: JSON.stringify({
         subscriber: { email },
@@ -263,10 +274,15 @@ export async function POST(request: Request) {
         },
       }),
     });
-    if (!eventResponse.ok) throw new Error(`Sender waitlist event failed with ${eventResponse.status}`);
+      if (!eventResponse.ok) throw new Error(`Sender waitlist event failed with ${eventResponse.status}`);
+    } catch (error) {
+      logSubmissionIssue("audit", stage, reference, error);
+    }
     if (audit) {
-      const report = reportEmail(firstName, audit);
-      const emailResponse = await senderFetch(token, "/message/send", {
+      stage = "report email";
+      try {
+        const report = reportEmail(firstName, audit);
+        const emailResponse = await senderFetch(token, "/message/send", {
         method: "POST",
         body: JSON.stringify({
           from: { email: process.env.SENDER_FROM_EMAIL || "info@runrentless.com", name: "Greatdorlin" },
@@ -277,20 +293,26 @@ export async function POST(request: Request) {
           headers: { charset: "utf-8" },
         }),
       });
-      if (!emailResponse.ok) {
-        const details = (await emailResponse.text()).slice(0, 300);
-        console.error("Sender report delivery rejected", emailResponse.status, details);
-        return NextResponse.json({ ok: true, reportSent: false, message: "Your audit is saved. Email delivery is temporarily unavailable. Download your full report below." }, { status: 202 });
+        if (!emailResponse.ok) {
+          logSubmissionIssue("audit", stage, reference, emailResponse.status);
+          return NextResponse.json({ ok: true, reportSent: false, reference, message: "Your audit is saved. Email delivery is temporarily unavailable. Download your full report below." }, { status: 202 });
+        }
+        const delivery = await emailResponse.json() as { success?: boolean; emailId?: string };
+        if (!delivery.success || !delivery.emailId) {
+          logSubmissionIssue("audit", stage, reference, new Error("Sender did not confirm message acceptance"));
+          return NextResponse.json({ ok: true, reportSent: false, reference, message: "Your audit is saved. Email delivery could not be confirmed. Download your report below." }, { status: 202 });
+        }
+        console.info("Sender report accepted", { emailId: delivery.emailId });
+      } catch (error) {
+        logSubmissionIssue("audit", stage, reference, error);
+        return NextResponse.json({ ok: true, reportSent: false, reference, message: "Your audit is saved. Email delivery could not be confirmed. Download your report below." }, { status: 202 });
       }
-      const delivery = await emailResponse.json() as { success?: boolean; emailId?: string };
-      if (!delivery.success || !delivery.emailId) return NextResponse.json({ ok: true, reportSent: false, message: "Your audit is saved. Email delivery could not be confirmed. Download your report below." }, { status: 202 });
-      console.info("Sender report accepted", { emailId: delivery.emailId });
     }
 
     console.info("Run Rentless submission completed", { reportSent: Boolean(audit), fieldsSaved: Object.keys(fields).length, toolCount: audit?.tools.length || 0 });
     return NextResponse.json({ ok: true, reportSent: Boolean(audit) });
   } catch (error) {
-    console.error("Waitlist submission failed", error instanceof Error ? error.message : "Unknown Sender error");
-    return NextResponse.json({ message: "We could not add you right now. Please try again in a moment." }, { status: 502 });
+    logSubmissionIssue("audit", stage, reference, error);
+    return submissionError(profileSaved ? "Your contact was saved, but we could not confirm every report detail. Please contact us with the reference below." : "We could not save your audit right now. Please try again in a moment.", 502, reference);
   }
 }

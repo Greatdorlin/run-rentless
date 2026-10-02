@@ -67,6 +67,7 @@ export function RegistrationForm() {
   const [error, setError] = useState("");
   const [firstName, setFirstName] = useState("");
   const [emailPending, setEmailPending] = useState(false);
+  const [detailsWarning, setDetailsWarning] = useState("");
   const [position, setPosition] = useState("");
   const [businessSector, setBusinessSector] = useState("");
   const [phase, setPhase] = useState<ReturnType<typeof webinarPhase>>("upcoming");
@@ -96,6 +97,7 @@ export function RegistrationForm() {
       return;
     }
     setError("");
+    setDetailsWarning("");
     setStatus("sending");
     try {
       const response = await fetch("/api/webinar", {
@@ -116,11 +118,12 @@ export function RegistrationForm() {
           website: data.get("website"),
         }),
       });
-      const result = await response.json() as { ok?: boolean; emailSent?: boolean; emailPending?: boolean; alreadyRegistered?: boolean; message?: string };
-      if (!result.ok) throw new Error(result.message || "Please try again.");
+      const result = await response.json().catch(() => ({})) as { ok?: boolean; emailSent?: boolean; emailPending?: boolean; detailsUnverified?: boolean; alreadyRegistered?: boolean; message?: string; reference?: string };
+      if (!response.ok || !result.ok) throw new Error(`${result.message || "We could not confirm your registration. Please try again."}${result.reference ? ` Reference: ${result.reference}.` : ""}`);
       setFirstName(String(data.get("firstName") || ""));
       if (!result.emailSent && !result.emailPending && !result.alreadyRegistered) throw new Error("Your spot is saved, but the email could not be sent. Please try again.");
       setEmailPending(result.emailPending === true);
+      if (result.detailsUnverified) setDetailsWarning(`We saved your spot, but could not confirm every detail. Please contact us with reference ${result.reference}.`);
       setStatus(result.alreadyRegistered ? "duplicate" : "success");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Please try again.");
@@ -142,6 +145,7 @@ export function RegistrationForm() {
       </div>
       <WebinarShare compact />
       <p>{status === "success" ? emailPending ? "Your spot is saved. Please allow about 10 minutes for your confirmation email. Join the WhatsApp group now for updates." : "Your confirmation email is on its way. Check Spam or Promotions if you do not see it." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
+      {detailsWarning && <p className="webinar-form__error" role="alert">{detailsWarning}</p>}
       <strong>Saturday, 10th October 2026 · 6PM GMT+1</strong>
       <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>
