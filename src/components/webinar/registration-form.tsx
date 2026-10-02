@@ -43,12 +43,18 @@ function SearchableChoice({ id, label, name, options, value, onChange, placehold
       <input id={id} type="text" role="combobox" aria-autocomplete="list" aria-expanded={open} aria-controls={`${id}-options`} autoComplete="off" maxLength={maxLength} required value={query} onChange={(event) => { onChange(""); setQuery(event.target.value); setOpen(true); }} onFocus={() => { setOpen(true); }} onKeyDown={(event) => {
         if (value && (event.key === "Backspace" || event.key === "Delete")) { event.preventDefault(); onChange(""); setQuery(""); setOpen(true); }
         if (event.key === "Escape") setOpen(false);
+        if (event.key === "Enter" && open) { event.preventDefault(); choose(matches[0] || "Other"); }
         if (event.key === "ArrowDown" && open) { event.preventDefault(); document.getElementById(`${id}-options`)?.querySelector<HTMLButtonElement>("button")?.focus(); }
       }} placeholder={placeholder} />
       <input type="hidden" name={name} value={value} />
       <button type="button" aria-label={`${open ? "Hide" : "Show"} ${label.toLowerCase()} options`} aria-expanded={open} aria-controls={`${id}-options`} onClick={() => setOpen(!open)}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 9 7 7 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
     </div>
-    {open && <div id={`${id}-options`} className="webinar-form__option-list" role="listbox" aria-label={`${label} options`}>
+    {open && <div id={`${id}-options`} className="webinar-form__option-list" role="listbox" aria-label={`${label} options`} onKeyDown={(event) => {
+      const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("button"));
+      const index = buttons.indexOf(event.target as HTMLButtonElement);
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); buttons[(index + (event.key === "ArrowDown" ? 1 : -1) + buttons.length) % buttons.length]?.focus(); }
+      if (event.key === "Escape") { event.preventDefault(); document.getElementById(id)?.focus(); setOpen(false); }
+    }}>
       {matches.map((option) => <button key={option} role="option" aria-selected={value === option} type="button" onClick={() => choose(option)}>{option}</button>)}
       {matches.length === 0 && <button role="option" aria-selected="false" type="button" onClick={() => choose("Other")}>Not listed? Choose Other</button>}
     </div>}

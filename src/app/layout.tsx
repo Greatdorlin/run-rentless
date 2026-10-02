@@ -28,10 +28,19 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#031e19", colorScheme: "dark" };
 
+const businessSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "Organization", "@id": "https://www.runrentless.com/#organization", name: "Run Rentless", url: "https://www.runrentless.com", logo: "https://www.runrentless.com/brand/run-rentless-logo-reverse.png", email: "info@runrentless.com", description: "Run Rentless helps businesses review paid tools, improve how they work together and build custom business software when it makes sense." },
+    { "@type": "WebSite", "@id": "https://www.runrentless.com/#website", name: "Run Rentless", url: "https://www.runrentless.com", publisher: { "@id": "https://www.runrentless.com/#organization" } },
+  ],
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(businessSchema).replace(/</g, "\\u003c") }} />
         <a className="skip-link" href="#main-content">Skip to content</a>
         <Header />
         <main id="main-content">{children}</main>

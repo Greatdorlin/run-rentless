@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- This standalone Node test intentionally runs as CommonJS. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -28,15 +29,21 @@ async function scenario(mode) {
     }
     return record ? json({ data: record }) : json({}, 404);
   };
-  const module = { exports: {} };
+  const testModule = { exports: {} };
   const requireStub = (name) => name === 'next/server' ? { NextResponse: { json: (data, init) => Response.json(data, init) } } : name.endsWith('/webinar') ? { WEBINAR_END: Date.now() + 86400000, WEBINAR_GROUP: 'October 2026 Webinar', WEBINAR_WHATSAPP_URL: 'https://example.invalid/test-only' } : name.endsWith('/business-profile') ? { positions: [body.position], businessSectors: [body.businessSector] } : { normalizeInternationalPhoneNumber: (value) => value };
-  vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, { module, exports: module.exports, require: requireStub, process: { env: { SENDER_API: 'mock-only' } }, fetch, Response, URL, AbortSignal, console: { error() {}, info() {} }, setTimeout });
-  const response = await module.exports.POST(new Request('https://example.invalid/api/webinar', { method: 'POST', body: JSON.stringify(body) }));
+  vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, { module: testModule, exports: testModule.exports, require: requireStub, process: { env: { SENDER_API: 'mock-only' } }, fetch, Response, URL, AbortSignal, console: { error() {}, info() {} }, setTimeout });
+  const response = await testModule.exports.POST(new Request('https://example.invalid/api/webinar', { method: 'POST', body: JSON.stringify(body) }));
   const result = await response.json();
   if (mode === 'save-failed') { assert.equal(response.status, 502); assert.notEqual(result.ok, true); assert.equal(enrolled, false); }
   else if (mode === 'duplicate') { assert.equal(result.alreadyRegistered, true); assert.equal(sends, 0); assert.equal(enrolled, false); }
   else if (mode === 'accepted') { assert.equal(result.emailSent, true); assert.equal(record.columns.find((f) => f.title === 'Webinar confirmation accepted at')?.value.length > 0, true); }
   else { assert.equal(result.emailPending, true); assert.equal(result.ok, true); assert.equal(enrolled, true); assert.equal(result.emailSent, false); }
+  const sendsBeforeInvalid = sends;
+  for (const invalid of [null, [], "invalid"]) {
+    const rejected = await testModule.exports.POST(new Request('https://example.invalid/api/webinar', { method: 'POST', body: JSON.stringify(invalid) }));
+    assert.equal(rejected.status, 400);
+  }
+  assert.equal(sends, sendsBeforeInvalid);
   console.log(`PASS ${mode}`);
 }
 (async () => { for (const mode of ['rejected', 'timeout', 'accepted', 'duplicate', 'save-failed']) await scenario(mode); })().catch((error) => { console.error(error); process.exitCode = 1; });

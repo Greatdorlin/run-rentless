@@ -10,6 +10,18 @@ import "./webinar.css";
 const webinarShareDescription = "Everyone is showing you what AI can do. Let’s shift the conversation to where it could help your business cut costs and grow revenue.";
 const webinarShareImage = "https://www.runrentless.com/webinar/making-ai-make-business-sense-share-2026.jpg";
 
+const webinarSchema = {
+  "@context": "https://schema.org", "@type": "Event",
+  name: "Making AI Make Business Sense", description: webinarShareDescription,
+  url: "https://www.runrentless.com/webinar", image: [webinarShareImage],
+  startDate: "2026-10-10T18:00:00+01:00", endDate: "2026-10-10T20:00:00+01:00",
+  eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+  eventStatus: "https://schema.org/EventScheduled", isAccessibleForFree: true,
+  location: { "@type": "VirtualLocation", url: "https://www.runrentless.com/webinar" },
+  organizer: [{ "@type": "Organization", name: "Run Rentless", url: "https://www.runrentless.com" }, { "@type": "Organization", name: "Navrademy" }],
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD", url: "https://www.runrentless.com/webinar#webinar-form" },
+};
+
 export const metadata: Metadata = {
   title: "Making AI Make Business Sense | Live Webinar",
   description: webinarShareDescription,
@@ -80,6 +92,7 @@ const audiences = [
 export default function WebinarPage() {
   return (
     <div className="webinar-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webinarSchema).replace(/</g, "\\u003c") }} />
       <section className="webinar-hero" aria-labelledby="webinar-title">
         <div className="shell webinar-hero__grid">
           <div className="webinar-hero__copy">

@@ -22,7 +22,7 @@ export function FloatingWaitlist() {
 
     observer.observe(hero);
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
 
   if (pathname === "/webinar") return null;
 

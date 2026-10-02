@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export function Logo({ compact = false }: { compact?: boolean }) {
+export function Logo({ compact = false, onClick }: { compact?: boolean; onClick?: () => void }) {
   return (
-    <Link className="brand-logo" href="/" aria-label="Run Rentless home">
+    <Link className="brand-logo" href="/" aria-label="Run Rentless home" onClick={onClick}>
       <Image
         src="/brand/run-rentless-logo-reverse.png"
         alt="Run Rentless"

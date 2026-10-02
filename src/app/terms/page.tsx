@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Website Terms", description: "Run Rentless website terms and commercial clarifications." };
+export const metadata: Metadata = { title: "Website Terms", description: "Run Rentless website terms and commercial clarifications.", alternates: { canonical: "/terms" } };
 
 export default function TermsPage() {
   return (

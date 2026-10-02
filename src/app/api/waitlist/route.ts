@@ -177,6 +177,7 @@ export async function POST(request: Request) {
   try { body = await request.json() as Record<string, unknown>; }
   catch { return NextResponse.json({ message: "Please check the form and try again." }, { status: 400 }); }
 
+  if (!body || typeof body !== "object" || Array.isArray(body)) return NextResponse.json({ message: "Please check your details and try again." }, { status: 400 });
   if (clean(body.companyWebsite, 200)) return NextResponse.json({ ok: true });
   const firstName = clean(body.firstName, 80);
   const lastName = clean(body.lastName, 80);

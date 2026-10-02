@@ -16,17 +16,21 @@ export function Header() {
     window.addEventListener("keydown", closeOnEscape);
     const closeOnNavigate = () => setOpen(false);
     window.addEventListener("runrentless:navigate", closeOnNavigate);
+    const wideScreen = window.matchMedia("(min-width: 821px)");
+    const closeOnResize = () => { if (wideScreen.matches) setOpen(false); };
+    wideScreen.addEventListener("change", closeOnResize);
     return () => {
       delete document.body.dataset.menuOpen;
       window.removeEventListener("keydown", closeOnEscape);
       window.removeEventListener("runrentless:navigate", closeOnNavigate);
+      wideScreen.removeEventListener("change", closeOnResize);
     };
   }, [open]);
 
   return (
     <header className="site-header">
       <div className="site-header__inner shell">
-        <Logo />
+        <Logo onClick={() => setOpen(false)} />
         <button
           type="button"
           className="menu-toggle"

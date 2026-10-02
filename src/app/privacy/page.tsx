@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Privacy Policy", description: "How Run Rentless handles information shared through this website." };
+export const metadata: Metadata = { title: "Privacy Policy", description: "How Run Rentless handles information shared through this website.", alternates: { canonical: "/privacy" } };
 
 export default function PrivacyPage() {
   return (
@@ -9,7 +9,7 @@ export default function PrivacyPage() {
       <p className="eyebrow"><span /> Website information</p>
       <h1>Privacy Policy</h1>
       <p className="legal-page__lede">You can see your audit results without giving us an email address. When you ask for a report, we receive the contact details and audit answers you choose to submit.</p>
-      <section><h2>What we collect</h2><p>For an audit, we collect the names, email, company, team size, software names, costs, usage, workflow answers and any investment or engagement preferences you provide. For webinar registration, we collect your first name, email and whether you are attending as an individual or company. Company attendees also provide a company name and phone number. Please do not include customer records, passwords or other sensitive information in free-text answers.</p></section>
+      <section><h2>What we collect</h2><p>For an audit, we collect the names, email, company, team size, software names, costs, usage, workflow answers and any investment or engagement preferences you provide. For webinar registration, we collect your first and last name, email, phone number, role, business sector and whether you are attending as an individual or company. Company attendees also provide a company name. If you choose Other for your role or sector, we collect the answer you enter. Please do not include customer records, passwords or other sensitive information in free-text answers.</p></section>
       <section><h2>How we use it</h2><p>We use audit submissions to prepare reports and respond to enquiries. We use webinar details to save your place, send confirmation and share joining details and event updates. Sender processes and stores submitted contact details on our behalf. Webinar registration does not by itself sign you up for unrelated marketing. Relevant service follow-up from the audit requires the separate permission offered on that form. Waitlist submissions are used for the products, demos and launch updates requested.</p></section>
       <section><h2>Your choices</h2><p>You can unsubscribe from marketing messages at any time using the link in an email, or contact Run Rentless to ask about access, correction, or deletion of your details.</p></section>
       <p><Link className="text-link" href="/#audit">Start the free audit →</Link></p>

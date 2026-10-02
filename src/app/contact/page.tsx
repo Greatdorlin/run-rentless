@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Contact", description: "Talk to Run Rentless about your business tools and what you want to improve." };
+export const metadata: Metadata = { title: "Contact", description: "Talk to Run Rentless about your business tools and what you want to improve.", alternates: { canonical: "/contact" } };
 
 export default function ContactPage() {
   return (
