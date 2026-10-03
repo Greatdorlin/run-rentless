@@ -3,6 +3,7 @@ import { parseAudit, reportEmail, auditSummary as summarizeReport } from "@/lib/
 import { budgetRanges, deliveryPreferences, savingsChoices, verdict } from "@/lib/audit";
 import { logSubmissionIssue, submissionError, submissionReference } from "@/lib/submission-error";
 import { readPublicForm } from "@/lib/public-form-request";
+import { businessSectors, positions } from "@/lib/business-profile";
 
 export const maxDuration = 60;
 
@@ -10,6 +11,10 @@ const SENDER_BASE_URL = "https://api.sender.net/v2";
 const GROUP_TITLE = "Run Rentless Waitlist";
 const PROFILE_FIELDS = {
   company: { title: "Company", type: "text", fieldName: "{$company}" },
+  position: { title: "Audit contact role", type: "text", fieldName: "{$audit_contact_role}" },
+  businessSector: { title: "Audit business sector", type: "text", fieldName: "{$audit_business_sector}" },
+  sectorEntered: { title: "Audit sector entered", type: "text", fieldName: "{$audit_sector_entered}" },
+  followupConsent: { title: "Audit follow-up permission", type: "text", fieldName: "{$audit_followup_permission}" },
   interest: { title: "Software interest", type: "text", fieldName: "{$software_interest}" },
   teamSize: { title: "Team size", type: "text", fieldName: "{$team_size}" },
   currentSoftware: { title: "Current software", type: "text", fieldName: "{$current_software}" },
@@ -183,6 +188,11 @@ export async function POST(request: Request) {
   const lastName = clean(body.lastName, 80);
   const email = clean(body.email, 160).toLowerCase();
   const company = clean(body.company, 120);
+  const selectedPosition = clean(body.position, 80);
+  const position = selectedPosition === "Other" ? clean(body.positionOther, 80) : selectedPosition;
+  const selectedSector = clean(body.businessSector, 100);
+  const sectorEntered = selectedSector === "Other" ? clean(body.businessSectorOther, 100) : selectedSector;
+  const followupConsent = body.followupConsent === true;
   const interest = clean(body.interest, 120);
   const teamSize = clean(body.teamSize, 30);
   const currentSoftware = clean(body.currentSoftware, 160);
@@ -190,9 +200,10 @@ export async function POST(request: Request) {
   const deliveryPreference = deliveryPreferences.includes(clean(body.deliveryPreference, 80)) ? clean(body.deliveryPreference, 80) : "Not provided";
   const savingsInterest = savingsChoices.includes(clean(body.savingsInterest, 100)) ? clean(body.savingsInterest, 100) : "Not provided";
   const audit = parseAudit(body.audit);
+  const businessProfileValid = interest !== "Software Rent Audit" || (positions.includes(selectedPosition as (typeof positions)[number]) && businessSectors.includes(selectedSector as (typeof businessSectors)[number]) && Boolean(position) && Boolean(sectorEntered));
   const consent = body.marketingConsent === "on" || body.marketingConsent === true;
   const reportConsent = body.reportConsent === "on" || body.reportConsent === true;
-  if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !company || !interest || !teamSize || (interest === "Software Rent Audit" ? !audit || !reportConsent : !consent) || (audit && !reportConsent)) {
+  if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !company || !interest || !teamSize || !businessProfileValid || (interest === "Software Rent Audit" ? !audit || !reportConsent : !consent) || (audit && !reportConsent)) {
     return NextResponse.json({ message: "Please complete every required field and confirm your consent." }, { status: 400 });
   }
 
@@ -210,6 +221,10 @@ export async function POST(request: Request) {
     const auditSummary = audit ? `${summarizeReport(audit)} Savings interest: ${savingsInterest}.` : "Not provided";
     const fields = Object.fromEntries([
       fieldNames.company && [fieldNames.company, company],
+      fieldNames.position && [fieldNames.position, audit ? position : "Not provided"],
+      fieldNames.businessSector && [fieldNames.businessSector, audit ? selectedSector : "Not provided"],
+      fieldNames.sectorEntered && [fieldNames.sectorEntered, audit ? sectorEntered : "Not provided"],
+      fieldNames.followupConsent && [fieldNames.followupConsent, audit && followupConsent ? "Yes" : "No"],
       fieldNames.interest && [fieldNames.interest, interest],
       fieldNames.teamSize && [fieldNames.teamSize, teamSize],
       fieldNames.currentSoftware && [fieldNames.currentSoftware, currentSoftware || "Not provided"],
@@ -241,7 +256,7 @@ export async function POST(request: Request) {
     const storedResponse = await senderFetch(token, `/subscribers/${encodeURIComponent(email)}`);
     if (!storedResponse.ok) throw new Error("Sender profile verification failed");
     const stored = await storedResponse.json() as { data?: { columns?: Array<{ title?: string; value?: unknown }> } };
-    const expected = { company, interest, teamSize, currentSoftware: currentSoftware || "Not provided", consent: consent ? "Yes" : "No", budgetRange, deliveryPreference, auditSummary, auditPriority: audit?.priority?.name || "No clear opportunity yet" };
+    const expected = { company, position: audit ? position : "Not provided", businessSector: audit ? selectedSector : "Not provided", sectorEntered: audit ? sectorEntered : "Not provided", followupConsent: audit && followupConsent ? "Yes" : "No", interest, teamSize, currentSoftware: currentSoftware || "Not provided", consent: consent ? "Yes" : "No", budgetRange, deliveryPreference, auditSummary, auditPriority: audit?.priority?.name || "No clear opportunity yet" };
     const confirmed = Object.entries(expected).filter(([key, value]) => stored.data?.columns?.some((column) => column.title === PROFILE_FIELDS[key as keyof typeof PROFILE_FIELDS].title && String(column.value) === value));
     if (confirmed.length !== Object.keys(expected).length) throw new Error(`Sender profile verification incomplete (${confirmed.length}/${Object.keys(expected).length})`);
     console.info("Sender profile persistence verified", { fieldCount: confirmed.length });
@@ -255,6 +270,10 @@ export async function POST(request: Request) {
         type: audit ? "run_rentless_audit_submission" : "run_rentless_waitlist_submission",
         properties: {
           company,
+          contact_role: audit ? position : "Not provided",
+          business_sector: audit ? selectedSector : "Not provided",
+          sector_entered: audit ? sectorEntered : "Not provided",
+          followup_permission: audit && followupConsent,
           software_interest: interest,
           team_size: teamSize,
           current_software: currentSoftware || "Not provided",

@@ -765,6 +765,9 @@ body[data-audit-active="true"] .floating-waitlist { display: none; }
 .optional-context[open] > :not(summary) { margin-top: 20px; }
 .guided-name { display: grid; gap: 20px; }
 .guided-name legend { margin-bottom: 20px; font-weight: 600; }
+.report-business-fields { display: grid; gap: 15px; }
+.report-business-fields label { display: grid; gap: 6px; }
+.report-business-fields p { margin: 0 0 4px; }
 .report-form--guided .report-fields { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .report-fields small { display: block; font-size: 13px; line-height: 1.5; margin-top: 10px; }
 .action-plan-intro { margin: 28px 0 36px; }
