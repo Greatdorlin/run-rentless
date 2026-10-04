@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { WEBINAR_WHATSAPP_URL, webinarPhase } from "@/lib/webinar";
+import { WEBINAR_CALENDAR_URL, WEBINAR_GOOGLE_CALENDAR_URL, WEBINAR_LIVE_URL, WEBINAR_WHATSAPP_URL, webinarPhase } from "@/lib/webinar";
 import { businessSectors, normalizeBusinessSector, positions } from "@/lib/business-profile";
 import { normalizeInternationalPhoneNumber } from "@/lib/phone";
 import { WebinarShare } from "@/components/webinar/webinar-share";
@@ -169,15 +169,16 @@ export function RegistrationForm() {
       <span className="webinar-form__success-label">{status === "success" ? "Registration complete" : "Registration found"}</span>
       <h3 ref={confirmationHeading} tabIndex={-1}>{status === "success" ? "Your spot is confirmed." : `${firstName}, you’re already registered.`}</h3>
       <p className="webinar-form__success-intro">Here’s what happens next, so you don’t miss the webinar.</p>
+      <div className="webinar-form__watch"><span>Your direct watch link</span><a href={WEBINAR_LIVE_URL} target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a><p>The webinar starts Saturday, 10th October at 6PM GMT+1. Save this link now.</p></div>
       <div className="webinar-form__group">
-        <span>First · Join the event group</span>
-        <h4>Get the link and reminders.</h4>
-        <p>Join our WhatsApp group now. We’ll share the joining link and any event updates there.</p>
+        <span>Next · Join the event group</span>
+        <h4>Get updates in one place.</h4>
+        <p>Join our WhatsApp group for reminders and event updates.</p>
         <a href={WEBINAR_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join the WhatsApp group <span aria-hidden="true">↗</span></a>
       </div>
       <div className="webinar-form__next">
-        <div><span>Next · Check your email</span><p>{status === "duplicate" ? "You’re already on the list. If you can’t find your confirmation, check Spam or Promotions." : emailPending ? "Your spot is saved. Your confirmation email may take about 10 minutes. Check Spam or Promotions too." : "Your confirmation is on its way. If it lands in Spam or Promotions, move it to your inbox so you see our updates."}</p></div>
-        <div><span>Then · Save the date</span><p>Saturday, 10th October 2026 at 6PM GMT+1. We’ll email joining details before the event.</p><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Making%20AI%20Make%20Business%20Sense&dates=20261010T170000Z%2F20261010T190000Z&details=Free%20live%20webinar%20by%20Run%20Rentless%20and%20Navrademy.%20Joining%20details%20will%20be%20sent%20before%20the%20event.&location=Online" target="_blank" rel="noopener noreferrer">Add to Google Calendar <span aria-hidden="true">↗</span></a></div>
+        <div><span>Then · Check your email</span><p>{status === "duplicate" ? "You’re already on the list. If you can’t find your confirmation, check Spam or Promotions." : emailPending ? "Your spot is saved. Your confirmation email may take about 10 minutes. Check Spam or Promotions too." : "Your confirmation includes the watch link. If it lands in Spam or Promotions, move it to your inbox so you see our reminders."}</p></div>
+        <div><span>Finally · Save the date</span><p>Saturday, 10th October 2026 at 6PM GMT+1. The calendar event includes the YouTube link and three reminders.</p><a href={WEBINAR_CALENDAR_URL}>Add to calendar <span aria-hidden="true">↗</span></a><a href={WEBINAR_GOOGLE_CALENDAR_URL} target="_blank" rel="noopener noreferrer">Use Google Calendar <span aria-hidden="true">↗</span></a></div>
       </div>
       {detailsWarning && <p className="webinar-form__error" role="alert">{detailsWarning}</p>}
       <WebinarShare compact />
@@ -207,7 +208,7 @@ export function RegistrationForm() {
       </div>
       {error && <p className="webinar-form__error" role="alert">{error}</p>}
       <button className="webinar-form__submit" type="submit" disabled={status === "sending"}>{status === "sending" ? "Saving your spot…" : "Register free"}<span aria-hidden="true">↗</span></button>
-      <p className="webinar-form__footnote">Free to attend. We’ll email your joining details before the event.</p>
+      <p className="webinar-form__footnote">Free to attend. Your confirmation includes the direct watch link.</p>
     </form>
   );
 }
