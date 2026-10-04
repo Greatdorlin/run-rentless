@@ -72,7 +72,18 @@ export function RegistrationForm() {
   const [businessSector, setBusinessSector] = useState("");
   const [phase, setPhase] = useState<ReturnType<typeof webinarPhase>>("upcoming");
   const phoneInput = useRef<HTMLInputElement>(null);
+  const confirmation = useRef<HTMLDivElement>(null);
+  const confirmationHeading = useRef<HTMLHeadingElement>(null);
   const phoneTouched = useRef(false);
+
+  useEffect(() => {
+    if (status !== "success" && status !== "duplicate") return;
+    const frame = window.requestAnimationFrame(() => {
+      confirmation.current?.scrollIntoView({ block: "start", behavior: "instant" });
+      confirmationHeading.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [status]);
 
   useEffect(() => {
     const update = () => setPhase(webinarPhase(Date.now()));
@@ -153,20 +164,24 @@ export function RegistrationForm() {
   if (phase === "ended") return <div className="webinar-form__closed"><h3>Registration has closed.</h3><p>The live event ended at 8PM GMT+1 on 10th October 2026. You can still explore Run Rentless.</p><Link href="/">Go to the homepage <span aria-hidden="true">↗</span></Link></div>;
 
   if (status === "success" || status === "duplicate") return (
-    <div className="webinar-form__success" role="status">
+    <div ref={confirmation} className="webinar-form__success" role="status">
       <span className="webinar-form__success-mark" aria-hidden="true">✓</span>
-      <h3>{status === "success" ? "Your spot is confirmed." : `${firstName}, you’re already registered.`}</h3>
+      <span className="webinar-form__success-label">{status === "success" ? "Registration complete" : "Registration found"}</span>
+      <h3 ref={confirmationHeading} tabIndex={-1}>{status === "success" ? "Your spot is confirmed." : `${firstName}, you’re already registered.`}</h3>
+      <p className="webinar-form__success-intro">Here’s what happens next, so you don’t miss the webinar.</p>
       <div className="webinar-form__group">
-        <span>One more step</span>
-        <h4>Be ready when we go live.</h4>
-        <p>Join the event WhatsApp group for the joining link, reminders and any last-minute updates.</p>
+        <span>First · Join the event group</span>
+        <h4>Get the link and reminders.</h4>
+        <p>Join our WhatsApp group now. We’ll share the joining link and any event updates there.</p>
         <a href={WEBINAR_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join the WhatsApp group <span aria-hidden="true">↗</span></a>
       </div>
-      <WebinarShare compact />
-      <p>{status === "success" ? emailPending ? "Your spot is saved. Please allow about 10 minutes for your confirmation email. Join the WhatsApp group now for updates." : "Your confirmation email is on its way. Check Spam or Promotions if you do not see it." : "Your email is already on the webinar list. If you need your details again, contact us."}</p>
+      <div className="webinar-form__next">
+        <div><span>Next · Check your email</span><p>{status === "duplicate" ? "You’re already on the list. If you can’t find your confirmation, check Spam or Promotions." : emailPending ? "Your spot is saved. Your confirmation email may take about 10 minutes. Check Spam or Promotions too." : "Your confirmation is on its way. If it lands in Spam or Promotions, move it to your inbox so you see our updates."}</p></div>
+        <div><span>Then · Save the date</span><p>Saturday, 10th October 2026 at 6PM GMT+1. We’ll email joining details before the event.</p><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Making%20AI%20Make%20Business%20Sense&dates=20261010T170000Z%2F20261010T190000Z&details=Free%20live%20webinar%20by%20Run%20Rentless%20and%20Navrademy.%20Joining%20details%20will%20be%20sent%20before%20the%20event.&location=Online" target="_blank" rel="noopener noreferrer">Add to Google Calendar <span aria-hidden="true">↗</span></a></div>
+      </div>
       {detailsWarning && <p className="webinar-form__error" role="alert">{detailsWarning}</p>}
-      <strong>Saturday, 10th October 2026 · 6PM GMT+1</strong>
-      <Link href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
+      <WebinarShare compact />
+      <Link className="webinar-form__help" href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
     </div>
   );
 
