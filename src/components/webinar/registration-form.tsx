@@ -6,6 +6,7 @@ import { WEBINAR_CALENDAR_URL, WEBINAR_GOOGLE_CALENDAR_URL, WEBINAR_LIVE_URL, WE
 import { businessSectors, normalizeBusinessSector, positions } from "@/lib/business-profile";
 import { normalizeInternationalPhoneNumber } from "@/lib/phone";
 import { WebinarShare } from "@/components/webinar/webinar-share";
+import { ConfirmationEmailStatus } from "@/components/webinar/confirmation-email-status";
 
 type AttendingAs = "individual" | "company";
 
@@ -67,6 +68,7 @@ export function RegistrationForm() {
   const [error, setError] = useState("");
   const [firstName, setFirstName] = useState("");
   const [emailPending, setEmailPending] = useState(false);
+  const [registrationEmail, setRegistrationEmail] = useState("");
   const [detailsWarning, setDetailsWarning] = useState("");
   const [position, setPosition] = useState("");
   const [businessSector, setBusinessSector] = useState("");
@@ -152,7 +154,9 @@ export function RegistrationForm() {
       if (!response.ok || !result.ok) throw new Error(`${result.message || "We could not confirm your registration. Please try again."}${result.reference ? ` Reference: ${result.reference}.` : ""}`);
       setFirstName(String(data.get("firstName") || ""));
       if (!result.emailSent && !result.emailPending && !result.alreadyRegistered) throw new Error("Your spot is saved, but the email could not be sent. Please try again.");
+      // The legacy emailSent flag means provider acceptance, not inbox delivery.
       setEmailPending(result.emailPending === true);
+      setRegistrationEmail(String(data.get("email") || "").trim().slice(0, 160).toLowerCase());
       if (result.detailsUnverified) setDetailsWarning(`We saved your spot, but could not confirm every detail. Please contact us with reference ${result.reference}.`);
       setStatus(result.alreadyRegistered ? "duplicate" : "success");
     } catch (caught) {
@@ -177,7 +181,7 @@ export function RegistrationForm() {
         <a href={WEBINAR_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join the WhatsApp group <span aria-hidden="true">↗</span></a>
       </div>
       <div className="webinar-form__next">
-        <div><span>Then · Check your email</span><p>{status === "duplicate" ? "You’re already on the list. If you can’t find your confirmation, check Spam or Promotions." : emailPending ? "Your spot is saved. Your confirmation email may take about 10 minutes. Check Spam or Promotions too." : "Your confirmation includes the watch link. If it lands in Spam or Promotions, move it to your inbox so you see our reminders."}</p></div>
+        <ConfirmationEmailStatus email={registrationEmail} pending={emailPending} duplicate={status === "duplicate"} />
         <div><span>Finally · Save the date</span><p>Saturday, 10th October 2026 at 6PM GMT+1. The calendar event includes the YouTube link and three reminders.</p><a href={WEBINAR_CALENDAR_URL}>Add to calendar <span aria-hidden="true">↗</span></a><a href={WEBINAR_GOOGLE_CALENDAR_URL} target="_blank" rel="noopener noreferrer">Use Google Calendar <span aria-hidden="true">↗</span></a></div>
       </div>
       {detailsWarning && <p className="webinar-form__error" role="alert">{detailsWarning}</p>}
