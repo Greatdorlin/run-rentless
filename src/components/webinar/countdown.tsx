@@ -17,10 +17,32 @@ export function WebinarCountdown() {
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
-    const update = () => setNow(Date.now());
-    update();
-    const timer = window.setInterval(update, 1000);
-    return () => window.clearInterval(timer);
+    let cancelled = false;
+    let timer: number | undefined;
+    const sync = async () => {
+      try {
+        const response = await fetch("/api/webinar/time", { cache: "no-store" });
+        if (!response.ok) return;
+        const data: unknown = await response.json();
+        if (!data || typeof data !== "object" || !("now" in data) || typeof data.now !== "number") return;
+        if (cancelled) return;
+        const serverNow = data.now;
+        const startedAt = performance.now();
+        const update = () => setNow(serverNow + (performance.now() - startedAt));
+        update();
+        if (timer !== undefined) window.clearInterval(timer);
+        timer = window.setInterval(update, 1000);
+      } catch {
+        // Keep the countdown hidden if trusted time is unavailable.
+      }
+    };
+    void sync();
+    const resync = window.setInterval(() => void sync(), 5 * 60 * 1000);
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearInterval(timer);
+      window.clearInterval(resync);
+    };
   }, []);
 
   const phase = now === null ? "upcoming" : webinarPhase(now);
