@@ -59,7 +59,7 @@ export function OfferCheckout() {
   </section>;
 
   return <div className="offer-checkout" id="checkout">
-    <div className="offer-checkout__intro"><span className="offer-kicker">CHOOSE YOUR SEATS</span><h2>Bring your own problem. Build a first version in class.</h2><p>One payment covers everyone in your group. Naira checkout is open now; dollar prices are shown for international guests.</p></div>
+    <div className="offer-checkout__intro"><span className="offer-kicker">CHOOSE YOUR SEATS</span><h2>Bring your own problem. Build a first version in class.</h2><p>One payment covers everyone in your group. You can use an international card at the naira checkout. Your bank will show the amount in your own currency.</p></div>
     <div className="offer-currency" role="group" aria-label="Payment currency">
       <button type="button" aria-pressed={currency === "USD"} onClick={() => setCurrency("USD")}>Pay in USD</button>
       <button type="button" aria-pressed={currency === "NGN"} onClick={() => setCurrency("NGN")}>Pay in NGN</button>
@@ -73,8 +73,10 @@ export function OfferCheckout() {
       </button>)}
     </div>
     {currency === "USD" ? <div className="offer-usd-notice" role="status">
-      <strong>Dollar prices are shown for international guests.</strong>
-      <p>USD checkout is not open yet. To ask about a seat, <a href="mailto:info@runrentless.com?subject=AI%20Execution%20Lab%20USD%20booking">email Run Rentless</a>. You can switch to naira to pay now.</p>
+      <strong>Want to pay from outside Nigeria?</strong>
+      <p>Choose the naira price to pay with an international card. Your bank handles the currency conversion and may charge its own conversion fee. Direct USD checkout is not available yet.</p>
+      <button type="button" onClick={() => { setCurrency("NGN"); setMessage(""); }}>Show naira checkout ↗</button>
+      <p>Need a dollar invoice? <a href="mailto:info@runrentless.com?subject=AI%20Execution%20Lab%20USD%20booking">Contact Run Rentless</a>.</p>
     </div> : <form onSubmit={startCheckout} className="offer-form">
       <div><label htmlFor="offer-name">Your name</label><input id="offer-name" autoComplete="name" maxLength={100} minLength={2} required value={name} onChange={(event) => setName(event.target.value)} placeholder="Name for the booking" /></div>
       <div><label htmlFor="offer-email">Email for your booking</label><input id="offer-email" type="email" autoComplete="email" maxLength={254} required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" /></div>

@@ -23,6 +23,24 @@
   text-underline-offset: 3px;
 }
 
+.offer-usd-notice button {
+  display: inline-flex;
+  margin-top: 18px;
+  min-height: 48px;
+  align-items: center;
+  padding: 12px 18px;
+  border: 0;
+  background: #ff906c;
+  color: #031e19;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.offer-usd-notice button:hover {
+  background: #f8f6ef;
+}
+
 .offer-partner-contact {
   margin: 28px 0 0;
   padding-top: 20px;
