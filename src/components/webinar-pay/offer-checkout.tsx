@@ -72,12 +72,16 @@ export function OfferCheckout() {
         <small>{count === 1 ? "One person" : `${format(webinarOffer[currency][count].amount / count, currency)} per person`}</small>
       </button>)}
     </div>
-    <form onSubmit={startCheckout} className="offer-form">
+    {currency === "USD" ? <div className="offer-usd-notice" role="status">
+      <strong>Dollar prices are shown for international guests.</strong>
+      <p>USD checkout is not open yet. To ask about a seat, <a href="mailto:info@runrentless.com?subject=AI%20Execution%20Lab%20USD%20booking">email Run Rentless</a>. You can switch to naira to pay now.</p>
+    </div> : <form onSubmit={startCheckout} className="offer-form">
       <div><label htmlFor="offer-name">Your name</label><input id="offer-name" autoComplete="name" maxLength={100} minLength={2} required value={name} onChange={(event) => setName(event.target.value)} placeholder="Name for the booking" /></div>
       <div><label htmlFor="offer-email">Email for your booking</label><input id="offer-email" type="email" autoComplete="email" maxLength={254} required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" /></div>
       <button className="offer-pay-button" type="submit" disabled={busy}>{busy ? "Opening secure checkout..." : `Pay ${format(webinarOffer[currency][selected].amount, currency)} securely`}<span aria-hidden="true">↗</span></button>
       {message && <p className="offer-error" role="alert">{message} <a href="mailto:info@runrentless.com?subject=AI%20Execution%20Lab%20booking">Contact Run Rentless</a></p>}
       <p className="offer-form__note">Payment is handled by Paystack. We never see your card details. By continuing, you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
-    </form>
+    </form>}
+    <p className="offer-partner-contact">Questions about bringing your team? <a href="https://wa.me/25079904461" target="_blank" rel="noopener noreferrer">WhatsApp Navrademy at +250 799 044 661 ↗</a></p>
   </div>;
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { OfferCheckout } from "@/components/webinar-pay/offer-checkout";
 import "./webinar-pay.css";
+import "./webinar-pay-checkout.css";
 
 export const metadata: Metadata = {
   title: "AI Execution Lab | Build a Better Way to Run Your Business",

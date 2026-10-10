@@ -1,0 +1,32 @@
+.offer-usd-notice {
+  margin-top: 28px;
+  padding: 25px;
+  border: 1px solid #6a8579;
+  background: #12382e;
+  color: #f8f6ef;
+  line-height: 1.55;
+}
+
+.offer-usd-notice strong {
+  display: block;
+  font-size: 19px;
+}
+
+.offer-usd-notice p {
+  margin: 9px 0 0;
+  color: #d2ded8;
+}
+
+.offer-usd-notice a,
+.offer-partner-contact a {
+  color: #ff906c;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.offer-partner-contact {
+  margin: 25px 0 0;
+  color: #d2ded8;
+  font-size: 14px;
+  line-height: 1.5;
+}
