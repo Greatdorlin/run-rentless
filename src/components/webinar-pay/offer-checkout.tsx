@@ -9,7 +9,7 @@ const format = (amount: number, currency: OfferCurrency) => new Intl.NumberForma
 }).format(amount / 100);
 
 export function OfferCheckout() {
-  const [currency, setCurrency] = useState<OfferCurrency>("USD");
+  const [currency, setCurrency] = useState<OfferCurrency>("NGN");
   const [selected, setSelected] = useState<OfferSeats>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -76,7 +76,7 @@ export function OfferCheckout() {
       <div><label htmlFor="offer-name">Your name</label><input id="offer-name" autoComplete="name" maxLength={100} minLength={2} required value={name} onChange={(event) => setName(event.target.value)} placeholder="Name for the booking" /></div>
       <div><label htmlFor="offer-email">Email for your booking</label><input id="offer-email" type="email" autoComplete="email" maxLength={254} required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" /></div>
       <button className="offer-pay-button" type="submit" disabled={busy}>{busy ? "Opening secure checkout..." : `Pay ${format(webinarOffer[currency][selected].amount, currency)} securely`}<span aria-hidden="true">↗</span></button>
-      {message && <p className="offer-error" role="alert">{message}</p>}
+      {message && <p className="offer-error" role="alert">{message} <a href="mailto:info@runrentless.com?subject=AI%20Execution%20Lab%20booking">Contact Run Rentless</a></p>}
       <p className="offer-form__note">Payment is handled by Paystack. We never see your card details. By continuing, you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
     </form>
   </div>;

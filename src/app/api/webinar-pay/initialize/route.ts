@@ -41,10 +41,16 @@ export async function POST(request: Request) {
       cache: "no-store",
     });
     const result: unknown = await response.json();
-    if (!response.ok || !result || typeof result !== "object") return error("Checkout could not start. Please try again.", 502, "provider_rejected");
+    if (!response.ok || !result || typeof result !== "object") {
+      return error(currency === "USD"
+        ? "Dollar checkout is not available through Paystack right now. Please contact us for help with your booking."
+        : "Checkout could not start. Please try again or contact us for help.", 502, "provider_rejected");
+    }
     const data = (result as { status?: unknown; data?: { authorization_url?: unknown; reference?: unknown } }).data;
     const url = data?.authorization_url;
-    if ((result as { status?: unknown }).status !== true) return error("Checkout could not start. Please try again.", 502, "provider_rejected");
+    if ((result as { status?: unknown }).status !== true) return error(currency === "USD"
+      ? "Dollar checkout is not available through Paystack right now. Please contact us for help with your booking."
+      : "Checkout could not start. Please try again or contact us for help.", 502, "provider_rejected");
     if (typeof url !== "string") return error("Checkout could not start. Please try again.", 502, "missing_checkout_url");
     let checkout: URL;
     try { checkout = new URL(url); } catch { return error("Checkout could not start. Please try again.", 502, "invalid_checkout_url"); }
