@@ -165,7 +165,7 @@ export function RegistrationForm() {
     }
   }
 
-  if (phase === "ended") return <div className="webinar-form__closed"><h3>Registration has closed.</h3><p>The live event ended at 8PM GMT+1 on 10th October 2026. You can still explore Run Rentless.</p><Link href="/">Go to the homepage <span aria-hidden="true">↗</span></Link></div>;
+  if (phase === "ended") return <div className="webinar-form__closed"><h3>The webinar has ended.</h3><p>Ready to build something useful for your own business? Join the AI Execution Lab.</p><Link href="/webinar-pay">See the class and prices <span aria-hidden="true">↗</span></Link></div>;
 
   if (status === "success" || status === "duplicate") return (
     <div ref={confirmation} className="webinar-form__success" role="status">
