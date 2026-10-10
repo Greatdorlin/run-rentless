@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { navigation } from "@/content/site";
 import { Logo } from "./logo";
 
 export function Header() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -52,8 +54,8 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <Link className="button button--small" href="/#audit" onClick={() => setOpen(false)}>
-            Start Free Audit
+          <Link className="button button--small" href={pathname === "/webinar-pay" ? "/webinar-pay#checkout" : "/#audit"} onClick={() => setOpen(false)}>
+            {pathname === "/webinar-pay" ? "Choose your seats" : "Start Free Audit"}
           </Link>
         </nav>
       </div>

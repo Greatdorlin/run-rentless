@@ -17,16 +17,37 @@
   color: #d2ded8;
 }
 
-.offer-usd-notice a,
-.offer-partner-contact a {
+.offer-usd-notice a {
   color: #ff906c;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .offer-partner-contact {
-  margin: 25px 0 0;
-  color: #d2ded8;
-  font-size: 14px;
+  margin: 28px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid #c5d4ca;
+  color: #294b41;
+  font-size: 15px;
   line-height: 1.5;
+}
+
+.offer-partner-contact a {
+  color: #963614;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.offer-what .offer-kicker,
+.offer-price-section .offer-kicker,
+.offer-what__grid span,
+.offer-tier__top span {
+  color: #a43b19;
+}
+
+.offer-tier:focus-visible,
+.offer-currency button:focus-visible {
+  outline: 3px solid #a43b19;
+  outline-offset: 3px;
 }

@@ -24,7 +24,7 @@ export function FloatingWaitlist() {
     return () => observer.disconnect();
   }, [pathname]);
 
-  if (pathname === "/webinar") return null;
+  if (pathname === "/webinar" || pathname === "/webinar-pay") return null;
 
   return (
     <Link

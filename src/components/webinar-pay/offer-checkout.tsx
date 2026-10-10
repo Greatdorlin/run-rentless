@@ -59,7 +59,7 @@ export function OfferCheckout() {
   </section>;
 
   return <div className="offer-checkout" id="checkout">
-    <div className="offer-checkout__intro"><span className="offer-kicker">CHOOSE YOUR SEATS</span><h2>Bring your own problem. Build a first version in class.</h2><p>One payment covers everyone in your group. Choose dollars or naira before checkout.</p></div>
+    <div className="offer-checkout__intro"><span className="offer-kicker">CHOOSE YOUR SEATS</span><h2>Bring your own problem. Build a first version in class.</h2><p>One payment covers everyone in your group. Naira checkout is open now; dollar prices are shown for international guests.</p></div>
     <div className="offer-currency" role="group" aria-label="Payment currency">
       <button type="button" aria-pressed={currency === "USD"} onClick={() => setCurrency("USD")}>Pay in USD</button>
       <button type="button" aria-pressed={currency === "NGN"} onClick={() => setCurrency("NGN")}>Pay in NGN</button>
