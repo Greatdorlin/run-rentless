@@ -3,7 +3,7 @@ import { isOfferCurrency, isOfferSeats, offerAmount } from "@/lib/webinar-offer"
 export const dynamic = "force-dynamic";
 
 const noStore = { "Cache-Control": "no-store" };
-const error = (message: string, status: number) => Response.json({ error: message }, { status, headers: noStore });
+const error = (message: string, status: number, code?: string) => Response.json({ error: message, code }, { status, headers: noStore });
 
 export async function POST(request: Request) {
   if (request.headers.get("origin") !== "https://www.runrentless.com" && process.env.NODE_ENV === "production") {
@@ -41,15 +41,19 @@ export async function POST(request: Request) {
       cache: "no-store",
     });
     const result: unknown = await response.json();
-    if (!response.ok || !result || typeof result !== "object") return error("Checkout could not start. Please try again.", 502);
+    if (!response.ok || !result || typeof result !== "object") return error("Checkout could not start. Please try again.", 502, "provider_rejected");
     const data = (result as { status?: unknown; data?: { authorization_url?: unknown; reference?: unknown } }).data;
     const url = data?.authorization_url;
-    if ((result as { status?: unknown }).status !== true || typeof url !== "string" ||
-        !/^https:\/\/checkout\.paystack\.com\/[a-zA-Z0-9]+$/.test(url) || data?.reference !== reference) {
-      return error("Checkout could not start. Please try again.", 502);
+    if ((result as { status?: unknown }).status !== true) return error("Checkout could not start. Please try again.", 502, "provider_rejected");
+    if (typeof url !== "string") return error("Checkout could not start. Please try again.", 502, "missing_checkout_url");
+    let checkout: URL;
+    try { checkout = new URL(url); } catch { return error("Checkout could not start. Please try again.", 502, "invalid_checkout_url"); }
+    if (checkout.protocol !== "https:" || checkout.hostname !== "checkout.paystack.com" || checkout.username || checkout.password) {
+      return error("Checkout could not start. Please try again.", 502, "invalid_checkout_url");
     }
+    if (data?.reference !== reference) return error("Checkout could not start. Please try again.", 502, "reference_mismatch");
     return Response.json({ url }, { headers: noStore });
   } catch {
-    return error("Checkout could not start. Please try again.", 502);
+    return error("Checkout could not start. Please try again.", 502, "provider_unreachable");
   }
 }
