@@ -5,6 +5,16 @@ export const dynamic = "force-dynamic";
 const noStore = { "Cache-Control": "no-store" };
 const error = (message: string, status: number, code?: string) => Response.json({ error: message, code }, { status, headers: noStore });
 
+function paystackFailureCode(result: unknown): string {
+  const message = result && typeof result === "object" && "message" in result && typeof result.message === "string"
+    ? result.message.toLowerCase() : "";
+  if (/currency|usd|dollar/.test(message) && /not|unsupported|enabled|allowed|available/.test(message)) {
+    return "currency_not_enabled";
+  }
+  if (/authorization|invalid key|secret key/.test(message)) return "provider_authorization_failed";
+  return "provider_rejected";
+}
+
 export async function POST(request: Request) {
   if (request.headers.get("origin") !== "https://www.runrentless.com" && process.env.NODE_ENV === "production") {
     return error("Please start from the offer page.", 403);
@@ -44,13 +54,13 @@ export async function POST(request: Request) {
     if (!response.ok || !result || typeof result !== "object") {
       return error(currency === "USD"
         ? "Dollar checkout is not available through Paystack right now. Please contact us for help with your booking."
-        : "Checkout could not start. Please try again or contact us for help.", 502, "provider_rejected");
+        : "Checkout could not start. Please try again or contact us for help.", 502, paystackFailureCode(result));
     }
     const data = (result as { status?: unknown; data?: { authorization_url?: unknown; reference?: unknown } }).data;
     const url = data?.authorization_url;
     if ((result as { status?: unknown }).status !== true) return error(currency === "USD"
       ? "Dollar checkout is not available through Paystack right now. Please contact us for help with your booking."
-      : "Checkout could not start. Please try again or contact us for help.", 502, "provider_rejected");
+      : "Checkout could not start. Please try again or contact us for help.", 502, paystackFailureCode(result));
     if (typeof url !== "string") return error("Checkout could not start. Please try again.", 502, "missing_checkout_url");
     let checkout: URL;
     try { checkout = new URL(url); } catch { return error("Checkout could not start. Please try again.", 502, "invalid_checkout_url"); }
