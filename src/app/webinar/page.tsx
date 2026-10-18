@@ -1,180 +1,117 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { WebinarAnchor } from "@/components/webinar/webinar-anchor";
-import { siAirtable, siAsana, siCalendly, siClickup, siFigma, siGooglesheets, siHootsuite, siHubspot, siJira, siMailchimp, siNotion, siQuickbooks, siSemrush, siShopify, siZapier, siZendesk } from "simple-icons";
-import { WebinarCountdown } from "@/components/webinar/countdown";
-import { RegistrationForm } from "@/components/webinar/registration-form";
-import { WebinarShare } from "@/components/webinar/webinar-share";
+import Link from "next/link";
 import "./webinar.css";
 
-const webinarShareDescription = "Everyone is showing you what AI can do. Let’s shift the conversation to where it could help your business cut costs and grow revenue.";
-const webinarShareImage = "https://www.runrentless.com/webinar/making-ai-make-business-sense-share-2026.jpg";
+const description = "Making AI Make Business Sense was a free online webinar hosted by Navrademy and Run Rentless on 10 October 2026. Explore ways to improve work, review software costs and build what your business needs.";
+const image = "https://www.runrentless.com/webinar/making-ai-make-business-sense-share-2026.jpg";
 
-const webinarSchema = {
-  "@context": "https://schema.org", "@type": "Event",
-  name: "Making AI Make Business Sense", description: webinarShareDescription,
-  url: "https://www.runrentless.com/webinar", image: [webinarShareImage],
-  startDate: "2026-10-10T18:00:00+01:00", endDate: "2026-10-10T20:00:00+01:00",
+const eventSchema = {
+  "@context": "https://schema.org",
+  "@type": "Event",
+  name: "Making AI Make Business Sense",
+  description,
+  url: "https://www.runrentless.com/webinar",
+  image: [image],
+  startDate: "2026-10-10T18:00:00+01:00",
+  endDate: "2026-10-10T20:00:00+01:00",
+  eventStatus: "https://schema.org/EventCompleted",
   eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
-  eventStatus: "https://schema.org/EventScheduled", isAccessibleForFree: true,
+  isAccessibleForFree: true,
   location: { "@type": "VirtualLocation", url: "https://www.runrentless.com/webinar" },
-  organizer: [{ "@type": "Organization", name: "Run Rentless", url: "https://www.runrentless.com" }, { "@type": "Organization", name: "Navrademy" }],
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD", url: "https://www.runrentless.com/webinar#webinar-form" },
+  organizer: [
+    { "@type": "Organization", name: "Run Rentless", url: "https://www.runrentless.com" },
+    { "@type": "Organization", name: "Navrademy" },
+  ],
 };
 
 export const metadata: Metadata = {
-  title: "Making AI Make Business Sense | Live Webinar",
-  description: webinarShareDescription,
+  title: "Making AI Make Business Sense | October 2026 Webinar",
+  description,
   alternates: { canonical: "/webinar" },
   openGraph: {
-    title: "Making AI Make Business Sense | Live Webinar",
-    description: webinarShareDescription,
+    title: "Making AI Make Business Sense | October 2026 Webinar",
+    description,
     url: "https://www.runrentless.com/webinar",
     type: "website",
-    images: [
-      {
-        url: webinarShareImage,
-        width: 1200,
-        height: 630,
-        type: "image/jpeg",
-        alt: "Making AI Make Business Sense live webinar, presented by Navrademy and Run Rentless",
-      },
-    ],
+    images: [{ url: image, width: 1200, height: 630, type: "image/jpeg", alt: "Making AI Make Business Sense, presented by Navrademy and Run Rentless" }],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Making AI Make Business Sense | Live Webinar",
-    description: webinarShareDescription,
-    images: [webinarShareImage],
-  },
+  twitter: { card: "summary_large_image", title: "Making AI Make Business Sense | October 2026 Webinar", description, images: [image] },
 };
 
 const lessons = [
-  { title: "See where your money goes", copy: "Start with your actual bills. Find the tools that cost the most and the charges that rise as your team grows." },
-  { title: "Find the work you still do manually", copy: "Spot the information your team copies, the follow-ups they chase and the jobs several tools are doing together." },
-  { title: "Know what to keep, connect or build", copy: "A useful tool may be worth the fee. Another may need a better setup. A focused job may be worth building for your business." },
-  { title: "Avoid an expensive mistake", copy: "Learn what to check before you build: your data, who can use the tool, how to test it and what it will cost to run." },
+  { title: "Know what you pay for", copy: "Start with the tools you use and your actual bills, including costs that rise with your team." },
+  { title: "Find the work you repeat", copy: "Look for customer enquiries, approvals or updates that your team copies, chases or forgets." },
+  { title: "Keep, improve or connect", copy: "A useful tool can be worth keeping. Sometimes changing one step solves the problem." },
+  { title: "Build only when it makes sense", copy: "Compare the cost of building, hosting and maintaining something new before deciding to replace a subscription." },
 ];
-
-const familiarTools = [
-  { name: "HubSpot", icon: siHubspot, job: "Sales" },
-  { name: "Mailchimp", icon: siMailchimp, job: "Email" },
-  { name: "Asana", icon: siAsana, job: "Projects" },
-  { name: "Airtable", icon: siAirtable, job: "Data" },
-  { name: "Zapier", icon: siZapier, job: "Automation" },
-  { name: "Calendly", icon: siCalendly, job: "Bookings" },
-  { name: "Notion", icon: siNotion, job: "Workspace" },
-  { name: "Semrush", icon: siSemrush, job: "Marketing" },
-  { name: "Shopify", icon: siShopify, job: "Stores" },
-  { name: "QuickBooks", icon: siQuickbooks, job: "Finance" },
-  { name: "Google Sheets", icon: siGooglesheets, job: "Spreadsheets" },
-  { name: "Jira", icon: siJira, job: "Projects" },
-  { name: "Hootsuite", icon: siHootsuite, job: "Social media" },
-  { name: "Figma", icon: siFigma, job: "Design" },
-  { name: "ClickUp", icon: siClickup, job: "Projects" },
-  { name: "Zendesk", icon: siZendesk, job: "Support" },
-];
-
 const examples = [
-  ["Customer details in three spreadsheets", "One place to find the latest details"],
-  ["Leads copied manually, then forgotten", "A clear follow-up for every lead"],
-  ["Finance checks several tools for one answer", "The numbers in one useful view"],
-  ["Client updates spread across different apps", "One way to track the job from start to finish"],
-];
-
-const audiences = [
-  ["Business owners & founders", "Your software bill keeps rising, but the work has not become easier."],
-  ["Sales, marketing & operations teams", "Your team still copies updates, chases follow-ups and switches between too many tools."],
-  ["Agencies & consultants", "Clients want faster work and clearer results. You want a practical way to deliver both."],
-  ["People learning AI", "You want to solve a business problem, not just show someone another AI trick."],
+  ["Customer enquiries across several inboxes", "One clear owner and next step for every enquiry"],
+  ["Client details copied by hand", "Details captured once and available where needed"],
+  ["Managers chasing updates in chats", "A simple view of outstanding work"],
+  ["Software bills rising with headcount", "A cost review before buying more seats"],
 ];
 
 export default function WebinarPage() {
-  return (
-    <div className="webinar-page">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webinarSchema).replace(/</g, "\\u003c") }} />
-      <section className="webinar-hero" aria-labelledby="webinar-title">
-        <div className="shell webinar-hero__grid">
-          <div className="webinar-hero__copy">
-            <p className="webinar-kicker"><span /> Navrademy × Run Rentless present <em>Live webinar</em></p>
-            <h1 id="webinar-title">Making AI make <span>business sense.</span></h1>
-            <p className="webinar-hero__lead">Everyone is showing you what AI can do. Let’s shift the conversation to where it could help your business cut costs and grow revenue.</p>
-            <div className="webinar-hero__event"><strong>Saturday, 10th October 2026</strong><span>6PM GMT+1 · Live online</span></div>
-            <div className="webinar-hero__actions"><WebinarAnchor className="webinar-cta" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor><WebinarAnchor className="webinar-hero__secondary" href="#what-you-will-learn">See what you’ll learn <span aria-hidden="true">↓</span></WebinarAnchor></div>
-            <p className="webinar-hero__takeaway">You do not need a technical background. You need a problem worth solving.</p>
+  return <div className="webinar-page webinar-archive">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema).replace(/</g, "\\u003c") }} />
+    <section className="webinar-hero" aria-labelledby="webinar-title">
+      <div className="shell webinar-hero__grid">
+        <div className="webinar-hero__copy">
+          <p className="webinar-kicker"><span /> Navrademy × Run Rentless <em>Past webinar</em></p>
+          <h1 id="webinar-title">Making AI make <span>business sense.</span></h1>
+          <p className="webinar-hero__lead">The October session has ended. The problems behind it have not: costly tools, repeated work and customer enquiries that fall through the cracks.</p>
+          <div className="webinar-hero__event"><strong>Held Saturday, 10 October 2026</strong><span>6PM GMT+1 · Online</span></div>
+          <div className="webinar-hero__actions">
+            <Link className="webinar-cta" href="/webinar-pay#checkout">Explore the AI Execution Lab <span aria-hidden="true">↗</span></Link>
+            <Link className="webinar-hero__secondary" href="/#audit">Start the free software audit <span aria-hidden="true">↗</span></Link>
           </div>
-          <div className="webinar-hero__visual">
-            <div className="webinar-hero__visual-top"><span>LIVE ONLINE</span><span>FREE WEBINAR</span></div>
-            <div className="webinar-hero__visual-main"><p>We go<br /><span>live in.</span></p><WebinarCountdown /></div>
-            <div className="webinar-hero__visual-bottom"><span>10TH OCTOBER 2026</span><span>6PM GMT+1</span></div>
-          </div>
+          <p className="webinar-hero__takeaway">No new webinar date or replay has been announced here. You can still take the next practical step for your business.</p>
         </div>
-      </section>
-
-      <section className="webinar-share-band" aria-label="Invite someone to the webinar"><div className="shell"><WebinarShare /></div></section>
-
-      <section className="webinar-problem" aria-labelledby="webinar-problem-title">
-        <div className="shell">
-          <div className="webinar-problem__opening">
-            <div>
-              <p className="webinar-section-label">The point of this webinar</p>
-              <h2 id="webinar-problem-title"><span>You’re not leaving with another list of AI tools.</span><span>You’re leaving knowing what to do with AI in your own business.</span></h2>
-            </div>
-            <div className="webinar-problem__intro">
-              <p>You’ve probably seen enough AI webinars that leave you with ten new tools to try, five more subscriptions to consider, and a “top 10 prompts” list for Claude, ChatGPT or whatever else is trending that week.</p>
-              <p className="webinar-problem__turn">We’re not doing that.</p>
-            </div>
-          </div>
-          <div className="webinar-problem__questions">
-            <p className="webinar-problem__questions-lead">We’re starting with <strong>your business as it is today.</strong></p>
-            <ul>
-              <li>What are you already paying for?</li>
-              <li>What still takes too much time?</li>
-              <li>Where are your team members doing work manually even though you’re already paying for software?</li>
-              <li>And where could AI help you do the same work better, spend less, or even create new ways to make money?</li>
-            </ul>
-          </div>
-          <div className="webinar-problem__closing">
-            <p className="webinar-problem__answer">That’s what we’ll help you figure out.</p>
-            <p>So instead of leaving with another app to test, you leave knowing what makes sense to <strong>keep, improve, automate or build differently</strong> for your own business.</p>
-            <div className="webinar-problem__final"><p>Because the goal isn’t to use more AI. <strong>It’s to make better business decisions with it.</strong></p><WebinarAnchor className="webinar-cta" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor></div>
-          </div>
+        <div className="webinar-hero__visual">
+          <div className="webinar-hero__visual-top"><span>OCTOBER 2026</span><span>EVENT COMPLETED</span></div>
+          <div className="webinar-hero__visual-main"><p>Business<br /><span>first.</span></p><div className="webinar-archive__visual-note">Keep what works.<br />Fix what slows you down.<br />Build what is missing.</div></div>
+          <div className="webinar-hero__visual-bottom"><span>RUN RENTLESS</span><span>× NAVRADEMY</span></div>
         </div>
-      </section>
-
-      <figure className="webinar-featured">
-        <div className="shell"><Image src="/webinar/making-ai-make-business-sense.png" width={1731} height={909} sizes="(max-width: 700px) 100vw, 1200px" alt="Making AI Make Business Sense webinar artwork with Navrademy and Run Rentless branding" /></div>
-      </figure>
-
-      <section className="webinar-tools" aria-labelledby="webinar-tools-title">
-        <div className="shell webinar-tools__grid">
-          <div className="webinar-tools__copy">
-            <h2 id="webinar-tools-title">Some of the tools you pay for, you may not need anymore.</h2>
-            <p>Not because the tools are bad.</p>
-            <p>But because AI can now help you <strong>build some of the things you pay those tools to do, around the way your own business works.</strong></p>
-            <div className="webinar-tools__question"><strong>That means lower costs, less wasted time, and a simpler way to run your business more efficiently and profitably.</strong></div>
-            <WebinarAnchor className="webinar-tools__link" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor>
-          </div>
-          <div className="webinar-tools__visual"><ul className="webinar-tools__list" aria-label="Examples of business software tools" tabIndex={0}>{familiarTools.map(({ name, icon, job }) => <li className="webinar-tools__item" key={name}><span className="webinar-tools__icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={icon.path} fill={name === "Mailchimp" ? "#031e19" : `#${icon.hex}`} /></svg></span><span className="webinar-tools__name">{name}<small>{job}</small></span></li>)}</ul><p className="webinar-tools__hint">Swipe or scroll to see more <span aria-hidden="true">→</span></p></div>
+      </div>
+    </section>
+    <section className="webinar-share-band" aria-label="Continue after the webinar">
+      <div className="shell webinar-archive__band">
+        <p><strong>The event is over. Your next move does not have to wait.</strong> Start with one costly tool or a job your team does by hand.</p>
+        <Link href="/contact">Talk to Run Rentless <span aria-hidden="true">↗</span></Link>
+      </div>
+    </section>
+    <section className="webinar-problem" aria-labelledby="webinar-problem-title">
+      <div className="shell">
+        <div className="webinar-problem__opening">
+          <div><p className="webinar-section-label">The idea behind the session</p><h2 id="webinar-problem-title"><span>Another list of AI tools is not a business plan.</span><span>Start with the work you need to improve.</span></h2></div>
+          <div className="webinar-problem__intro"><p>Business owners already have enough subscriptions, dashboards and apps competing for attention.</p><p className="webinar-problem__turn">What actually needs to change?</p></div>
         </div>
-        <p className="shell webinar-tools__note">Brand marks are shown only as familiar examples. Run Rentless is not affiliated with these companies.</p>
-      </section>
-
-      <section className="webinar-promise" aria-labelledby="webinar-promise-title">
-        <div className="shell"><p className="webinar-section-label">Why this webinar is different</p><h2 id="webinar-promise-title">Your business first.<br /><span>AI second.</span></h2><p className="webinar-promise__intro">Most AI classes show you what a new tool can do. We start with what your team pays for and the work it still does manually. Then we look at where AI could help, what you can leave alone and how to judge the cost.</p><div className="webinar-promise__outcomes"><span>Keep what works</span><span>Fix repeated work</span><span>Build what is missing</span><span>Know what it costs</span></div><WebinarAnchor className="webinar-cta webinar-cta--dark" href="#webinar-form">Get a spot <span aria-hidden="true">↗</span></WebinarAnchor></div>
-      </section>
-
-      <section id="what-you-will-learn" className="webinar-learning" aria-labelledby="webinar-learning-title">
-        <div className="shell"><div className="webinar-learning__heading"><p className="webinar-section-label">What you will get</p><h2 id="webinar-learning-title">A way to make the next decision.</h2><p>You will know what to ask before paying for another tool or asking someone to build one.</p></div><div className="webinar-learning__list">{lessons.map((item) => <article key={item.title}><span className="webinar-learning__marker" aria-hidden="true" /><div><h3>{item.title}</h3><p>{item.copy}</p></div><span aria-hidden="true">↗</span></article>)}</div><div className="webinar-learning__test"><strong>Bring a real problem</strong><p>Think of one bill that feels too high or one task your team does manually. This session will help you see what could change and what to check before you spend more.</p></div></div>
-      </section>
-
-      <section className="webinar-examples" aria-labelledby="webinar-examples-title">
-        <div className="shell webinar-examples__grid"><div><p className="webinar-section-label">Picture it in your business</p><h2 id="webinar-examples-title">What could you make easier?</h2><p>You may not need a whole new system. Sometimes one better step changes the day.</p></div><div className="webinar-examples__list">{examples.map(([before, after]) => <div key={before}><span>{before}</span><strong aria-hidden="true">→</strong><span>{after}</span></div>)}</div></div>
-      </section>
-
-      <section className="webinar-audience" aria-labelledby="webinar-audience-title"><div className="shell"><p className="webinar-section-label">Who should join</p><h2 id="webinar-audience-title">If you pay for tools and still do the work manually, this is for you.</h2><div className="webinar-audience__list">{audiences.map(([title, copy]) => <article key={title}><h3>{title}</h3><p>{copy}</p></article>)}</div></div></section>
-
-      <section className="webinar-register" id="register" aria-labelledby="webinar-register-title"><div className="shell webinar-register__grid"><div className="webinar-register__copy"><p className="webinar-section-label">Join us live</p><h2 id="webinar-register-title">Bring the problem.<br /><span>Leave with a way forward.</span></h2><p>Come with one expensive tool or one task that takes too much time. Learn how to judge whether to keep it, improve it or build something better. You do not need to know how to code.</p><div className="webinar-register__date"><strong>Making AI Make Business Sense</strong><span>Saturday, 10th October 2026</span><span>6PM GMT+1 · Live online</span></div></div><div id="webinar-form"><RegistrationForm /></div></div></section>
-    </div>
-  );
+        <div className="webinar-problem__questions">
+          <p className="webinar-problem__questions-lead">Four questions to bring back to <strong>your business today.</strong></p>
+          <ul><li>What are you paying for, and what does each tool really do?</li><li>Where do customer enquiries or approvals get delayed?</li><li>What does your team still copy, repeat or chase manually?</li><li>Would fixing a tool, connecting it or building something focused actually cost less?</li></ul>
+        </div>
+        <div className="webinar-problem__closing">
+          <p className="webinar-problem__answer">Better decisions start with a real problem.</p>
+          <p>Keep what works. Fix what wastes time. Build only what your team needs.</p>
+          <div className="webinar-problem__final"><p>The goal is not to use more AI. <strong>It is to make better business decisions with it.</strong></p><Link className="webinar-cta" href="/#audit">Review my tools <span aria-hidden="true">↗</span></Link></div>
+        </div>
+      </div>
+    </section>
+    <figure className="webinar-featured"><div className="shell"><Image src="/webinar/making-ai-make-business-sense.png" width={1731} height={909} sizes="(max-width: 700px) 100vw, 1200px" alt="Making AI Make Business Sense October 2026 event artwork with Navrademy and Run Rentless" /></div></figure>
+    <section className="webinar-learning" id="what-you-will-learn" aria-labelledby="webinar-learning-title">
+      <div className="shell"><div className="webinar-learning__heading"><p className="webinar-section-label">Questions worth taking forward</p><h2 id="webinar-learning-title">Make your next decision with the numbers in front of you.</h2><p>Useful starting points whether you joined the webinar or found this page afterwards.</p></div>
+        <div className="webinar-learning__list">{lessons.map((item) => <article key={item.title}><span className="webinar-learning__marker" aria-hidden="true" /><div><h3>{item.title}</h3><p>{item.copy}</p></div><span aria-hidden="true">↗</span></article>)}</div>
+      </div>
+    </section>
+    <section className="webinar-examples" aria-labelledby="webinar-examples-title">
+      <div className="shell webinar-examples__grid"><div><p className="webinar-section-label">What this could look like</p><h2 id="webinar-examples-title">Small problems. Useful changes.</h2><p>You may not need a whole new system. Sometimes one better step changes the day.</p></div><div className="webinar-examples__list">{examples.map(([before,after]) => <div key={before}><span>{before}</span><strong aria-hidden="true">→</strong><span>{after}</span></div>)}</div></div>
+    </section>
+    <section className="webinar-register" id="register" aria-labelledby="webinar-register-title">
+      <div className="shell webinar-register__grid">
+        <div className="webinar-register__copy"><p className="webinar-section-label">What comes after the webinar</p><h2 id="webinar-register-title">Bring the problem.<br /><span>Make the next move.</span></h2><p>Want to learn to build a useful workflow yourself? Explore the AI Execution Lab. Prefer someone to work through the problem with you? Tell us where your team gets stuck.</p><div className="webinar-register__date"><strong>Making AI Make Business Sense</strong><span>Past event · 10 October 2026</span><span>Presented by Navrademy × Run Rentless</span></div></div>
+        <div className="webinar-archive__next"><span className="webinar-section-label">Choose your next step</span><h3>Learn it, fix it or have us build it.</h3><p>Start with a real task. We can help you find a practical route instead of selling you another tool you may not need.</p><Link className="webinar-cta" href="/webinar-pay#checkout">Explore the AI Execution Lab <span aria-hidden="true">↗</span></Link><Link className="webinar-archive__next-link" href="/contact">Discuss a done-for-you solution <span aria-hidden="true">↗</span></Link><Link className="webinar-archive__next-link" href="/#audit">Start with the free audit <span aria-hidden="true">↗</span></Link></div>
+      </div>
+    </section>
+  </div>;
 }
