@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { RegistrationForm } from "@/components/webinar/registration-form";
 import "./webinar.css";
 
 const description = "Making AI Make Business Sense was a free online webinar hosted by Navrademy and Run Rentless on 10 October 2026. Explore ways to improve work, review software costs and build what your business needs.";
@@ -63,10 +64,10 @@ export default function WebinarPage() {
           <p className="webinar-hero__lead">The October session has ended. The problems behind it have not: costly tools, repeated work and customer enquiries that fall through the cracks.</p>
           <div className="webinar-hero__event"><strong>Held Saturday, 10 October 2026</strong><span>6PM GMT+1 · Online</span></div>
           <div className="webinar-hero__actions">
-            <Link className="webinar-cta" href="/webinar-pay#checkout">Explore the AI Execution Lab <span aria-hidden="true">↗</span></Link>
+            <Link className="webinar-cta" href="#webinar-form">Watch the free replay <span aria-hidden="true">↗</span></Link>
             <Link className="webinar-hero__secondary" href="/#audit">Start the free software audit <span aria-hidden="true">↗</span></Link>
           </div>
-          <p className="webinar-hero__takeaway">No new webinar date or replay has been announced here. You can still take the next practical step for your business.</p>
+          <p className="webinar-hero__takeaway">Register below for instant access to the October webinar replay. We will email you the recording link too.</p>
         </div>
         <div className="webinar-hero__visual">
           <div className="webinar-hero__visual-top"><span>OCTOBER 2026</span><span>EVENT COMPLETED</span></div>
@@ -77,7 +78,7 @@ export default function WebinarPage() {
     </section>
     <section className="webinar-share-band" aria-label="Continue after the webinar">
       <div className="shell webinar-archive__band">
-        <p><strong>The event is over. Your next move does not have to wait.</strong> Start with one costly tool or a job your team does by hand.</p>
+        <p><strong>The live event is over. Watch the replay now.</strong> Start with one costly tool or a job your team does by hand.</p>
         <Link href="/contact">Talk to Run Rentless <span aria-hidden="true">↗</span></Link>
       </div>
     </section>
@@ -109,8 +110,8 @@ export default function WebinarPage() {
     </section>
     <section className="webinar-register" id="register" aria-labelledby="webinar-register-title">
       <div className="shell webinar-register__grid">
-        <div className="webinar-register__copy"><p className="webinar-section-label">What comes after the webinar</p><h2 id="webinar-register-title">Bring the problem.<br /><span>Make the next move.</span></h2><p>Want to learn to build a useful workflow yourself? Explore the AI Execution Lab. Prefer someone to work through the problem with you? Tell us where your team gets stuck.</p><div className="webinar-register__date"><strong>Making AI Make Business Sense</strong><span>Past event · 10 October 2026</span><span>Presented by Navrademy × Run Rentless</span></div></div>
-        <div className="webinar-archive__next"><span className="webinar-section-label">Choose your next step</span><h3>Learn it, fix it or have us build it.</h3><p>Start with a real task. We can help you find a practical route instead of selling you another tool you may not need.</p><Link className="webinar-cta" href="/webinar-pay#checkout">Explore the AI Execution Lab <span aria-hidden="true">↗</span></Link><Link className="webinar-archive__next-link" href="/contact">Discuss a done-for-you solution <span aria-hidden="true">↗</span></Link><Link className="webinar-archive__next-link" href="/#audit">Start with the free audit <span aria-hidden="true">↗</span></Link></div>
+        <div className="webinar-register__copy"><p className="webinar-section-label">What comes after the webinar</p><h2 id="webinar-register-title">Bring the problem.<br /><span>Make the next move.</span></h2><p>Register for the free recording. Watch it immediately after registration and get the replay link in your email.</p><div className="webinar-register__date"><strong>Making AI Make Business Sense</strong><span>Past event · 10 October 2026</span><span>Presented by Navrademy × Run Rentless</span></div></div>
+        <div id="webinar-form"><RegistrationForm /></div>
       </div>
     </section>
   </div>;

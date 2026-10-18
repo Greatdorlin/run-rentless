@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { WEBINAR_CALENDAR_URL, WEBINAR_GOOGLE_CALENDAR_URL, WEBINAR_LIVE_URL, WEBINAR_WHATSAPP_URL, webinarPhase } from "@/lib/webinar";
+import { WEBINAR_REPLAY_URL } from "@/lib/webinar";
 import { businessSectors, normalizeBusinessSector, positions } from "@/lib/business-profile";
 import { normalizeInternationalPhoneNumber } from "@/lib/phone";
 import { WebinarShare } from "@/components/webinar/webinar-share";
@@ -72,7 +72,6 @@ export function RegistrationForm() {
   const [detailsWarning, setDetailsWarning] = useState("");
   const [position, setPosition] = useState("");
   const [businessSector, setBusinessSector] = useState("");
-  const [phase, setPhase] = useState<ReturnType<typeof webinarPhase>>("upcoming");
   const phoneInput = useRef<HTMLInputElement>(null);
   const confirmation = useRef<HTMLDivElement>(null);
   const confirmationHeading = useRef<HTMLHeadingElement>(null);
@@ -87,12 +86,6 @@ export function RegistrationForm() {
     return () => window.cancelAnimationFrame(frame);
   }, [status]);
 
-  useEffect(() => {
-    const update = () => setPhase(webinarPhase(Date.now()));
-    const first = window.setTimeout(update, 0);
-    const timer = window.setInterval(update, 60_000);
-    return () => { window.clearTimeout(first); window.clearInterval(timer); };
-  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -165,25 +158,14 @@ export function RegistrationForm() {
     }
   }
 
-  if (phase === "ended") return <div className="webinar-form__closed"><h3>The webinar has ended.</h3><p>Ready to build something useful for your own business? Join the AI Execution Lab.</p><Link href="/webinar-pay">See the class and prices <span aria-hidden="true">↗</span></Link></div>;
-
   if (status === "success" || status === "duplicate") return (
     <div ref={confirmation} className="webinar-form__success" role="status">
       <span className="webinar-form__success-mark" aria-hidden="true">✓</span>
       <span className="webinar-form__success-label">{status === "success" ? "Registration complete" : "Registration found"}</span>
       <h3 ref={confirmationHeading} tabIndex={-1}>{status === "success" ? "Your spot is confirmed." : `${firstName}, you’re already registered.`}</h3>
-      <p className="webinar-form__success-intro">Here’s what happens next, so you don’t miss the webinar.</p>
-      <div className="webinar-form__watch"><span>Your direct watch link</span><a href={WEBINAR_LIVE_URL} target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a><p>The webinar starts Saturday, 10th October at 6PM GMT+1. Save this link now.</p></div>
-      <div className="webinar-form__group">
-        <span>Next · Join the event group</span>
-        <h4>Get updates in one place.</h4>
-        <p>Join our WhatsApp group for reminders and event updates.</p>
-        <a href={WEBINAR_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join the WhatsApp group <span aria-hidden="true">↗</span></a>
-      </div>
-      <div className="webinar-form__next">
-        <ConfirmationEmailStatus email={registrationEmail} pending={emailPending} duplicate={status === "duplicate"} />
-        <div><span>Finally · Save the date</span><p>Saturday, 10th October 2026 at 6PM GMT+1. The calendar event includes the YouTube link and three reminders.</p><a href={WEBINAR_CALENDAR_URL}>Add to calendar <span aria-hidden="true">↗</span></a><a href={WEBINAR_GOOGLE_CALENDAR_URL} target="_blank" rel="noopener noreferrer">Use Google Calendar <span aria-hidden="true">↗</span></a></div>
-      </div>
+      <p className="webinar-form__success-intro">Your replay is ready. Watch now or open the link in your confirmation email.</p>
+      <div className="webinar-form__watch"><span>Your webinar recording</span><a href={WEBINAR_REPLAY_URL} target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a><p>Recorded 10 October 2026. Watch at your own pace.</p></div>
+      <div className="webinar-form__next"><ConfirmationEmailStatus email={registrationEmail} pending={emailPending} duplicate={status === "duplicate"} /></div>
       {detailsWarning && <p className="webinar-form__error" role="alert">{detailsWarning}</p>}
       <WebinarShare compact />
       <Link className="webinar-form__help" href="/contact">Questions? Contact us <span aria-hidden="true">↗</span></Link>
@@ -192,7 +174,7 @@ export function RegistrationForm() {
 
   return (
     <form className="webinar-form" onSubmit={submit}>
-      <div className="webinar-form__heading"><span>Free live webinar</span><h3>Get a spot.</h3><p>Bring one costly tool or slow task. No technical background needed.</p></div>
+      <div className="webinar-form__heading"><span>Free webinar recording</span><h3>Get the replay.</h3><p>Register to watch the October session right away. We will email the link too.</p></div>
       <div className="webinar-form__fields">
         <label>First name<input name="firstName" autoComplete="given-name" maxLength={80} required placeholder="Your first name" /></label>
         <label>Last name<input name="lastName" autoComplete="family-name" maxLength={80} required placeholder="Your last name" /></label>
@@ -211,8 +193,8 @@ export function RegistrationForm() {
         <label className="webinar-form__trap" aria-hidden="true">Website<input name="website" autoComplete="off" tabIndex={-1} /></label>
       </div>
       {error && <p className="webinar-form__error" role="alert">{error}</p>}
-      <button className="webinar-form__submit" type="submit" disabled={status === "sending"}>{status === "sending" ? "Saving your spot…" : "Register free"}<span aria-hidden="true">↗</span></button>
-      <p className="webinar-form__footnote">Free to attend. Your confirmation includes the direct watch link.</p>
+      <button className="webinar-form__submit" type="submit" disabled={status === "sending"}>{status === "sending" ? "Saving your details…" : "Get the free replay"}<span aria-hidden="true">↗</span></button>
+      <p className="webinar-form__footnote">Free replay access. Your confirmation includes the YouTube recording link.</p>
     </form>
   );
 }
