@@ -3,10 +3,12 @@ import { Logo } from "./logo";
 
 const footerLinks = [
   ["Free Audit", "/#audit"],
-  ["Live Webinar", "/webinar"],
+  ["Past Webinar", "/webinar"],
+  ["AI Execution Lab", "/webinar-pay"],
   ["How It Works", "/#how-it-works"],
   ["Leads Desk", "/#leads-desk"],
   ["For Companies", "/#for-companies"],
+  ["Who We Help", "/#who-we-help"],
   ["About", "/#about"],
   ["Privacy Policy", "/privacy"],
   ["Terms", "/terms"],
