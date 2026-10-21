@@ -9,6 +9,7 @@ import { Logo } from "./logo";
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const isMoreDone = pathname === "/moredone";
 
   useEffect(() => {
     document.body.dataset.menuOpen = open ? "true" : "false";
@@ -54,8 +55,8 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <Link className="button button--small" href={pathname === "/webinar-pay" ? "/webinar-pay#checkout" : "/#audit"} onClick={() => setOpen(false)}>
-            {pathname === "/webinar-pay" ? "Choose your seats" : "Start Free Audit"}
+          <Link className="button button--small" href={isMoreDone ? "/moredone#join" : pathname === "/webinar-pay" ? "/webinar-pay#checkout" : "/#audit"} onClick={() => setOpen(false)}>
+            {isMoreDone ? "Join MoreDone" : pathname === "/webinar-pay" ? "Choose your seats" : "Start Free Audit"}
           </Link>
         </nav>
       </div>
