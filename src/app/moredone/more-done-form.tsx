@@ -70,7 +70,7 @@ export function MoreDoneForm({ country }: { country: MoreDoneCountry }) {
 
   return <form className="md-form" onSubmit={submit}>
     <div className="md-form__top"><span>MORE DONE</span><strong>Join the challenge</strong></div>
-    <p className="md-form__country-note">Prices shown for {country === "ng" ? "Nigeria" : country === "rw" ? "Rwanda" : "other countries"}. <a href="#md-country">Change country ↑</a></p>
+    <p className="md-form__country-note">Prices shown for {country === "ng" ? "Nigeria" : country === "rw" ? "Rwanda" : "Global"}. <a href="#md-country">Change country ↑</a></p>
     <p className="md-form__choice-label">How many people are joining?</p>
     <div className={`md-form__seats${nigeria ? "" : " md-form__seats--four"}`} role="group" aria-label="Number of places">
       {([1, 2, 3, 5] as const).filter((count) => !nigeria || count !== 2).map((count) => <button key={count} type="button" aria-pressed={seats === count} onClick={() => setSeats(count)}>

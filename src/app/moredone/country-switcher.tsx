@@ -14,7 +14,7 @@ export function CountrySwitcher({ country }: { country: MoreDoneCountry }) {
     }}>
       <option value="ng">Nigeria</option>
       <option value="rw">Rwanda</option>
-      <option value="other">Other countries</option>
+      <option value="other">Global</option>
     </select>
   </label>;
 }
