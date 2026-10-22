@@ -1,4 +1,4 @@
-import { type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
+import { isMoreDoneSeats, type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
 import { sendMoreDonePaymentConfirmation } from "@/lib/moredone-email";
 
 const base = "https://api.sender.net/v2";
@@ -8,6 +8,7 @@ const fieldTitles = [
   "MoreDone seats", "MoreDone amount NGN", "MoreDone payment reference",
   "MoreDone payment status", "MoreDone submitted at",
   "MoreDone payment email accepted",
+  "MoreDone checkout URL", "MoreDone reminder accepted",
 ] as const;
 
 type Field = { title?: string; field_name?: string; name?: string; id?: string };
@@ -118,6 +119,8 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     "MoreDone payment status": "Checkout started",
     "MoreDone submitted at": new Date().toISOString(),
     "MoreDone payment email accepted": "Not sent",
+    "MoreDone checkout URL": "Not ready",
+    "MoreDone reminder accepted": "Not sent",
   };
   if (!fieldTitles.every((title) => fieldNames[title])) throw new Error("Sender fields unavailable");
   const groups = [...new Set([...(existing?.subscriber_tags || []).map((item) => item.id).filter((id): id is string => Boolean(id)), group])];
@@ -138,6 +141,59 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     if (correctGroup && correctFields && stored?.firstname === lead.firstName && stored?.lastname === lead.lastName) return;
   }
   throw new Error("Sender did not retain MoreDone answers");
+}
+
+export async function saveMoreDoneCheckoutUrl(email: string, reference: string, url: string) {
+  const [record, fieldNames] = await Promise.all([subscriber(email), fields()]);
+  if (!record?.columns?.some((column) => column.title === "MoreDone payment reference" && column.value === reference)) throw new Error("MoreDone checkout record missing");
+  const response = await sender(`/subscribers/${encodeURIComponent(email)}`, {
+    method: "PATCH", body: JSON.stringify({ fields: { ...retainedFields(record, fieldNames), [fieldNames["MoreDone checkout URL"]]: url }, trigger_automation: false }),
+  });
+  if (!response.ok) throw new Error(`Sender checkout URL save ${response.status}`);
+}
+
+export type MoreDoneCheckoutCandidate = { email: string; firstName: string; reference: string; seats: MoreDoneSeats; url: string };
+
+export async function listMoreDoneCheckoutCandidates(): Promise<MoreDoneCheckoutCandidate[]> {
+  const group = await groupId();
+  const entries: Array<{ email?: string; created?: string; status?: { email?: string } }> = [];
+  for (let page = 1; page <= 5; page += 1) {
+    const response = await sender(`/groups/${encodeURIComponent(group)}/subscribers?limit=100&page=${page}`);
+    if (!response.ok) throw new Error(`Sender group subscribers ${response.status}`);
+    const result = await response.json() as { data?: typeof entries; meta?: { last_page?: number } };
+    entries.push(...(result.data || []));
+    if (!result.meta?.last_page || page >= result.meta.last_page) break;
+  }
+  const now = Date.now();
+  const recent = entries.filter((entry) => entry.email && entry.status?.email === "active").slice(0, 80);
+  const candidates: MoreDoneCheckoutCandidate[] = [];
+  for (let index = 0; index < recent.length; index += 5) {
+    const batch = await Promise.allSettled(recent.slice(index, index + 5).map(async (entry) => {
+      const record = await subscriber(entry.email!);
+      const value = (title: string) => String(record?.columns?.find((column) => column.title === title)?.value || "");
+      const reference = value("MoreDone payment reference");
+      const seats = Number(value("MoreDone seats"));
+      const url = value("MoreDone checkout URL");
+      const submitted = new Date(value("MoreDone submitted at")).getTime();
+      if (value("MoreDone payment status") !== "Checkout started" || value("MoreDone reminder accepted") !== "Not sent" ||
+        value("MoreDone business").includes("(email test)") || !/^rrmd_[a-f0-9]{32}$/.test(reference) ||
+        !isMoreDoneSeats(seats) || !Number.isFinite(submitted) || now - submitted < 18 * 60 * 60 * 1000 || now - submitted > 21 * 24 * 60 * 60 * 1000) return null;
+      const checkout = new URL(url);
+      if (checkout.protocol !== "https:" || checkout.hostname !== "checkout.paystack.com") return null;
+      return { email: entry.email!, firstName: record?.firstname || "there", reference, seats, url };
+    }));
+    for (const item of batch) if (item.status === "fulfilled" && item.value) candidates.push(item.value);
+  }
+  return candidates;
+}
+
+export async function markMoreDoneReminderAccepted(email: string, reference: string, emailId: string) {
+  const [record, fieldNames] = await Promise.all([subscriber(email), fields()]);
+  if (!record?.columns?.some((column) => column.title === "MoreDone payment reference" && column.value === reference)) throw new Error("MoreDone reminder record missing");
+  const response = await sender(`/subscribers/${encodeURIComponent(email)}`, {
+    method: "PATCH", body: JSON.stringify({ fields: { ...retainedFields(record, fieldNames), [fieldNames["MoreDone reminder accepted"]]: `${reference}:${emailId}` }, trigger_automation: false }),
+  });
+  if (!response.ok) throw new Error(`Sender reminder marker ${response.status}`);
 }
 
 export async function markMoreDonePaid(email: string, reference: string, seats: MoreDoneSeats) {

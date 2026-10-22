@@ -34,6 +34,13 @@ export function sendMoreDoneCheckoutLink(email: string, firstName: string, seats
   return send(email, firstName, "Your MoreDone checkout link", text, layout(firstName, "Your checkout link is ready.", [`You chose ${label} for ${total}. Your place is not paid yet.`, "If you need more time, use the link below to finish your payment.", "Already paid? Do not pay again. Reply to this email and we will check it."], { label: "Finish your payment", url }));
 }
 
+export function sendMoreDoneCheckoutReminder(email: string, firstName: string, seats: MoreDoneSeats, url: string) {
+  const total = money(seats);
+  const label = seats === 1 ? "one place" : "three places";
+  const text = `Hi ${firstName},\n\nYou started joining MoreDone but did not finish payment. Your ${label} will be ${total}.\n\nIf you still want to join, return to checkout here: ${url}\n\nIf you already paid, do not pay again. Reply to this email and we will check it.\n\nRun Rentless`;
+  return send(email, firstName, "Still want to join MoreDone?", text, layout(firstName, "Your checkout is still here.", [`You chose ${label} for ${total}, but we have not confirmed a payment.`, "If you still want to join, you can return to checkout below.", "Already paid? Do not pay again. Reply to this email and we will check it."], { label: "Return to checkout", url }));
+}
+
 export function sendMoreDonePaymentConfirmation(email: string, firstName: string, seats: MoreDoneSeats, reference: string) {
   const label = seats === 1 ? "one place" : "three places";
   const total = money(seats);

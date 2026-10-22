@@ -1,5 +1,5 @@
 import { cleanMoreDoneText, isMoreDoneSeats, moreDonePlans, moreDoneProjects } from "@/lib/moredone";
-import { saveMoreDoneLead } from "@/lib/moredone-sender";
+import { saveMoreDoneCheckoutUrl, saveMoreDoneLead } from "@/lib/moredone-sender";
 import { sendMoreDoneCheckoutLink } from "@/lib/moredone-email";
 import { readPublicForm } from "@/lib/public-form-request";
 
@@ -54,6 +54,8 @@ export async function POST(request: Request) {
     if (!response.ok || !result.status || !url || result.data?.reference !== reference) throw new Error(`Paystack initialize ${response.status}`);
     const checkout = new URL(url);
     if (checkout.protocol !== "https:" || checkout.hostname !== "checkout.paystack.com" || checkout.username || checkout.password) throw new Error("Unexpected Paystack checkout URL");
+    try { await saveMoreDoneCheckoutUrl(email, reference, url); }
+    catch (error) { console.error("MoreDone checkout URL sync failed", error instanceof Error ? error.message : "Unknown error"); }
     let checkoutEmailSent = false;
     try { await sendMoreDoneCheckoutLink(email, firstName, seats, url); checkoutEmailSent = true; }
     catch (error) { console.error("MoreDone checkout email failed", error instanceof Error ? error.message : "Unknown error"); }
