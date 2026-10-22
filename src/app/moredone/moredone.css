@@ -70,3 +70,18 @@
 @media(max-width:950px){.md-pricing__grid{grid-template-columns:1fr 1fr}.md-pricing article:last-child{grid-column:1/-1;min-height:240px}}
 @media(max-width:680px){.md-pricing__grid{grid-template-columns:1fr}.md-pricing article:last-child{grid-column:auto}.md-pricing article{min-height:300px}.md-form__seats{grid-template-columns:1fr}.md-form__seats button{min-height:58px;flex-direction:row;align-items:center;justify-content:space-between}.md-form__seats strong{font-size:19px}}
 @media(max-width:680px){.md-sticky-cta{position:sticky;top:var(--header-height);z-index:49;display:block;padding:8px 18px;background:#082a23;border-block:1px solid #3d6846}.md-sticky-cta a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 15px;background:var(--md-lime);color:var(--md-ink);font-size:14px;font-weight:850}.md-pricing__team{scroll-margin-top:calc(var(--header-height) + 72px)}}
+
+/* Navrademy orange marks the collaboration and the customer-growth lesson. */
+.md-page{--md-nav-orange:#ff6338}
+.md-brandline span,.md-program{color:var(--md-nav-orange)}
+.md-hero__visual{border-top:4px solid var(--md-nav-orange)}
+.md-ads{background:#fff3eb}
+.md-ads .md-section-kicker{color:#ae3d1e}
+.md-ads__graphic{border-color:#ffb49d;background:#ffe3d4}
+.md-ads__graphic span{background:#123a2d}
+.md-ads__graphic span:first-child,.md-ads__graphic span:last-child{background:#a83213}
+.md-ads__graphic i{background:#b7624c}
+.md-pricing__team{border-top:4px solid var(--md-nav-orange)!important}
+.md-pricing__team>span{color:#ffb39a}
+.md-form__seats button[aria-pressed=true]{border-color:#b33a19;background:#fff0e8}
+.md-page .md-form__seats button:focus-visible{outline-color:#b33a19}
