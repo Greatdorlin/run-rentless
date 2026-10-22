@@ -36,6 +36,8 @@
 .md-hero__actions{margin-top:27px}
 .md-brandline{margin-bottom:22px}
 .md-program{margin:0 0 14px;color:var(--md-lime);font-size:13px;font-weight:850;letter-spacing:.035em}
+.md-hero__micro a{color:#e5ffc1;text-decoration:underline;text-underline-offset:4px}
+#md-pricing-title{scroll-margin-top:100px}
 .md-software h3{max-width:480px;margin:42px 0 18px;font-size:clamp(30px,3.2vw,46px);line-height:1.08;letter-spacing:-.045em}
 .md-software p{max-width:480px;font-size:15px;line-height:1.65}
 .md-hero__visual{transform:none}
