@@ -1,5 +1,6 @@
 import { cleanMoreDoneText, isMoreDoneSeats, moreDonePlans, moreDoneProjects } from "@/lib/moredone";
 import { saveMoreDoneLead } from "@/lib/moredone-sender";
+import { sendMoreDoneCheckoutLink } from "@/lib/moredone-email";
 import { readPublicForm } from "@/lib/public-form-request";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
   const project = cleanMoreDoneText(body.project, 80);
   const goal = cleanMoreDoneText(body.goal, 400);
   const seats = body.seats;
-  if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !company || !teamSize ||
+  if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !company ||
     !moreDoneProjects.includes(project as (typeof moreDoneProjects)[number]) || !isMoreDoneSeats(seats) || body.consent !== true) {
     return fail("Please complete the required details and agree to receive course updates.", 400);
   }
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
   if (!key || !process.env.SENDER_API) return fail("Checkout is temporarily unavailable. Please try again shortly.", 503);
   const reference = `rrmd_${crypto.randomUUID().replaceAll("-", "")}`;
   try {
-    await saveMoreDoneLead({ firstName, lastName, email, company, teamSize, project, goal, seats, reference });
+    await saveMoreDoneLead({ firstName, lastName, email, company, teamSize: teamSize || "Not shared", project, goal, seats, reference });
   } catch (error) {
     console.error("MoreDone Sender sync failed", error instanceof Error ? error.message : "Unknown error");
     return fail("We could not save your details. Please try again before paying.", 502);
@@ -53,7 +54,10 @@ export async function POST(request: Request) {
     if (!response.ok || !result.status || !url || result.data?.reference !== reference) throw new Error(`Paystack initialize ${response.status}`);
     const checkout = new URL(url);
     if (checkout.protocol !== "https:" || checkout.hostname !== "checkout.paystack.com" || checkout.username || checkout.password) throw new Error("Unexpected Paystack checkout URL");
-    return Response.json({ url }, { headers });
+    let checkoutEmailSent = false;
+    try { await sendMoreDoneCheckoutLink(email, firstName, seats, url); checkoutEmailSent = true; }
+    catch (error) { console.error("MoreDone checkout email failed", error instanceof Error ? error.message : "Unknown error"); }
+    return Response.json({ url, checkoutEmailSent }, { headers });
   } catch (error) {
     console.error("MoreDone checkout failed", error instanceof Error ? error.message : "Unknown error");
     return fail("Paystack could not open checkout. Your details are saved, and no payment was taken. Please try again.", 502);

@@ -2,6 +2,7 @@ import { isMoreDoneSeats, moreDonePlans } from "@/lib/moredone";
 import { markMoreDonePaid } from "@/lib/moredone-sender";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 const headers = { "Cache-Control": "no-store" };
 
 export async function GET(request: Request) {
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
     const email = typeof data?.customer === "object" && data.customer && "email" in data.customer ? data.customer.email : undefined;
     let synced = false;
     if (typeof email === "string") {
-      try { await markMoreDonePaid(email, reference); synced = true; }
+      try { await markMoreDonePaid(email, reference, seats); synced = true; }
       catch (error) { console.error("MoreDone paid profile sync failed", error instanceof Error ? error.message : "Unknown error"); }
     }
     return Response.json({ paid: true, reference, seats, synced }, { headers });

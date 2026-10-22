@@ -1,4 +1,5 @@
 import { type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
+import { sendMoreDonePaymentConfirmation } from "@/lib/moredone-email";
 
 const base = "https://api.sender.net/v2";
 const groupTitle = "MoreDone Challenge";
@@ -6,6 +7,7 @@ const fieldTitles = [
   "MoreDone business", "MoreDone team size", "MoreDone project", "MoreDone project goal",
   "MoreDone seats", "MoreDone amount NGN", "MoreDone payment reference",
   "MoreDone payment status", "MoreDone submitted at",
+  "MoreDone payment email accepted",
 ] as const;
 
 type Field = { title?: string; field_name?: string; name?: string; id?: string };
@@ -115,6 +117,7 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     "MoreDone payment reference": lead.reference,
     "MoreDone payment status": "Checkout started",
     "MoreDone submitted at": new Date().toISOString(),
+    "MoreDone payment email accepted": "Not sent",
   };
   if (!fieldTitles.every((title) => fieldNames[title])) throw new Error("Sender fields unavailable");
   const groups = [...new Set([...(existing?.subscriber_tags || []).map((item) => item.id).filter((id): id is string => Boolean(id)), group])];
@@ -137,16 +140,25 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
   throw new Error("Sender did not retain MoreDone answers");
 }
 
-export async function markMoreDonePaid(email: string, reference: string) {
+export async function markMoreDonePaid(email: string, reference: string, seats: MoreDoneSeats) {
   const [record, fieldNames] = await Promise.all([subscriber(email), fields()]);
   if (!record || !record.columns?.some((column) => column.title === "MoreDone payment reference" && column.value === reference)) {
     throw new Error("MoreDone payment record missing");
   }
-  if (record.columns.some((column) => column.title === "MoreDone payment status" && column.value === "Paid")) return;
-  const updated = await sender(`/subscribers/${encodeURIComponent(email)}`, {
-    method: "PATCH", body: JSON.stringify({ fields: { ...retainedFields(record, fieldNames), [fieldNames["MoreDone payment status"]]: "Paid" }, trigger_automation: false }),
-  });
-  if (!updated.ok) throw new Error(`Sender payment update ${updated.status}`);
+  const alreadyPaid = record.columns.some((column) => column.title === "MoreDone payment status" && column.value === "Paid");
+  if (!alreadyPaid) {
+    const updated = await sender(`/subscribers/${encodeURIComponent(email)}`, {
+      method: "PATCH", body: JSON.stringify({ fields: { ...retainedFields(record, fieldNames), [fieldNames["MoreDone payment status"]]: "Paid" }, trigger_automation: false }),
+    });
+    if (!updated.ok) throw new Error(`Sender payment update ${updated.status}`);
+  }
   const confirmed = await subscriber(email);
   if (!confirmed?.columns?.some((column) => column.title === "MoreDone payment status" && column.value === "Paid")) throw new Error("Sender payment status not retained");
+  const accepted = confirmed.columns.some((column) => column.title === "MoreDone payment email accepted" && String(column.value).startsWith(`${reference}:`));
+  if (accepted) return;
+  const emailId = await sendMoreDonePaymentConfirmation(email, confirmed.firstname || "there", seats, reference);
+  const marked = await sender(`/subscribers/${encodeURIComponent(email)}`, {
+    method: "PATCH", body: JSON.stringify({ fields: { ...retainedFields(confirmed, fieldNames), [fieldNames["MoreDone payment email accepted"]]: `${reference}:${emailId}` }, trigger_automation: false }),
+  });
+  if (!marked.ok) throw new Error(`Sender payment email marker ${marked.status}`);
 }

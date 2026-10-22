@@ -3,6 +3,7 @@ import { isMoreDoneSeats, moreDonePlans } from "@/lib/moredone";
 import { markMoreDonePaid } from "@/lib/moredone-sender";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const key = process.env.PAYSTACK_SECRET_KEY;
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     typeof reference !== "string" || !/^rrmd_[a-f0-9]{32}$/.test(reference) ||
     typeof email !== "string" || data?.status !== "success" || data?.domain !== "live" ||
     data?.currency !== "NGN" || data?.amount !== moreDonePlans[seats].amount) return Response.json({ ok: true });
-  try { await markMoreDonePaid(email, reference); return Response.json({ ok: true }); }
+  try { await markMoreDonePaid(email, reference, seats); return Response.json({ ok: true }); }
   catch (error) {
     console.error("MoreDone webhook profile sync failed", error instanceof Error ? error.message : "Unknown error");
     return Response.json({ ok: false }, { status: 500 });

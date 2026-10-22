@@ -62,3 +62,7 @@
 .md-payment-result code{display:block;overflow-wrap:anywhere;margin:20px 0}
 .md-page .md-form__seats button:focus-visible,.md-page textarea:focus-visible{outline:3px solid #19593f;outline-offset:3px}
 @media(max-width:680px){.md-hero{padding:36px 0 46px}.md-hero__grid{gap:0}.md-hero h1{font-size:clamp(40px,10.4vw,56px);line-height:1.02}.md-hero__lede{font-size:16px;line-height:1.45}.md-hero__actions{margin-top:22px;gap:12px}.md-hero__micro{margin-top:18px}.md-hero__visual{display:none}.md-program{font-size:12px}.md-for__grid,.md-website{grid-template-columns:1fr}.md-for__grid{gap:5px}.md-for__grid>div{padding:12px 0}.md-for__grid>div+div{border-left:0;border-top:1px solid #a7bfaa;padding:18px 0 12px}.md-website{gap:18px}.md-form__seats button{min-height:70px;padding:10px}.md-form__seats strong{font-size:19px}}
+.md-sticky-cta{display:none}
+.md-pricing__team{scroll-margin-top:calc(var(--header-height) + 22px)}
+.md-form__choice-label{margin:0 0 10px;font-size:14px;font-weight:800}
+@media(max-width:680px){.md-sticky-cta{position:sticky;top:var(--header-height);z-index:49;display:block;padding:8px 18px;background:#082a23;border-block:1px solid #3d6846}.md-sticky-cta a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 15px;background:var(--md-lime);color:var(--md-ink);font-size:14px;font-weight:850}.md-pricing__team{scroll-margin-top:calc(var(--header-height) + 72px)}}
