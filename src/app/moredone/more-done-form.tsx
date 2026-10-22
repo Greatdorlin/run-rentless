@@ -61,13 +61,13 @@ export function MoreDoneForm() {
     <p className="md-form__amount">Total today: <strong>{price(seats)}</strong></p>
     <div className="md-form__row"><label>First name<input name="firstName" autoComplete="given-name" required maxLength={80} /></label><label>Last name<input name="lastName" autoComplete="family-name" required maxLength={80} /></label></div>
     <label>Email for your place<input name="email" type="email" autoComplete="email" required maxLength={160} /></label>
-    <label>Business or project name<input name="company" autoComplete="organization" required maxLength={120} /></label>
+    <label>Business name<input name="company" autoComplete="organization" required maxLength={120} /></label>
     <div className="md-form__row"><label>Team size<select name="teamSize" required defaultValue=""><option value="" disabled>Choose one</option><option>Just me</option><option>2–5 people</option><option>6–15 people</option><option>16+ people</option></select></label><label>What would you build?<select name="project" required defaultValue=""><option value="" disabled>Choose a starting point</option>{moreDoneProjects.map((project) => <option key={project}>{project}</option>)}</select></label></div>
-    <label>What should it help you do? <span className="md-form__optional">Optional</span><textarea name="goal" maxLength={400} rows={3} placeholder="For example, remind the team when a customer needs a reply." /></label>
+    <label>What job should your tool make easier? <span className="md-form__optional">Optional</span><textarea name="goal" maxLength={400} rows={3} placeholder="For example, remind us when a customer is waiting for a reply." /></label>
     <div className="md-form__trap" aria-hidden="true"><label>Website<input name="companyWebsite" tabIndex={-1} autoComplete="off" /></label></div>
     <label className="md-form__consent"><input name="consent" type="checkbox" required /><span>Send me my payment and course information by email. I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>
     {error && <p className="md-form__error" role="alert">{error}</p>}
     <button className="md-button md-form__pay" type="submit" disabled={busy}>{busy ? "Opening Paystack…" : `Pay ${price(seats)} securely`} <span aria-hidden="true">↗</span></button>
-    <small>Paystack handles your card details. International cards can use the naira checkout; your bank sets the conversion rate.</small>
+    <small>Our payment partner, Paystack, handles your card details. International cards can use the naira checkout. Your bank sets the conversion rate.</small>
   </form>;
 }

@@ -35,6 +35,9 @@
 .md-hero__lede{margin-top:22px}
 .md-hero__actions{margin-top:27px}
 .md-brandline{margin-bottom:22px}
+.md-program{margin:0 0 14px;color:var(--md-lime);font-size:13px;font-weight:850;letter-spacing:.035em}
+.md-software h3{max-width:480px;margin:42px 0 18px;font-size:clamp(30px,3.2vw,46px);line-height:1.08;letter-spacing:-.045em}
+.md-software p{max-width:480px;font-size:15px;line-height:1.65}
 .md-hero__visual{transform:none}
 .md-join{scroll-margin-top:78px}
 .md-form__seats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
@@ -52,4 +55,4 @@
 .md-payment-result p{line-height:1.5}
 .md-payment-result code{display:block;overflow-wrap:anywhere;margin:20px 0}
 .md-page .md-form__seats button:focus-visible,.md-page textarea:focus-visible{outline:3px solid #19593f;outline-offset:3px}
-@media(max-width:680px){.md-hero{padding:36px 0 46px}.md-hero__grid{gap:0}.md-hero h1{font-size:clamp(40px,10.4vw,56px);line-height:1.02}.md-hero__lede{font-size:16px;line-height:1.45}.md-hero__actions{margin-top:22px;gap:12px}.md-hero__micro{margin-top:18px}.md-hero__visual{display:none}.md-form__seats button{min-height:70px;padding:10px}.md-form__seats strong{font-size:19px}}
+@media(max-width:680px){.md-hero{padding:36px 0 46px}.md-hero__grid{gap:0}.md-hero h1{font-size:clamp(40px,10.4vw,56px);line-height:1.02}.md-hero__lede{font-size:16px;line-height:1.45}.md-hero__actions{margin-top:22px;gap:12px}.md-hero__micro{margin-top:18px}.md-hero__visual{display:none}.md-program{font-size:12px}.md-form__seats button{min-height:70px;padding:10px}.md-form__seats strong{font-size:19px}}
