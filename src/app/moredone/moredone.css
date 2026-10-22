@@ -121,4 +121,4 @@
 #md-country{scroll-margin-top:calc(var(--header-height) + 18px)}
 .md-form__country-note{margin:0 0 22px;color:#49614f;font-size:12px;line-height:1.5}
 .md-form__country-note a{color:#0a6047;font-weight:800;text-decoration:underline;text-underline-offset:3px}
-@media(max-width:680px){.md-hero__top{align-items:center;gap:10px}.md-hero__top .md-brandline{margin:0;font-size:11px}.md-country{gap:5px;font-size:0}.md-country select{max-width:145px;font-size:12px}}
+@media(max-width:680px){.md-hero__top{align-items:center;gap:8px}.md-hero__top .md-brandline{margin:0;font-size:10px;letter-spacing:0}.md-country{gap:5px;font-size:0}.md-country select{max-width:119px;font-size:11px}}
