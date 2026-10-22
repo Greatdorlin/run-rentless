@@ -1,4 +1,4 @@
-import { isMoreDoneNairaSeats, type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
+import { isMoreDoneNairaSeats, type MoreDoneCountry, type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
 import { sendMoreDonePaymentConfirmation } from "@/lib/moredone-email";
 
 const base = "https://api.sender.net/v2";
@@ -9,7 +9,7 @@ const fieldTitles = [
   "MoreDone payment status", "MoreDone submitted at",
   "MoreDone payment email accepted",
   "MoreDone checkout URL", "MoreDone reminder accepted",
-  "MoreDone amount USD", "MoreDone payment route",
+  "MoreDone amount USD", "MoreDone amount RWF", "MoreDone payment country", "MoreDone payment route",
 ] as const;
 
 type Field = { title?: string; field_name?: string; name?: string; id?: string };
@@ -22,7 +22,7 @@ type Subscriber = {
 export type MoreDoneLead = {
   firstName: string; lastName: string; email: string; company: string; teamSize: string;
   project: string; goal: string; seats: MoreDoneSeats; reference: string;
-  paymentRegion?: "ng" | "international";
+  paymentCountry: MoreDoneCountry;
 };
 
 async function sender(path: string, init: RequestInit = {}) {
@@ -114,7 +114,7 @@ function retainedFields(record: Subscriber | undefined, fieldNames: Record<strin
 }
 
 export async function saveMoreDoneLead(lead: MoreDoneLead) {
-  const international = lead.paymentRegion === "international";
+  const nigeria = lead.paymentCountry === "ng";
   const [group, fieldNames, existing] = await Promise.all([groupId(), fields(), subscriber(lead.email)]);
   const expected: Record<(typeof fieldTitles)[number], string> = {
     "MoreDone business": lead.company,
@@ -122,15 +122,17 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     "MoreDone project": lead.project,
     "MoreDone project goal": lead.goal || "Not provided",
     "MoreDone seats": String(lead.seats),
-    "MoreDone amount NGN": international ? "Not applicable" : String(moreDonePlans[lead.seats].amount / 100),
+    "MoreDone amount NGN": nigeria ? String(moreDonePlans[lead.seats].amount / 100) : "Not applicable",
     "MoreDone payment reference": lead.reference,
-    "MoreDone payment status": international ? "Awaiting international payment details" : "Checkout started",
+    "MoreDone payment status": nigeria ? "Checkout started" : "Awaiting payment details",
     "MoreDone submitted at": new Date().toISOString(),
     "MoreDone payment email accepted": "Not sent",
-    "MoreDone checkout URL": international ? "WhatsApp payment request" : "Not ready",
+    "MoreDone checkout URL": nigeria ? "Not ready" : "WhatsApp payment request",
     "MoreDone reminder accepted": "Not sent",
-    "MoreDone amount USD": international ? String(moreDonePlans[lead.seats].usd) : "Not applicable",
-    "MoreDone payment route": international ? "International WhatsApp" : "Nigeria Paystack",
+    "MoreDone amount USD": lead.paymentCountry === "other" ? String(moreDonePlans[lead.seats].usd) : "Not applicable",
+    "MoreDone amount RWF": lead.paymentCountry === "rw" ? String(moreDonePlans[lead.seats].rwf) : "Not applicable",
+    "MoreDone payment country": lead.paymentCountry === "ng" ? "Nigeria" : lead.paymentCountry === "rw" ? "Rwanda" : "Other countries",
+    "MoreDone payment route": nigeria ? "Paystack" : "WhatsApp payment request",
   };
   if (!fieldTitles.every((title) => fieldNames[title])) throw new Error("Sender fields unavailable");
   const groups = [...new Set([...(existing?.subscriber_tags || []).map((item) => item.id).filter((id): id is string => Boolean(id)), group])];

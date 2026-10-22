@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { moreDonePlans, type MoreDoneSeats } from "@/lib/moredone";
+import { moreDonePlans, moreDonePrice, type MoreDoneCountry, type MoreDoneSeats } from "@/lib/moredone";
 import { MoreDoneForm } from "./more-done-form";
 import { MoreDoneSound } from "./more-done-sound";
+import { CountrySwitcher } from "./country-switcher";
 import "./moredone.css";
 
 export const metadata: Metadata = {
@@ -29,24 +30,29 @@ const days = [
   ["07", "Test and show your tool", "Demonstrate what works, fix what does not and decide what to build next."],
 ];
 
-export default async function MoreDonePage({ searchParams }: { searchParams: Promise<{ region?: string }> }) {
-  const requestedRegion = (await searchParams).region;
-  const detectedNigeria = (await headers()).get("x-vercel-ip-country")?.toUpperCase() === "NG";
-  const isNigeria = requestedRegion === "ng" ? true : requestedRegion === "international" ? false : detectedNigeria;
-  const region = isNigeria ? "ng" : "international";
-  const amount = (seats: MoreDoneSeats) => isNigeria
-    ? `₦${(moreDonePlans[seats].amount / 100).toLocaleString("en-NG")}`
-    : `$${moreDonePlans[seats].usd}`;
+export default async function MoreDonePage({ searchParams }: { searchParams: Promise<{ country?: string; region?: string }> }) {
+  const requested = await searchParams;
+  const detected = (await headers()).get("x-vercel-ip-country")?.toUpperCase();
+  const country: MoreDoneCountry = requested.country === "ng" || requested.country === "rw" || requested.country === "other"
+    ? requested.country
+    : requested.region === "ng" ? "ng" : requested.region === "international" ? "other"
+    : detected === "NG" ? "ng" : detected === "RW" ? "rw" : "other";
+  const isNigeria = country === "ng";
+  const amount = (seats: MoreDoneSeats) => moreDonePrice(seats, country);
+  const savings = (seats: MoreDoneSeats) => country === "ng"
+    ? `₦${((moreDonePlans[1].amount * seats - moreDonePlans[seats].amount) / 100).toLocaleString("en-NG")}`
+    : country === "rw" ? `RWF ${(moreDonePlans[1].rwf * seats - moreDonePlans[seats].rwf).toLocaleString("en-RW")}`
+    : `$${moreDonePlans[1].usd * seats - moreDonePlans[seats].usd}`;
   const offers = [
     { seats: 1 as const, note: "Bring a business problem or a client idea. Build your first working version with us." },
-    ...(!isNigeria ? [{ seats: 2 as const, note: "Build with one colleague. Each place costs $90 instead of $100." }] : []),
-    { seats: 3 as const, note: `Bring two colleagues to build around one real business need. ${isNigeria ? "₦100,000" : "$83.33"} per person.` },
-    { seats: 5 as const, note: `Bring more of your team into the build. ${isNigeria ? "₦90,000" : "$75"} per person.` },
+    ...(!isNigeria ? [{ seats: 2 as const, note: "Bring one colleague and build together. You both save on individual places." }] : []),
+    { seats: 3 as const, note: "Bring two colleagues to build around one real business need." },
+    { seats: 5 as const, note: "Bring more of your team into the build. Pay less per person." },
   ];
   return <div className="md-page">
     <section className="md-hero" aria-labelledby="md-title"><div className="md-shell md-hero__grid">
       <div className="md-hero__copy">
-        <p className="md-brandline">Run Rentless <span>×</span> Navrademy</p>
+        <div className="md-hero__top"><p className="md-brandline">Run Rentless <span>×</span> Navrademy</p><CountrySwitcher country={country} /></div>
         <p className="md-program">MoreDone: The 7-Day AI Business Challenge</p>
         <h1 id="md-title">Build the tool your business keeps wishing it had.</h1>
         <p className="md-hero__lede">That idea you keep wishing someone would build for your business? Bring it to MoreDone. In seven days, we will help you build and test a working first version, even if you have never coded.</p>
@@ -72,7 +78,7 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
     <section className="md-numbers" aria-labelledby="md-cost-title"><div className="md-shell">
       <div className="md-heading"><p>THE OPPORTUNITY</p><h2 id="md-cost-title">Your next hire or software bill can wait until you check this.</h2><span>Pick the work taking up your team’s time. We will help you build a tool for it and test whether it can reduce the cost.</span></div>
       <div className="md-numbers__grid">
-        <div className="md-salary"><small>Before another hire</small><div className="md-salary__sum"><strong>{isNigeria ? "₦250k" : "$500"} <em>/ month</em></strong><span>× 12</span><strong>{isNigeria ? "₦3m" : "$6k"} <em>/ year</em></strong></div><p>{isNigeria ? "A ₦250,000 monthly hire adds ₦3 million in annual salary." : "A $500 monthly support role adds $6,000 in annual pay."} If AI helps your current team handle extra follow-ups, reports or record updates, you could put off that hire and use the money elsewhere.</p></div>
+        <div className="md-salary"><small>Before another hire</small><div className="md-salary__sum"><strong>{country === "ng" ? "₦250k" : country === "rw" ? "RWF 500k" : "$500"} <em>/ month</em></strong><span>× 12</span><strong>{country === "ng" ? "₦3m" : country === "rw" ? "RWF 6m" : "$6k"} <em>/ year</em></strong></div><p>{country === "ng" ? "A ₦250,000 monthly hire adds ₦3 million in annual salary." : country === "rw" ? "A RWF 500,000 monthly hire adds RWF 6 million in annual salary." : "A $500 monthly support role adds $6,000 in annual pay."} If AI helps your current team handle extra follow-ups, reports or record updates, you could put off that hire and use the money elsewhere.</p></div>
         <div className="md-software"><small>Before another subscription</small><h3>What does the tool do for you?</h3><p>Your business might pay for sales, bookings and team tasks in separate tools, while staff still copy customer details between them. We will show you how to build the steps you need in one place and compare the cost with your current bills.</p><div className="md-software__example"><strong>A real price example</strong><span>At published annual prices, 15 seats on Pipedrive Growth and Asana Advanced cost about <b>$11,518 a year</b>. Cutting 15% of that bill would free up about <b>$1,728 a year</b>. We will help you check whether a new tool would cost less to build and run before you change anything.</span><small><a href="https://www.pipedrive.com/en/pricing/professional-crm" target="_blank" rel="noopener noreferrer">Pipedrive pricing</a> · <a href="https://asana.com/pricing" target="_blank" rel="noopener noreferrer">Asana pricing</a></small></div></div>
       </div>
     </div></section>
@@ -83,8 +89,8 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
 
     <section className="md-ads" aria-labelledby="md-ads-title"><div className="md-shell md-ads__layout"><div><p className="md-section-kicker">A CHANCE TO LEARN A NEW AD CHANNEL EARLY</p><h2 id="md-ads-title">ChatGPT Ads is growing. Learn how to use it while it is new.</h2><p>Businesses that learned Facebook Ads early had time to test what brought customers to them. ChatGPT Ads offers another chance to learn a growing channel. In October 2026, it reached 89 countries, and more than 100,000 advertisers had used it. More than 1.2 billion people use ChatGPT each week.</p><p>We will help you choose an offer, write an ad and build a page that turns interest into enquiries. Then you will learn how to track which enquiries become customers. If your business has access, you can submit a campaign for approval and decide whether to spend on a test.</p><p className="md-ads__source"><a href="https://openai.com/index/chatgpt-ads-expands-26-new-countries/" target="_blank" rel="noopener noreferrer">See the ChatGPT Ads announcement ↗</a> · <a href="https://help.openai.com/en/articles/20001245-ads-manager-availability" target="_blank" rel="noopener noreferrer">Check country access ↗</a></p></div><div className="md-ads__graphic" aria-label="From a clear offer to an ad, enquiry and sale"><span>YOUR OFFER</span><i /><span>AD</span><i /><span>ENQUIRY</span><i /><span>SALE</span></div></div></section>
 
-    <section className="md-pricing" aria-labelledby="md-pricing-title"><div className="md-shell"><div className="md-heading"><p>CHOOSE YOUR PLACE</p><h2 id="md-pricing-title">Come alone. Or get your team building together.</h2><span>Everyone gets the same workshops, exercises and guidance. Team places cost less per person.</span></div><div className={`md-pricing__grid${isNigeria ? "" : " md-pricing__grid--four"}`}>{offers.map(({ seats, note }) => <article key={seats} className={seats > 1 ? "md-pricing__team" : undefined} id={seats === 3 ? "team-offer" : undefined}><span>{moreDonePlans[seats].label}{seats > 1 ? ` · save ${isNigeria ? `₦${((12000000 * seats - moreDonePlans[seats].amount) / 100).toLocaleString("en-NG")}` : `$${100 * seats - moreDonePlans[seats].usd}`}` : ""}</span><h3>{amount(seats)}</h3><p>{note}</p><a href={`?seats=${seats}&region=${region}#join`}>Choose {moreDonePlans[seats].label.toLowerCase()} ↗</a></article>)}</div><p className="md-pricing__fine">{isNigeria ? "Nigeria: pay securely online after choosing your place." : "Outside Nigeria: enter your details, then ask for payment instructions by WhatsApp."} A paid AI building tool, hosting and ad spend are separate where needed; we explain your options before you use them. <a href={`?region=${isNigeria ? "international" : "ng"}#md-pricing-title`}>Paying {isNigeria ? "outside Nigeria" : "from Nigeria"}? View your prices ↗</a></p></div></section>
+    <section className="md-pricing" aria-labelledby="md-pricing-title"><div className="md-shell"><div className="md-heading"><p>CHOOSE YOUR PLACE</p><h2 id="md-pricing-title">Come alone. Or get your team building together.</h2><span>Everyone gets the same workshops, exercises and guidance. Team places cost less per person.</span></div><div className={`md-pricing__grid${isNigeria ? "" : " md-pricing__grid--four"}`}>{offers.map(({ seats, note }) => <article key={seats} className={seats > 1 ? "md-pricing__team" : undefined} id={seats === 3 ? "team-offer" : undefined}><span>{moreDonePlans[seats].label}{seats > 1 ? ` · save ${savings(seats)}` : ""}</span><h3>{amount(seats)}</h3><p>{note}</p><a href={`?seats=${seats}&country=${country}#join`}>Choose {moreDonePlans[seats].label.toLowerCase()} ↗</a></article>)}</div><p className="md-pricing__fine">Prices are shown for {country === "ng" ? "Nigeria" : country === "rw" ? "Rwanda" : "other countries"}. <a href="#md-country">Change country ↑</a> A paid AI building tool, hosting and ad spend are separate where needed; we explain your options before you use them.</p></div></section>
     <section className="md-guarantee"><div className="md-shell md-guarantee__layout"><strong>What if my tool does not work?</strong><p>Before the challenge, we agree on one small tool and what it needs to do. Come to the required sessions and finish the exercises. If your tool does not pass that test, we will help you again in an extra session for free. If our promised help still does not get it working as agreed, we will refund your challenge fee.</p></div></section>
-    <section className="md-join" id="join" aria-labelledby="md-join-title"><div className="md-shell md-join__layout"><div><p className="md-section-kicker">JOIN MOREDONE</p><h2 id="md-join-title">Start with the problem you want to solve.</h2><p>Choose one, three or five places and tell us what you would like to build. {isNigeria ? "Pay securely online to complete your place." : "We will give you payment details after you send the prepared message."}</p></div><MoreDoneForm initialNigeria={isNigeria} /></div></section>
+    <section className="md-join" id="join" aria-labelledby="md-join-title"><div className="md-shell md-join__layout"><div><p className="md-section-kicker">JOIN MOREDONE</p><h2 id="md-join-title">Start with the problem you want to solve.</h2><p>Choose your places and tell us what you would like to build. {isNigeria ? "Pay securely online to complete your place." : "Get your payment details after you send the prepared message."}</p></div><MoreDoneForm country={country} /></div></section>
   </div>;
 }
