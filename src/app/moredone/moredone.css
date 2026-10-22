@@ -89,3 +89,4 @@
 .md-form__region button{min-height:46px;border:2px solid #acc4ae;background:#fff;color:var(--md-ink);font:inherit;font-size:13px;font-weight:750;cursor:pointer}
 .md-form__region button[aria-pressed=true]{border-color:#b33a19;background:#fff0e8}
 .md-page .md-form__region button:focus-visible{outline:3px solid #b33a19;outline-offset:3px}
+.md-pricing__fine a{display:inline-block;margin-left:5px;color:#0a6047;font-weight:800;text-decoration:underline;text-underline-offset:3px}
