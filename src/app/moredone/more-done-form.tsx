@@ -13,6 +13,11 @@ const examples = [
 export function MoreDoneForm({ country }: { country: MoreDoneCountry }) {
   const [seats, setSeats] = useState<MoreDoneSeats>(1);
   const nigeria = country === "ng";
+  const saving = country === "ng"
+    ? (moreDonePlans[1].amount * seats - moreDonePlans[seats].amount) / 100
+    : country === "rw" ? moreDonePlans[1].rwf * seats - moreDonePlans[seats].rwf
+    : moreDonePlans[1].usd * seats - moreDonePlans[seats].usd;
+  const savingLabel = new Intl.NumberFormat("en", { style: "currency", currency: nigeria ? "NGN" : country === "rw" ? "RWF" : "USD", maximumFractionDigits: 0 }).format(saving);
   const [exampleIndex, setExampleIndex] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -78,6 +83,7 @@ export function MoreDoneForm({ country }: { country: MoreDoneCountry }) {
       </button>)}
     </div>
     <p className="md-form__amount" aria-live="polite">{moreDonePlans[seats].label} · Total: <strong>{moreDonePrice(seats, country)}</strong></p>
+    {saving > 0 && <p className="md-form__saving" aria-live="polite">You save {savingLabel} compared with individual places.</p>}
     <div className="md-form__row"><label>First name<input name="firstName" autoComplete="given-name" required maxLength={80} /></label><label>Last name<input name="lastName" autoComplete="family-name" required maxLength={80} /></label></div>
     <label>Email for your place<input name="email" type="email" autoComplete="email" required maxLength={160} /></label>
     <label>Business or project name<input name="company" autoComplete="organization" required maxLength={120} /></label>
