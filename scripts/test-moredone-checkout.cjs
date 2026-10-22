@@ -21,15 +21,16 @@ function load(path, dependencies = {}, globals = {}) {
   assert.equal([...link.searchParams.keys()].length, 1);
 
   let saves = 0, emails = 0;
+  const publicForm = load('src/lib/public-form-request.ts', {}, { TextDecoder });
   const initialize = load('src/app/api/moredone/initialize/route.ts', {
     '@/lib/moredone': plans,
     '@/lib/moredone-sender': { saveMoreDoneLead: async () => { saves++; }, saveMoreDoneCheckoutUrl: async () => {} },
     '@/lib/moredone-email': { sendMoreDonePaymentRequest: async () => { emails++; } },
-    '@/lib/public-form-request': { readPublicForm: async request => { try { return { body: await request.json() }; } catch { return { status: 400, message: 'Please check your details.' }; } } },
+    '@/lib/public-form-request': publicForm,
   });
   const body = { firstName: 'Example', lastName: 'Buyer', email: 'buyer@example.com', company: 'Demo', project: 'Business website', consent: true, seats: 3, paymentCountry: 'rw' };
   for (const origin of ['https://www.runrentless.com', 'https://runrentless.com']) {
-    const response = await initialize.POST(new Request('https://www.runrentless.com/api/moredone/initialize', { method: 'POST', headers: { origin, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }));
+    const response = await initialize.POST(new Request(`${origin}/api/moredone/initialize`, { method: 'POST', headers: { origin, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }));
     assert.equal(response.status, 200);
     const result = await response.json();
     assert.equal(new URL(result.url).pathname, '/250799904461');
@@ -38,6 +39,8 @@ function load(path, dependencies = {}, globals = {}) {
   assert.equal(saves, 2); assert.equal(emails, 2);
   const denied = await initialize.POST(new Request('https://www.runrentless.com/api/moredone/initialize', { method: 'POST', headers: { origin: 'https://example.com' }, body: '{}' }));
   assert.equal(denied.status, 403); assert.equal(saves, 2);
+  const malformed = await initialize.POST(new Request('https://www.runrentless.com/api/moredone/initialize', { method: 'POST', headers: { origin: 'https://www.runrentless.com', 'Content-Type': 'application/json' }, body: '{' }));
+  assert.equal(malformed.status, 400); assert.equal(saves, 2);
 
   let reminders = 0, confirmations = 0;
   const candidates = [
