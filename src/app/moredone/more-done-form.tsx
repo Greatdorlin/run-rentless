@@ -10,6 +10,7 @@ export function MoreDoneForm() {
   const [error, setError] = useState("");
   const [reference, setReference] = useState("");
   const [payment, setPayment] = useState<"checking" | "paid" | "unconfirmed" | null>(null);
+  const [confirmationAccepted, setConfirmationAccepted] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -20,7 +21,7 @@ export function MoreDoneForm() {
     document.getElementById("join")?.scrollIntoView({ block: "start" });
     fetch(`/api/moredone/verify?reference=${encodeURIComponent(returned)}`, { cache: "no-store" })
       .then(async (response) => response.ok ? response.json() : { paid: false })
-      .then((result: { paid?: boolean }) => setPayment(result.paid ? "paid" : "unconfirmed"))
+      .then((result: { paid?: boolean; synced?: boolean }) => { setConfirmationAccepted(result.synced === true); setPayment(result.paid ? "paid" : "unconfirmed"); })
       .catch(() => setPayment("unconfirmed"));
   }, []);
 
@@ -46,7 +47,7 @@ export function MoreDoneForm() {
 
   if (payment) return <div className="md-form md-payment-result" role="status">
     <h3>{payment === "paid" ? "Your place is paid." : payment === "checking" ? "Checking your payment…" : "We cannot confirm payment yet."}</h3>
-    <p>{payment === "paid" ? "Keep this reference. We will send the challenge schedule to the email you used at checkout." : payment === "checking" ? "We are checking with Paystack now." : "If your card was charged, please do not pay again. Send us the reference below so we can check it."}</p>
+    <p>{payment === "paid" ? confirmationAccepted ? "Check your email for the payment confirmation. We will send your challenge schedule and joining details separately." : "Your payment is confirmed, but we could not confirm the email was sent. Keep this reference and contact us if it does not arrive." : payment === "checking" ? "We are checking with Paystack now." : "If your card was charged, please do not pay again. Send us the reference below so we can check it."}</p>
     <code>{reference}</code>
     <a href={`mailto:info@runrentless.com?subject=MoreDone%20payment%20${encodeURIComponent(reference)}`}>Contact Run Rentless ↗</a>
   </div>;

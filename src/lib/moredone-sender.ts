@@ -83,9 +83,14 @@ async function fields() {
     if (known.some((field) => field.title === title && field.field_name)) continue;
     const created = await sender("/fields", { method: "POST", body: JSON.stringify({ title, type: "text" }) });
     if (!created.ok && created.status !== 400) throw new Error(`Sender field creation ${title} ${created.status}`);
-    const listed = await sender("/fields?limit=100");
-    if (!listed.ok) throw new Error(`Sender field confirmation ${listed.status}`);
-    const recovered = items(await listed.json()).find((field) => field.title === title && field.field_name);
+    let recovered: Field | undefined;
+    for (let page = 1; page <= 10 && !recovered; page += 1) {
+      const listed = await sender(`/fields?limit=100&page=${page}`);
+      if (!listed.ok) throw new Error(`Sender field confirmation ${listed.status}`);
+      const result = await listed.json() as { meta?: { last_page?: number }; has_more_resources?: boolean };
+      recovered = items(result).find((field) => field.title === title && field.field_name);
+      if (typeof result.meta?.last_page === "number" ? page >= result.meta.last_page : result.has_more_resources !== true) break;
+    }
     if (!recovered) throw new Error(`Sender field missing ${title}`);
     known.push(recovered);
   }
