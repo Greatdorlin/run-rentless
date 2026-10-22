@@ -25,18 +25,25 @@ export async function POST(request: Request) {
   const project = cleanMoreDoneText(body.project, 80);
   const goal = cleanMoreDoneText(body.goal, 400);
   const seats = body.seats;
+  const paymentRegion = body.paymentRegion === "international" ? "international" : "ng";
   if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !company ||
     !moreDoneProjects.includes(project as (typeof moreDoneProjects)[number]) || !isMoreDoneSeats(seats) || body.consent !== true) {
     return fail("Please complete the required details and agree to receive course updates.", 400);
   }
   const key = process.env.PAYSTACK_SECRET_KEY;
-  if (!key || !process.env.SENDER_API) return fail("Checkout is temporarily unavailable. Please try again shortly.", 503);
+  if (!process.env.SENDER_API || (paymentRegion === "ng" && !key)) return fail("Registration is temporarily unavailable. Please try again shortly.", 503);
   const reference = `rrmd_${crypto.randomUUID().replaceAll("-", "")}`;
   try {
-    await saveMoreDoneLead({ firstName, lastName, email, company, teamSize: teamSize || "Not shared", project, goal, seats, reference });
+    await saveMoreDoneLead({ firstName, lastName, email, company, teamSize: teamSize || "Not shared", project, goal, seats, reference, paymentRegion });
   } catch (error) {
     console.error("MoreDone Sender sync failed", error instanceof Error ? error.message : "Unknown error");
     return fail("We could not save your details. Please try again before paying.", 502);
+  }
+  if (paymentRegion === "international") {
+    const message = `I want to register for the More Done With AI Challenge. My name is ${firstName} ${lastName}. I would need the payment details to complete my payment for ${moreDonePlans[seats].label.toLowerCase()} ($${moreDonePlans[seats].usd}).`;
+    const url = new URL("https://wa.me/25079904461");
+    url.searchParams.set("text", message);
+    return Response.json({ url: url.toString(), paymentRoute: "international" }, { headers });
   }
   try {
     const response = await fetch("https://api.paystack.co/transaction/initialize", {

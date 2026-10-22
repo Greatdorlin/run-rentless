@@ -1,7 +1,7 @@
 export const moreDonePlans = {
-  1: { label: "One place", amount: 12000000 },
-  3: { label: "Three places", amount: 30000000 },
-  5: { label: "Five places", amount: 45000000 },
+  1: { label: "One place", amount: 12000000, usd: 100 },
+  3: { label: "Three places", amount: 30000000, usd: 250 },
+  5: { label: "Five places", amount: 45000000, usd: 375 },
 } as const;
 
 export type MoreDoneSeats = keyof typeof moreDonePlans;

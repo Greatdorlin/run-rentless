@@ -85,3 +85,7 @@
 .md-pricing__team>span{color:#ffb39a}
 .md-form__seats button[aria-pressed=true]{border-color:#b33a19;background:#fff0e8}
 .md-page .md-form__seats button:focus-visible{outline-color:#b33a19}
+.md-form__region{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 24px}
+.md-form__region button{min-height:46px;border:2px solid #acc4ae;background:#fff;color:var(--md-ink);font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+.md-form__region button[aria-pressed=true]{border-color:#b33a19;background:#fff0e8}
+.md-page .md-form__region button:focus-visible{outline:3px solid #b33a19;outline-offset:3px}
