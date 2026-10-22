@@ -57,6 +57,14 @@
   text-underline-offset: 3px;
 }
 
+.offer-page .offer-partner-contact {
+  color: #163d32;
+}
+
+.offer-page .offer-partner-contact a {
+  color: #84300f;
+}
+
 .offer-what .offer-kicker,
 .offer-price-section .offer-kicker,
 .offer-what__grid span,

@@ -28,3 +28,28 @@
 @media(max-width:950px){.md-hero__grid,.md-days__layout,.md-ads__layout,.md-join__layout{grid-template-columns:1fr}.md-hero__visual{max-width:640px}.md-projects__grid{grid-template-columns:1fr 1fr}.md-project:first-child{grid-column:span 2}.md-heading{grid-template-columns:1fr}.md-heading>span{max-width:650px}.md-ads__graphic{max-width:620px}}
 @media(max-width:680px){.md-shell{width:min(100% - 36px,560px)}.md-hero{padding:62px 0 80px}.md-hero h1{font-size:clamp(52px,12.5vw,70px)}.md-hero__actions{align-items:flex-start;flex-direction:column;gap:20px}.md-hero__visual{transform:rotate(0);padding:13px}.md-visual__body{padding:17px}.md-visual__flow{gap:3px}.md-visual__flow div{padding:9px 6px}.md-visual__flow span{font-size:8px}.md-visual__flow strong{font-size:10px}.md-visual__flow b{font-size:11px}.md-numbers__grid,.md-projects__grid,.md-pricing__grid{grid-template-columns:1fr}.md-project:first-child{grid-column:auto}.md-project{min-height:240px}.md-savings{grid-template-columns:1fr}.md-savings p{grid-column:auto}.md-salary,.md-software{min-height:auto}.md-salary__sum{margin:30px 0}.md-days li{grid-template-columns:70px 1fr}.md-ads__graphic{min-height:150px}.md-ads__graphic span{padding:10px 5px;font-size:8px}.md-guarantee__layout{grid-template-columns:1fr;gap:17px}.md-form{box-shadow:10px 10px 0 #144534}.md-form__row{grid-template-columns:1fr;gap:0}}
 @media(prefers-reduced-motion:reduce){.md-page *{scroll-behavior:auto!important;transition:none!important}}
+
+/* The offer and payment action should fit in the first view on common screens. */
+.md-hero{padding:clamp(44px,5vw,74px) 0 clamp(55px,6vw,85px)}
+.md-hero h1{max-width:680px;font-size:clamp(48px,5.35vw,76px);line-height:1.02}
+.md-hero__lede{margin-top:22px}
+.md-hero__actions{margin-top:27px}
+.md-brandline{margin-bottom:22px}
+.md-hero__visual{transform:none}
+.md-join{scroll-margin-top:78px}
+.md-form__seats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+.md-form__seats button{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:74px;padding:13px;border:2px solid #acc4ae;background:#fff;color:var(--md-ink);text-align:left;font:inherit;cursor:pointer}
+.md-form__seats button[aria-pressed=true]{border-color:#19593f;background:#eaf5da}
+.md-form__seats span{font-size:12px;font-weight:750}
+.md-form__seats strong{font-family:var(--display);font-size:22px}
+.md-form__amount{display:flex;justify-content:space-between;gap:14px;margin:0 0 24px;padding:12px 0;border-bottom:1px solid #cad7c9;font-size:14px}
+.md-form__amount strong{font-size:18px}
+.md-form textarea{display:block;width:100%;min-height:78px;margin-top:7px;padding:10px 12px;border:1px solid #afc3b3;background:#fff;color:var(--md-ink);font:inherit;resize:vertical}
+.md-form__optional{font-weight:500;color:#4a6756}
+.md-form__consent a,.md-payment-result a{color:#0a6445;text-decoration:underline;text-underline-offset:3px}
+.md-form .md-form__pay{width:100%}
+.md-payment-result h3{font-size:clamp(28px,3vw,40px);margin:0 0 16px}
+.md-payment-result p{line-height:1.5}
+.md-payment-result code{display:block;overflow-wrap:anywhere;margin:20px 0}
+.md-page .md-form__seats button:focus-visible,.md-page textarea:focus-visible{outline:3px solid #19593f;outline-offset:3px}
+@media(max-width:680px){.md-hero{padding:36px 0 46px}.md-hero__grid{gap:0}.md-hero h1{font-size:clamp(40px,10.4vw,56px);line-height:1.02}.md-hero__lede{font-size:16px;line-height:1.45}.md-hero__actions{margin-top:22px;gap:12px}.md-hero__micro{margin-top:18px}.md-hero__visual{display:none}.md-form__seats button{min-height:70px;padding:10px}.md-form__seats strong{font-size:19px}}

@@ -4,17 +4,19 @@ import "./moredone.css";
 
 export const metadata: Metadata = {
   title: "MoreDone: The 7-Day AI Business Challenge",
-  description: "Your next employee could cost ₦3 million a year. Learn to build and test a tool for the work your business needs done.",
+  description: "Build and test a useful business tool in seven guided days. Bring one real problem, choose your place and pay securely online.",
   alternates: { canonical: "/moredone" },
 };
 
 const projects = [
-  ["01", "Customer tracker", "Keep WhatsApp, Instagram and website enquiries in one queue.", "A working sales view"],
-  ["02", "Team workboard", "Give each job an owner and a clear due date.", "A shared task flow"],
-  ["03", "Business website", "Show what you offer, then collect bookings or quote requests.", "A usable first site"],
-  ["04", "Follow-up system", "Capture customer interest and prompt a timely reply.", "Fewer missed leads"],
-  ["05", "AI work assistant", "Prepare drafts from approved business information for a person to check.", "A repeatable workflow"],
-  ["06", "A tool you can sell", "Build a website or a follow-up system for another business, then charge for the work.", "A service you can offer"],
+  ["01", "Customer tracker", "Bring enquiries from your website and social channels into one view. See who owns each reply.", "A sales process your team can use"],
+  ["02", "Booking system", "Let customers choose a time, send confirmations and keep your team's calendar current.", "A booking flow for your business"],
+  ["03", "Team workboard", "Track jobs, owners and due dates without chasing updates across chats.", "A shared view of the work"],
+  ["04", "Business website", "Show your offer and collect bookings or quote requests in one place.", "A first site people can use"],
+  ["05", "Reports that update", "Pull the numbers your team already records into a view you can check each week.", "A report tied to your data"],
+  ["06", "AI team assistant", "Draft answers from approved company information, with a person reviewing before anything goes out.", "A checked, repeatable process"],
+  ["07", "Client portal", "Give customers one place to submit requests and see the next step.", "A clearer service experience"],
+  ["08", "A tool you can sell", "Turn a common client problem into a first working service and test whether people will pay for it.", "A service idea you can show"],
 ];
 const days = [
   ["01", "Find the cost", "Bring one bill or recurring job. Decide what needs attention."],
@@ -28,17 +30,17 @@ export default function MoreDonePage() {
     <section className="md-hero" aria-labelledby="md-title"><div className="md-shell md-hero__grid">
       <div className="md-hero__copy">
         <p className="md-brandline">Run Rentless <span>×</span> Navrademy</p>
-        <h1 id="md-title">Your next employee could cost ₦3 million a year.</h1>
-        <p className="md-hero__lede">See how much of that work AI could handle first. Choose one problem your business needs solved, then spend seven days building and testing a tool for it. You do not need to know how to code.</p>
-        <div className="md-hero__actions"><a className="md-button" href="#join">Ask about the next cohort <span aria-hidden="true">↗</span></a><a className="md-text-link" href="#projects">See what you can build ↓</a></div>
-        <p className="md-hero__micro">Two live workshops · Daily exercises · Group support</p>
+        <h1 id="md-title">Build the tool your business keeps wishing it had.</h1>
+        <p className="md-hero__lede">Bring one job that takes too long or costs too much. In seven guided days, build a first working tool around it and test it with your team. No coding background needed.</p>
+        <div className="md-hero__actions"><a className="md-button" href="#join">Choose your place <span aria-hidden="true">↗</span></a><a className="md-text-link" href="#projects">See what you could build ↓</a></div>
+        <p className="md-hero__micro">Two live workshops and daily help across seven days.</p>
       </div>
       <div className="md-hero__visual" aria-label="Illustrative customer follow-up project">
-        <div className="md-visual__top"><span>YOUR FIRST BUILD</span><span className="md-status"><i /> Working example</span></div>
-        <div className="md-visual__body"><div className="md-visual__head"><span>Customer follow-up</span><strong>Know who needs a reply.</strong></div>
-          <div className="md-visual__flow"><div><span>New enquiry</span><strong>Captured</strong></div><b>→</b><div><span>Owner</span><strong>Assigned</strong></div><b>→</b><div><span>Next step</span><strong>Scheduled</strong></div></div>
-          <div className="md-visual__row"><span>WhatsApp enquiry</span><span>Follow up today</span></div><div className="md-visual__row"><span>Website enquiry</span><span>Quote to review</span></div>
-        </div><p>Illustrative view. Your project depends on the problem you choose.</p>
+        <div className="md-visual__top"><span>ONE POSSIBLE BUILD</span><span className="md-status"><i /> Customer enquiries</span></div>
+        <div className="md-visual__body"><div className="md-visual__head"><span>Sales follow-up</span><strong>Every enquiry has a next step.</strong></div>
+          <div className="md-visual__flow"><div><span>Customer</span><strong>Enquires</strong></div><b>→</b><div><span>Team</span><strong>Gets owner</strong></div><b>→</b><div><span>Follow-up</span><strong>Gets reminder</strong></div></div>
+          <div className="md-visual__row"><span>New request</span><span>Assigned to Timi</span></div><div className="md-visual__row"><span>Quote sent</span><span>Check back tomorrow</span></div>
+        </div><p>Example only. Your first build starts with a problem you choose.</p>
       </div>
     </div></section>
 
@@ -51,14 +53,14 @@ export default function MoreDonePage() {
       <div className="md-savings" aria-label="Illustrative annual savings on the software example"><div><span>15% reduction</span><strong>$1,728</strong></div><div><span>25% reduction</span><strong>$2,880</strong></div><div><span>35% reduction</span><strong>$4,031</strong></div><p>Rounded annual scenarios on the example bill. Your results may differ; savings are not guaranteed.</p></div>
     </div></section>
 
-    <section className="md-projects" id="projects" aria-labelledby="md-projects-title"><div className="md-shell"><div className="md-heading"><p>YOUR PROJECT</p><h2 id="md-projects-title">Pick the tool you would actually use.</h2><span>You build one achievable first version. We help you set its scope before the challenge starts.</span></div><div className="md-projects__grid">{projects.map(([number, title, detail, output]) => <article className="md-project" key={number}><span>{number}</span><h3>{title}</h3><p>{detail}</p><small>{output}</small></article>)}</div><a className="md-underlink" href="#join">Tell us what you want to build ↗</a></div></section>
+    <section className="md-projects" id="projects" aria-labelledby="md-projects-title"><div className="md-shell"><div className="md-heading"><p>YOUR PROJECT</p><h2 id="md-projects-title">Choose a problem worth solving.</h2><span>These are starting points. We help you choose a version you can build and test in seven days.</span></div><div className="md-projects__grid">{projects.map(([number, title, detail, output]) => <article className="md-project" key={number}><span>{number}</span><h3>{title}</h3><p>{detail}</p><small>{output}</small></article>)}</div><a className="md-underlink" href="#join">Choose your place and tell us your idea ↗</a></div></section>
 
     <section className="md-days" aria-labelledby="md-days-title"><div className="md-shell md-days__layout"><div><p className="md-section-kicker">THE SEVEN DAYS</p><h2 id="md-days-title">A first version you can demonstrate.</h2><p>Two live 90-minute workshops, a daily task, starter materials and group help give your project a clear path from idea to test.</p></div><ol>{days.map(([day, title, detail]) => <li key={day}><span>DAY {day}</span><div><h3>{title}</h3><p>{detail}</p></div></li>)}</ol></div></section>
 
     <section className="md-ads" aria-labelledby="md-ads-title"><div className="md-shell md-ads__layout"><div><p className="md-section-kicker">ALSO INCLUDED</p><h2 id="md-ads-title">Plan an ad before you spend on one.</h2><p>The ChatGPT Ads lesson covers your offer, campaign plan and how to track enquiries. Access depends on your business and account approval. Ad spend is separate.</p><a href="https://help.openai.com/en/articles/20001245-ads-manager-availability" target="_blank" rel="noopener noreferrer">Check current Ads Manager availability ↗</a></div><div className="md-ads__graphic" aria-hidden="true"><span>OFFER</span><i /><span>AD</span><i /><span>ENQUIRY</span><i /><span>FOLLOW-UP</span></div></div></section>
 
-    <section className="md-pricing" aria-labelledby="md-pricing-title"><div className="md-shell"><div className="md-heading"><p>CHOOSE YOUR PLACE</p><h2 id="md-pricing-title">Come alone or bring the team.</h2><span>Request next-cohort details below. This page does not take a payment.</span></div><div className="md-pricing__grid"><article><span>Individual</span><h3>₦120,000 <small>or $100</small></h3><p>One place, including workshops, exercises, templates, group help and a review of your starter tool.</p><a href="#join">Ask for an individual place ↗</a></article><article className="md-pricing__team"><span>Team of three</span><h3>₦300,000 <small>or $250</small></h3><p>Three colleagues can tackle one business problem. Save ₦60,000 or $50 against three individual places.</p><a href="#join">Ask about a team place ↗</a></article></div><p className="md-pricing__fine">Hosting, paid software and ad spend may cost extra. We discuss needed services before you build.</p></div></section>
+    <section className="md-pricing" aria-labelledby="md-pricing-title"><div className="md-shell"><div className="md-heading"><p>CHOOSE YOUR PLACE</p><h2 id="md-pricing-title">Come alone or bring the team.</h2><span>Select your places below and pay securely through Paystack.</span></div><div className="md-pricing__grid"><article><span>Individual</span><h3>₦120,000</h3><p>One place, including workshops, exercises, templates, group help and a review of your starter tool.</p><a href="?seats=1#join">Choose one place ↗</a></article><article className="md-pricing__team"><span>Team of three</span><h3>₦300,000</h3><p>Three colleagues can work on one business problem together. That is ₦60,000 less than three individual places.</p><a href="?seats=3#join">Choose three places ↗</a></article></div><p className="md-pricing__fine">Your fee covers the challenge and support shown here. If your project needs hosting or a paid service, we discuss the options before you spend anything extra.</p></div></section>
     <section className="md-guarantee"><div className="md-shell md-guarantee__layout"><strong>What we stand behind</strong><p>We agree on a realistic starter tool and a test before the challenge begins. Attend the required sessions and complete the exercises. If the tool misses that test, we provide another guided session at no charge. If our promised support still does not produce the agreed outcome, we refund the challenge fee.</p></div></section>
-    <section className="md-join" id="join" aria-labelledby="md-join-title"><div className="md-shell md-join__layout"><div><p className="md-section-kicker">MORE DONE</p><h2 id="md-join-title">What would you build first?</h2><p>Tell us which place you want. We will contact you with the next-cohort details and joining steps.</p></div><MoreDoneForm /></div></section>
+    <section className="md-join" id="join" aria-labelledby="md-join-title"><div className="md-shell md-join__layout"><div><p className="md-section-kicker">MORE DONE</p><h2 id="md-join-title">Put your first idea to work.</h2><p>Choose one or three places, tell us the kind of tool you want to build, then pay through Paystack. We will send course information to your email.</p></div><MoreDoneForm /></div></section>
   </div>;
 }
