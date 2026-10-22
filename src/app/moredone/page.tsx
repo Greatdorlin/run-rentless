@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { moreDonePlans, moreDonePrice, type MoreDoneCountry, type MoreDoneSeats } from "@/lib/moredone";
 import { MoreDoneForm } from "./more-done-form";
 import { CountrySwitcher } from "./country-switcher";
+import { CostScenario } from "./cost-scenario";
 import "./moredone.css";
 
 export const metadata: Metadata = {
@@ -87,7 +88,7 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
       <div className="md-heading"><h2 id="md-cost-title">Build a tool someone already needs.</h2><span>Think of a job that keeps coming back, such as booking customers or following up on sales. We will help you turn it into a working tool. Use it in your business, at work or for a client.</span></div>
       <div className="md-numbers__grid">
         <div className="md-salary"><small>Before another hire</small><div className="md-salary__sum"><strong>{country === "ng" ? "₦250k" : country === "rw" ? "RWF 500k" : "$500"} <em>/ month</em></strong><span>× 12</span><strong>{country === "ng" ? "₦3m" : country === "rw" ? "RWF 6m" : "$6k"} <em>/ year</em></strong></div><p>{country === "ng" ? "A ₦250,000 monthly salary adds ₦3 million a year." : country === "rw" ? "A RWF 500,000 monthly salary adds RWF 6 million a year." : "A $500 monthly salary adds $6,000 a year."} Before hiring someone to handle repeat work, build a tool for one part of that job, such as tracking customer replies or preparing weekly updates. If you work alone, this is also a problem you can learn to solve for clients.</p></div>
-        <div className="md-software"><small>Before another subscription</small><h3>Pay for the parts you use. Build the part you need.</h3><p>A company may pay for a customer management tool and still need a separate way to remind staff when a lead needs a reply. In the challenge, build that missing step and try it with a real example. If you work with clients, you can build the same kind of fix for them.</p><div className="md-software__example"><strong>See how quickly software bills add up</strong><span>Pipedrive Growth is $39 per seat each month and Asana Advanced is $24.99, both billed annually. For 15 people on each, that is <b>$11,518 a year</b>. For perspective, 15% of that bill is <b>$1,728 a year</b>. Use your own bills to decide what is worth keeping and what you want to build.</span><small><a href="https://www.pipedrive.com/en/pricing" target="_blank" rel="noopener noreferrer">Pipedrive pricing</a> · <a href="https://asana.com/pricing" target="_blank" rel="noopener noreferrer">Asana pricing</a></small></div></div>
+        <div className="md-software"><CostScenario key={country} country={country} /></div>
       </div>
     </div></section>
 
