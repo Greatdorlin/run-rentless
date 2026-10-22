@@ -81,7 +81,7 @@ export function MoreDoneForm({ initialNigeria }: { initialNigeria: boolean }) {
       <button type="button" aria-pressed={!nigeria} onClick={() => setNigeria(false)}>Outside Nigeria</button>
     </div>
     <p className="md-form__choice-label">How many people are joining?</p>
-    <div className="md-form__seats" role="group" aria-label="Number of places">
+    <div className={`md-form__seats${nigeria ? "" : " md-form__seats--four"}`} role="group" aria-label="Number of places">
       {([1, 2, 3, 5] as const).filter((count) => !nigeria || count !== 2).map((count) => <button key={count} type="button" aria-pressed={seats === count} onClick={() => setSeats(count)}>
         <span>{moreDonePlans[count].label}</span><strong>{price(count, nigeria)}</strong>
       </button>)}
