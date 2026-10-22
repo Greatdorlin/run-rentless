@@ -1,6 +1,7 @@
 import { moreDonePlans, type MoreDoneSeats } from "@/lib/moredone";
 
 const money = (seats: MoreDoneSeats) => `₦${(moreDonePlans[seats].amount / 100).toLocaleString("en-NG")}`;
+const placeLabel = (seats: MoreDoneSeats) => seats === 1 ? "one place" : seats === 3 ? "three places" : "five places";
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] || character);
 
 function layout(firstName: string, title: string, paragraphs: string[], action?: { label: string; url: string }) {
@@ -29,21 +30,21 @@ async function send(email: string, firstName: string, subject: string, text: str
 
 export function sendMoreDoneCheckoutLink(email: string, firstName: string, seats: MoreDoneSeats, url: string) {
   const total = money(seats);
-  const label = seats === 1 ? "one place" : "three places";
+  const label = placeLabel(seats);
   const text = `Hi ${firstName},\n\nYou chose ${label} for MoreDone. Your total is ${total}. Your place is not paid yet.\n\nYou can finish your payment here: ${url}\n\nIf you have already paid, do not pay again. Reply to this email and we will check it.\n\nRun Rentless`;
   return send(email, firstName, "Your MoreDone checkout link", text, layout(firstName, "Your checkout link is ready.", [`You chose ${label} for ${total}. Your place is not paid yet.`, "If you need more time, use the link below to finish your payment.", "Already paid? Do not pay again. Reply to this email and we will check it."], { label: "Finish your payment", url }));
 }
 
 export function sendMoreDoneCheckoutReminder(email: string, firstName: string, seats: MoreDoneSeats, url: string) {
   const total = money(seats);
-  const label = seats === 1 ? "one place" : "three places";
+  const label = placeLabel(seats);
   const text = `Hi ${firstName},\n\nYou started joining MoreDone but did not finish payment. Your ${label} will be ${total}.\n\nIf you still want to join, return to checkout here: ${url}\n\nIf you already paid, do not pay again. Reply to this email and we will check it.\n\nRun Rentless`;
   return send(email, firstName, "Still want to join MoreDone?", text, layout(firstName, "Your checkout is still here.", [`You chose ${label} for ${total}, but we have not confirmed a payment.`, "If you still want to join, you can return to checkout below.", "Already paid? Do not pay again. Reply to this email and we will check it."], { label: "Return to checkout", url }));
 }
 
 export function sendMoreDonePaymentConfirmation(email: string, firstName: string, seats: MoreDoneSeats, reference: string) {
-  const label = seats === 1 ? "one place" : "three places";
+  const label = placeLabel(seats);
   const total = money(seats);
-  const text = `Hi ${firstName},\n\nYour MoreDone payment is confirmed. You have ${label} in the 7-Day AI Business Challenge.\n\nPaid: ${total}\nPayment reference: ${reference}\n\nWe will email your challenge schedule and joining details. Bring the business problem or idea you want to work on.\n\nQuestions? Reply to this email.\n\nRun Rentless`;
-  return send(email, firstName, "Your MoreDone payment is confirmed", text, layout(firstName, "Your place is confirmed.", [`Your payment of ${total} for ${label} is complete.`, `Payment reference: ${reference}`, "We will email your challenge schedule and joining details. Bring the problem or idea you want to work on."]));
+  const text = `Hi ${firstName},\n\nYour MoreDone payment is confirmed. You have ${label} in the 7-Day AI Business Challenge.\n\nPaid: ${total}\nPayment reference: ${reference}\n\nWe will email your challenge schedule and joining details. Bring the business problem or idea you want to work on. You will use a paid AI building tool during the week; we will help you choose and set it up before the first workshop. That subscription is separate from the challenge fee.\n\nQuestions? Reply to this email.\n\nRun Rentless`;
+  return send(email, firstName, "Your MoreDone payment is confirmed", text, layout(firstName, "Your place is confirmed.", [`Your payment of ${total} for ${label} is complete.`, `Payment reference: ${reference}`, "We will email your challenge schedule and joining details. Bring the problem or idea you want to work on.", "You will use a paid AI building tool during the week. We will help you choose and set it up before the first workshop. That subscription is separate from the challenge fee."]));
 }

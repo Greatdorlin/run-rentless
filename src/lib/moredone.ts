@@ -1,12 +1,13 @@
 export const moreDonePlans = {
   1: { label: "One place", amount: 12000000 },
   3: { label: "Three places", amount: 30000000 },
+  5: { label: "Five places", amount: 45000000 },
 } as const;
 
 export type MoreDoneSeats = keyof typeof moreDonePlans;
 
 export function isMoreDoneSeats(value: unknown): value is MoreDoneSeats {
-  return value === 1 || value === 3;
+  return value === 1 || value === 3 || value === 5;
 }
 
 export const moreDoneProjects = [
