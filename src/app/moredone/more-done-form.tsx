@@ -6,11 +6,11 @@ const price = (seats: MoreDoneSeats, nigeria: boolean) => nigeria
   ? new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(moreDonePlans[seats].amount / 100)
   : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(moreDonePlans[seats].usd);
 const examples = [
-  "An online store that tracks orders and stock",
-  "A customer tracker that reminds us to follow up",
-  "A booking page with automatic confirmations",
-  "A team task board for client work",
-  "An AI assistant that helps prepare quotes",
+  "An online store that tracks every order and low-stock item",
+  "A private customer tracker that reminds us who needs a reply",
+  "A booking app that fills open slots and confirms each visit",
+  "A client portal that shows tasks, files and what is due next",
+  "An assistant that turns a customer brief into a first quote",
 ];
 
 export function MoreDoneForm({ initialNigeria }: { initialNigeria: boolean }) {
@@ -25,6 +25,7 @@ export function MoreDoneForm({ initialNigeria }: { initialNigeria: boolean }) {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    if (params.get("seats") === "2" && (params.get("region") === "international" || !initialNigeria)) queueMicrotask(() => setSeats(2));
     if (params.get("seats") === "3") queueMicrotask(() => setSeats(3));
     if (params.get("seats") === "5") queueMicrotask(() => setSeats(5));
     if (params.get("region") === "ng") queueMicrotask(() => setNigeria(true));
@@ -37,7 +38,7 @@ export function MoreDoneForm({ initialNigeria }: { initialNigeria: boolean }) {
       .then(async (response) => response.ok ? response.json() : { paid: false })
       .then((result: { paid?: boolean; synced?: boolean }) => { setConfirmationAccepted(result.synced === true); setPayment(result.paid ? "paid" : "unconfirmed"); })
       .catch(() => setPayment("unconfirmed"));
-  }, []);
+  }, [initialNigeria]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -76,12 +77,12 @@ export function MoreDoneForm({ initialNigeria }: { initialNigeria: boolean }) {
     <div className="md-form__top"><span>MORE DONE</span><strong>Join the challenge</strong></div>
     <p className="md-form__choice-label">Where are you paying from?</p>
     <div className="md-form__region" role="group" aria-label="Payment location">
-      <button type="button" aria-pressed={nigeria} onClick={() => setNigeria(true)}>Nigeria</button>
+      <button type="button" aria-pressed={nigeria} onClick={() => { setNigeria(true); if (seats === 2) setSeats(1); }}>Nigeria</button>
       <button type="button" aria-pressed={!nigeria} onClick={() => setNigeria(false)}>Outside Nigeria</button>
     </div>
     <p className="md-form__choice-label">How many people are joining?</p>
     <div className="md-form__seats" role="group" aria-label="Number of places">
-      {([1, 3, 5] as const).map((count) => <button key={count} type="button" aria-pressed={seats === count} onClick={() => setSeats(count)}>
+      {([1, 2, 3, 5] as const).filter((count) => !nigeria || count !== 2).map((count) => <button key={count} type="button" aria-pressed={seats === count} onClick={() => setSeats(count)}>
         <span>{moreDonePlans[count].label}</span><strong>{price(count, nigeria)}</strong>
       </button>)}
     </div>
@@ -90,7 +91,7 @@ export function MoreDoneForm({ initialNigeria }: { initialNigeria: boolean }) {
     <label>Email for your place<input name="email" type="email" autoComplete="email" required maxLength={160} /></label>
     <label>Business or project name<input name="company" autoComplete="organization" required maxLength={120} /></label>
     <div className="md-form__row"><label>How big is your business? <span className="md-form__optional">Optional</span><select name="teamSize" defaultValue=""><option value="">Choose if you know</option><option>Just me</option><option>2–5 people</option><option>6–15 people</option><option>16+ people</option></select></label><label>What would you build?<select name="project" required defaultValue=""><option value="" disabled>Choose a starting point</option>{moreDoneProjects.map((project) => <option key={project}>{project}</option>)}</select></label></div>
-    <label>What would you love to build? <span className="md-form__optional">Optional</span><textarea name="goal" maxLength={400} rows={3} placeholder={examples[exampleIndex]} /></label>
+    <label className="md-form__idea">What would you love to build? <span className="md-form__optional">Optional</span><textarea name="goal" maxLength={400} rows={3} placeholder={examples[exampleIndex]} /><span className="md-form__idea-hint">A small, working first version is enough to start.</span></label>
     <p className="md-form__tool-note">You will need access to a paid AI building tool during the challenge. That subscription is separate. We will help you choose and set it up before the first workshop.</p>
     <div className="md-form__trap" aria-hidden="true"><label>Website<input name="companyWebsite" tabIndex={-1} autoComplete="off" /></label></div>
     <label className="md-form__consent"><input name="consent" type="checkbox" required /><span>Send me my payment and course information by email. I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>

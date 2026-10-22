@@ -1,4 +1,4 @@
-import { isMoreDoneSeats, type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
+import { isMoreDoneNairaSeats, type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
 import { sendMoreDonePaymentConfirmation } from "@/lib/moredone-email";
 
 const base = "https://api.sender.net/v2";
@@ -187,7 +187,7 @@ export async function listMoreDoneCheckoutCandidates(): Promise<MoreDoneCheckout
       const submitted = new Date(value("MoreDone submitted at")).getTime();
       if (value("MoreDone payment status") !== "Checkout started" || value("MoreDone reminder accepted") !== "Not sent" ||
         value("MoreDone business").includes("(email test)") || !/^rrmd_[a-f0-9]{32}$/.test(reference) ||
-        !isMoreDoneSeats(seats) || !Number.isFinite(submitted) || now - submitted < 18 * 60 * 60 * 1000 || now - submitted > 21 * 24 * 60 * 60 * 1000) return null;
+        !isMoreDoneNairaSeats(seats) || !Number.isFinite(submitted) || now - submitted < 18 * 60 * 60 * 1000 || now - submitted > 21 * 24 * 60 * 60 * 1000) return null;
       const checkout = new URL(url);
       if (checkout.protocol !== "https:" || checkout.hostname !== "checkout.paystack.com") return null;
       return { email: entry.email!, firstName: record?.firstname || "there", reference, seats, url };

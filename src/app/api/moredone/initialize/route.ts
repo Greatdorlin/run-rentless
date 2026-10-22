@@ -1,4 +1,4 @@
-import { cleanMoreDoneText, isMoreDoneSeats, moreDonePlans, moreDoneProjects } from "@/lib/moredone";
+import { cleanMoreDoneText, isMoreDoneNairaSeats, isMoreDoneSeats, moreDonePlans, moreDoneProjects } from "@/lib/moredone";
 import { saveMoreDoneCheckoutUrl, saveMoreDoneLead } from "@/lib/moredone-sender";
 import { sendMoreDoneCheckoutLink } from "@/lib/moredone-email";
 import { readPublicForm } from "@/lib/public-form-request";
@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     !moreDoneProjects.includes(project as (typeof moreDoneProjects)[number]) || !isMoreDoneSeats(seats) || body.consent !== true) {
     return fail("Please complete the required details and agree to receive course updates.", 400);
   }
+  if (paymentRegion === "ng" && !isMoreDoneNairaSeats(seats)) return fail("Choose one, three or five places for naira checkout.", 400);
   const key = process.env.PAYSTACK_SECRET_KEY;
   if (!process.env.SENDER_API || (paymentRegion === "ng" && !key)) return fail("Registration is temporarily unavailable. Please try again shortly.", 503);
   const reference = `rrmd_${crypto.randomUUID().replaceAll("-", "")}`;

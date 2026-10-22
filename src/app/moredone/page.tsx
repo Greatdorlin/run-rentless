@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { moreDonePlans, type MoreDoneSeats } from "@/lib/moredone";
 import { MoreDoneForm } from "./more-done-form";
+import { MoreDoneSound } from "./more-done-sound";
 import "./moredone.css";
 
 export const metadata: Metadata = {
@@ -32,6 +34,15 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
   const detectedNigeria = (await headers()).get("x-vercel-ip-country")?.toUpperCase() === "NG";
   const isNigeria = requestedRegion === "ng" ? true : requestedRegion === "international" ? false : detectedNigeria;
   const region = isNigeria ? "ng" : "international";
+  const amount = (seats: MoreDoneSeats) => isNigeria
+    ? `₦${(moreDonePlans[seats].amount / 100).toLocaleString("en-NG")}`
+    : `$${moreDonePlans[seats].usd}`;
+  const offers = [
+    { seats: 1 as const, note: "Bring a business problem or a client idea. Build your first working version with us." },
+    ...(!isNigeria ? [{ seats: 2 as const, note: "Build with one colleague. Each place costs $90 instead of $100." }] : []),
+    { seats: 3 as const, note: `Bring two colleagues to build around one real business need. ${isNigeria ? "₦100,000" : "$83.33"} per person.` },
+    { seats: 5 as const, note: `Bring more of your team into the build. ${isNigeria ? "₦90,000" : "$75"} per person.` },
+  ];
   return <div className="md-page">
     <section className="md-hero" aria-labelledby="md-title"><div className="md-shell md-hero__grid">
       <div className="md-hero__copy">
@@ -41,6 +52,7 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
         <p className="md-hero__lede">That idea you keep wishing someone would build for your business? Bring it to MoreDone. In seven days, we will help you build and test a working first version, even if you have never coded.</p>
         <div className="md-hero__actions"><a className="md-button" href="#join">Join the cohort <span aria-hidden="true">↗</span></a><a className="md-text-link" href="#projects">See what you could build ↓</a></div>
         <p className="md-hero__micro">Bringing your team? <a href="#team-offer">See the team offer ↗</a></p>
+        <MoreDoneSound />
       </div>
       <div className="md-hero__visual" aria-label="Illustrative customer follow-up project">
         <div className="md-visual__top"><span>ONE POSSIBLE BUILD</span><span className="md-status"><i /> Customer enquiries</span></div>
@@ -71,7 +83,7 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
 
     <section className="md-ads" aria-labelledby="md-ads-title"><div className="md-shell md-ads__layout"><div><p className="md-section-kicker">A CHANCE TO LEARN A NEW AD CHANNEL EARLY</p><h2 id="md-ads-title">ChatGPT Ads is growing. Learn how to use it while it is new.</h2><p>Businesses that learned Facebook Ads early had time to test what brought customers to them. ChatGPT Ads offers another chance to learn a growing channel. In October 2026, it reached 89 countries, and more than 100,000 advertisers had used it. More than 1.2 billion people use ChatGPT each week.</p><p>We will help you choose an offer, write an ad and build a page that turns interest into enquiries. Then you will learn how to track which enquiries become customers. If your business has access, you can submit a campaign for approval and decide whether to spend on a test.</p><p className="md-ads__source"><a href="https://openai.com/index/chatgpt-ads-expands-26-new-countries/" target="_blank" rel="noopener noreferrer">See the ChatGPT Ads announcement ↗</a> · <a href="https://help.openai.com/en/articles/20001245-ads-manager-availability" target="_blank" rel="noopener noreferrer">Check country access ↗</a></p></div><div className="md-ads__graphic" aria-label="From a clear offer to an ad, enquiry and sale"><span>YOUR OFFER</span><i /><span>AD</span><i /><span>ENQUIRY</span><i /><span>SALE</span></div></div></section>
 
-    <section className="md-pricing" aria-labelledby="md-pricing-title"><div className="md-shell"><div className="md-heading"><p>CHOOSE YOUR PLACE</p><h2 id="md-pricing-title">Come alone. Or get your team building together.</h2><span>Everyone gets the same workshops, exercises and guidance. Team places cost less per person.</span></div><div className="md-pricing__grid"><article><span>One place</span><h3>{isNigeria ? "₦120,000" : "$100"}</h3><p>Bring a problem from work, your own business or a client idea. Build and test your first tool with us.</p><a href={`?seats=1&region=${region}#join`}>Choose one place ↗</a></article><article className="md-pricing__team" id="team-offer"><span>Three places · save {isNigeria ? "₦60,000" : "$50"}</span><h3>{isNigeria ? "₦300,000" : "$250"}</h3><p>{isNigeria ? "₦100,000" : "$83.33"} per person. Bring two colleagues to work on one business problem together.</p><a href={`?seats=3&region=${region}#join`}>Choose three places ↗</a></article><article className="md-pricing__team"><span>Five places · save {isNigeria ? "₦150,000" : "$125"}</span><h3>{isNigeria ? "₦450,000" : "$375"}</h3><p>{isNigeria ? "₦90,000" : "$75"} per person. Give more of your team the skill to build and improve the tools they use.</p><a href={`?seats=5&region=${region}#join`}>Choose five places ↗</a></article></div><p className="md-pricing__fine">{isNigeria ? "Nigeria: pay securely online after choosing your place." : "Outside Nigeria: enter your details, then ask for payment instructions by WhatsApp."} A paid AI building tool, hosting and ad spend are separate where needed; we explain your options before you use them. <a href={`?region=${isNigeria ? "international" : "ng"}#md-pricing-title`}>Paying {isNigeria ? "outside Nigeria" : "from Nigeria"}? View your prices ↗</a></p></div></section>
+    <section className="md-pricing" aria-labelledby="md-pricing-title"><div className="md-shell"><div className="md-heading"><p>CHOOSE YOUR PLACE</p><h2 id="md-pricing-title">Come alone. Or get your team building together.</h2><span>Everyone gets the same workshops, exercises and guidance. Team places cost less per person.</span></div><div className={`md-pricing__grid${isNigeria ? "" : " md-pricing__grid--four"}`}>{offers.map(({ seats, note }) => <article key={seats} className={seats > 1 ? "md-pricing__team" : undefined} id={seats === 3 ? "team-offer" : undefined}><span>{moreDonePlans[seats].label}{seats > 1 ? ` · save ${isNigeria ? `₦${((12000000 * seats - moreDonePlans[seats].amount) / 100).toLocaleString("en-NG")}` : `$${100 * seats - moreDonePlans[seats].usd}`}` : ""}</span><h3>{amount(seats)}</h3><p>{note}</p><a href={`?seats=${seats}&region=${region}#join`}>Choose {moreDonePlans[seats].label.toLowerCase()} ↗</a></article>)}</div><p className="md-pricing__fine">{isNigeria ? "Nigeria: pay securely online after choosing your place." : "Outside Nigeria: enter your details, then ask for payment instructions by WhatsApp."} A paid AI building tool, hosting and ad spend are separate where needed; we explain your options before you use them. <a href={`?region=${isNigeria ? "international" : "ng"}#md-pricing-title`}>Paying {isNigeria ? "outside Nigeria" : "from Nigeria"}? View your prices ↗</a></p></div></section>
     <section className="md-guarantee"><div className="md-shell md-guarantee__layout"><strong>What if my tool does not work?</strong><p>Before the challenge, we agree on one small tool and what it needs to do. Come to the required sessions and finish the exercises. If your tool does not pass that test, we will help you again in an extra session for free. If our promised help still does not get it working as agreed, we will refund your challenge fee.</p></div></section>
     <section className="md-join" id="join" aria-labelledby="md-join-title"><div className="md-shell md-join__layout"><div><p className="md-section-kicker">JOIN MOREDONE</p><h2 id="md-join-title">Start with the problem you want to solve.</h2><p>Choose one, three or five places and tell us what you would like to build. {isNigeria ? "Pay securely online to complete your place." : "We will give you payment details after you send the prepared message."}</p></div><MoreDoneForm initialNigeria={isNigeria} /></div></section>
   </div>;

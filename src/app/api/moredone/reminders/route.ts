@@ -1,4 +1,4 @@
-import { isMoreDoneSeats, moreDonePlans } from "@/lib/moredone";
+import { isMoreDoneNairaSeats, moreDonePlans } from "@/lib/moredone";
 import { sendMoreDoneCheckoutReminder } from "@/lib/moredone-email";
 import { listMoreDoneCheckoutCandidates, markMoreDonePaid, markMoreDoneReminderAccepted } from "@/lib/moredone-sender";
 
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         const data = result.data;
         const metadata = typeof data?.metadata === "string" ? JSON.parse(data.metadata) : data?.metadata;
         if (result.status !== true || data?.reference !== candidate.reference ||
-          metadata?.product !== "more_done_challenge" || !isMoreDoneSeats(metadata?.seats) || metadata.seats !== candidate.seats ||
+          metadata?.product !== "more_done_challenge" || !isMoreDoneNairaSeats(metadata?.seats) || metadata.seats !== candidate.seats ||
           data?.currency !== "NGN" || data?.amount !== moreDonePlans[candidate.seats].amount) { failed += 1; continue; }
         checked += 1;
         if (data?.status === "success") {

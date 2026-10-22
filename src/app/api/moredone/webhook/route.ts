@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { isMoreDoneSeats, moreDonePlans } from "@/lib/moredone";
+import { isMoreDoneNairaSeats, moreDonePlans } from "@/lib/moredone";
 import { markMoreDonePaid } from "@/lib/moredone-sender";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const reference = data?.reference;
   const customer = data?.customer;
   const email = customer && typeof customer === "object" && "email" in customer ? customer.email : undefined;
-  if (metadata?.product !== "more_done_challenge" || !isMoreDoneSeats(seats) ||
+  if (metadata?.product !== "more_done_challenge" || !isMoreDoneNairaSeats(seats) ||
     typeof reference !== "string" || !/^rrmd_[a-f0-9]{32}$/.test(reference) ||
     typeof email !== "string" || data?.status !== "success" || data?.domain !== "live" ||
     data?.currency !== "NGN" || data?.amount !== moreDonePlans[seats].amount) return Response.json({ ok: true });

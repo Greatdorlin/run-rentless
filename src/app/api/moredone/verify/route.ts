@@ -1,4 +1,4 @@
-import { isMoreDoneSeats, moreDonePlans } from "@/lib/moredone";
+import { isMoreDoneNairaSeats, moreDonePlans } from "@/lib/moredone";
 import { markMoreDonePaid } from "@/lib/moredone-sender";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const seats = metadata && typeof metadata === "object" ? metadata.seats : undefined;
     const paid = result.status === true && data?.status === "success" && data?.reference === reference &&
       (process.env.NODE_ENV !== "production" || data?.domain === "live") &&
-      metadata?.product === "more_done_challenge" && isMoreDoneSeats(seats) &&
+      metadata?.product === "more_done_challenge" && isMoreDoneNairaSeats(seats) &&
       data?.currency === "NGN" && data?.amount === moreDonePlans[seats].amount;
     if (!paid) return Response.json({ paid: false, reference }, { headers });
     const email = typeof data?.customer === "object" && data.customer && "email" in data.customer ? data.customer.email : undefined;

@@ -90,3 +90,26 @@
 .md-form__region button[aria-pressed=true]{border-color:#b33a19;background:#fff0e8}
 .md-page .md-form__region button:focus-visible{outline:3px solid #b33a19;outline-offset:3px}
 .md-pricing__fine a{display:inline-block;margin-left:5px;color:#0a6047;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+
+/* A little depth keeps the page lively without competing with the decision. */
+.md-hero{background:radial-gradient(ellipse at 78% 17%,#19553f 0,transparent 36%),radial-gradient(ellipse at 8% 89%,#43281d 0,transparent 31%),linear-gradient(145deg,#031e19 8%,#092b24 100%)}
+.md-hero__visual{background:linear-gradient(145deg,#fffdf4,#e5eee5);box-shadow:0 34px 92px #0009,0 0 54px #ff63381f}
+.md-projects{background:radial-gradient(ellipse at 78% 12%,#174936 0,transparent 38%),#05251e}
+.md-project{background:linear-gradient(145deg,#123b30,#0b2b24);box-shadow:inset 0 1px #ffffff16}
+.md-project:first-child{background:linear-gradient(145deg,#1c573f,#10392f)}
+.md-pricing article{box-shadow:0 17px 42px #0b2a1d0d;transition:transform .2s ease,box-shadow .2s ease}
+.md-pricing article:hover{transform:translateY(-3px);box-shadow:0 22px 48px #0b2a1d1b}
+.md-pricing__grid--four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.md-form{background:linear-gradient(155deg,#fffef9,#eff3e8)}
+.md-form__idea textarea{border:2px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(100deg,#ff6338,#c6ff00,#ff6338) border-box;background-size:100% 100%,220% 100%;animation:md-idea-line 8s linear infinite}
+.md-form__idea textarea:focus{outline:2px solid #0d6343;outline-offset:3px}
+.md-form__idea-hint{display:block;margin:7px 0 0;color:#45634e;font-size:11px;font-weight:500}
+@keyframes md-idea-line{to{background-position:0 0,220% 0}}
+.md-sound{display:inline-flex;align-items:center;gap:10px;margin-top:19px;padding:9px 13px;border:1px solid #748f7c;background:#ffffff0d;color:#dbeadf;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s}
+.md-sound:hover,.md-sound[aria-pressed=true]{border-color:var(--md-nav-orange);background:#ff63381a}
+.md-sound__bars{display:flex;align-items:center;gap:3px;height:16px}.md-sound__bars i{display:block;width:2px;height:6px;background:var(--md-nav-orange)}
+.md-sound[aria-pressed=true] .md-sound__bars i{animation:md-sound-bars .85s ease-in-out infinite alternate}.md-sound[aria-pressed=true] .md-sound__bars i:nth-child(2){animation-delay:.17s}.md-sound[aria-pressed=true] .md-sound__bars i:nth-child(3){animation-delay:.35s}.md-sound[aria-pressed=true] .md-sound__bars i:nth-child(4){animation-delay:.51s}
+@keyframes md-sound-bars{to{height:15px}}
+@media(max-width:950px){.md-pricing__grid--four{grid-template-columns:repeat(2,minmax(0,1fr))}.md-pricing__grid--four article:last-child{grid-column:auto}}
+@media(max-width:680px){.md-pricing__grid--four{grid-template-columns:1fr}.md-pricing__grid--four article:last-child{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){.md-form__idea textarea,.md-sound__bars i{animation:none!important}.md-pricing article{transition:none}}
