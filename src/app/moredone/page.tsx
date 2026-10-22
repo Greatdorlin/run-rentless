@@ -59,13 +59,15 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
         <p className="md-hero__micro">Bringing your team? <a href="#team-offer">See the team offer ↗</a></p>
       </div>
       <div className="md-hero__visual" aria-label="Examples of what you can build and learn in MoreDone">
-        <div className="md-build-stack__top"><span>ONE CHALLENGE</span><strong>Many ways to use it.</strong></div>
         <div className="md-build-stack">
-          <article className="md-build-card md-build-card--crm"><span className="md-build-card__number">01 / BUILD</span><h2>Your own CRM</h2><p>See every lead and who needs a reply.</p><span className="md-build-card__mark" aria-hidden="true">↗</span></article>
-          <article className="md-build-card md-build-card--stock"><span className="md-build-card__number">02 / BUILD</span><h2>A stock manager</h2><p>Know what is selling and what needs restocking.</p><span className="md-build-card__mark" aria-hidden="true">↗</span></article>
-          <article className="md-build-card md-build-card--ads"><span className="md-build-card__number">03 / LEARN</span><h2>ChatGPT Ads</h2><p>Prepare an offer and your first campaign.</p><span className="md-build-card__mark" aria-hidden="true">↗</span></article>
+          <article className="md-build-card"><h2>Your own CRM</h2><p>Keep customer details and follow-ups together.</p></article>
+          <article className="md-build-card"><h2>Stock manager</h2><p>Track sales and know when to restock.</p></article>
+          <article className="md-build-card"><h2>Business website</h2><p>Show your work and bring in enquiries.</p></article>
+          <article className="md-build-card"><h2>Booking app</h2><p>Let customers book an available time.</p></article>
+          <article className="md-build-card"><h2>Client portal</h2><p>Share files and project updates in one place.</p></article>
+          <article className="md-build-card"><h2>AI assistant</h2><p>Prepare quotes and replies for you to review.</p></article>
         </div>
-        <p className="md-build-stack__note">Choose one tool to build. The ads lesson is part of the challenge.</p>
+        <div className="md-build-ads"><h2>Learn ChatGPT Ads</h2><p>Plan your first campaign and track the enquiries it brings.</p></div>
       </div>
     </div></section>
 
