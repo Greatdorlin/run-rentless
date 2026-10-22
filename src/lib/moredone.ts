@@ -8,6 +8,15 @@ export const moreDonePlans = {
 export type MoreDoneSeats = keyof typeof moreDonePlans;
 export type MoreDoneCountry = "ng" | "rw" | "other";
 
+export const moreDonePaymentPhone = "250799904461";
+export const moreDoneCohortDates = "14–21 November 2026";
+
+export function moreDonePaymentRequest(firstName: string, lastName: string, seats: MoreDoneSeats, country: MoreDoneCountry) {
+  const url = new URL(`https://wa.me/${moreDonePaymentPhone}`);
+  url.searchParams.set("text", `I want to register for the MoreDone With AI Challenge. My name is ${firstName} ${lastName}. Please send me payment details for ${moreDonePlans[seats].label.toLowerCase()} (${moreDonePrice(seats, country)}) so I can complete my payment.`);
+  return url.toString();
+}
+
 export function moreDonePrice(seats: MoreDoneSeats, country: MoreDoneCountry) {
   const plan = moreDonePlans[seats];
   if (country === "ng") return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(plan.amount / 100);

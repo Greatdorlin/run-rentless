@@ -1,5 +1,5 @@
 import { isMoreDoneNairaSeats, moreDonePlans } from "@/lib/moredone";
-import { sendMoreDoneCheckoutReminder } from "@/lib/moredone-email";
+import { sendMoreDoneCheckoutReminder, sendMoreDonePaymentRequest } from "@/lib/moredone-email";
 import { listMoreDoneCheckoutCandidates, markMoreDonePaid, markMoreDoneReminderAccepted } from "@/lib/moredone-sender";
 
 export const dynamic = "force-dynamic";
@@ -9,15 +9,21 @@ export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) return new Response(null, { status: 401 });
   const key = process.env.PAYSTACK_SECRET_KEY;
-  if (!key) return Response.json({ error: "Payment verification unavailable" }, { status: 503 });
   let checked = 0;
   let reminded = 0;
   let recovered = 0;
   let failed = 0;
   try {
     const candidates = await listMoreDoneCheckoutCandidates();
-    for (const candidate of candidates.slice(0, 20)) {
+    for (const candidate of candidates.slice(0, 5)) {
       try {
+        if (candidate.country !== "ng") {
+          const emailId = await sendMoreDonePaymentRequest(candidate.email, candidate.firstName, candidate.seats, candidate.country, candidate.url, true);
+          await markMoreDoneReminderAccepted(candidate.email, candidate.reference, emailId);
+          reminded += 1;
+          continue;
+        }
+        if (!key) { failed += 1; continue; }
         const response = await fetch(`https://api.paystack.co/transaction/verify/${candidate.reference}`, {
           headers: { Authorization: `Bearer ${key}` }, cache: "no-store", signal: AbortSignal.timeout(10000),
         });

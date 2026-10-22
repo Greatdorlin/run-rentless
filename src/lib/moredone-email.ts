@@ -1,7 +1,7 @@
-import { moreDonePlans, type MoreDoneSeats } from "@/lib/moredone";
+import { moreDonePlans, moreDonePrice, moreDoneCohortDates, type MoreDoneSeats, type MoreDoneCountry } from "@/lib/moredone";
 
 const money = (seats: MoreDoneSeats) => `₦${(moreDonePlans[seats].amount / 100).toLocaleString("en-NG")}`;
-const placeLabel = (seats: MoreDoneSeats) => seats === 1 ? "one place" : seats === 3 ? "three places" : "five places";
+const placeLabel = (seats: MoreDoneSeats) => seats === 1 ? "one place" : seats === 2 ? "two places" : seats === 3 ? "three places" : "five places";
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] || character);
 
 function layout(firstName: string, title: string, paragraphs: string[], action?: { label: string; url: string }) {
@@ -42,9 +42,20 @@ export function sendMoreDoneCheckoutReminder(email: string, firstName: string, s
   return send(email, firstName, "Still want to join MoreDone?", text, layout(firstName, "Your checkout is still here.", [`You chose ${label} for ${total}, but we have not confirmed a payment.`, "If you still want to join, you can return to checkout below.", "Already paid? Do not pay again. Reply to this email and we will check it."], { label: "Return to checkout", url }));
 }
 
+export function sendMoreDonePaymentRequest(email: string, firstName: string, seats: MoreDoneSeats, country: MoreDoneCountry, url: string, reminder = false) {
+  const total = moreDonePrice(seats, country);
+  const paragraphs = [
+    `You selected ${placeLabel(seats)} for ${total} in the MoreDone 7-Day AI Business Challenge, ${moreDoneCohortDates}.`,
+    "Bring the website, customer tracker or business tool you want to build. We will guide you through its first working version.",
+    "Use the button below to ask our payment team for the details. Your message already includes your name and chosen places.",
+    "If you have already paid, reply with your payment reference so we can confirm your place.",
+  ];
+  return send(email, firstName, reminder ? "Complete your MoreDone registration" : "Your MoreDone payment details", `Hi ${firstName},\n\n${paragraphs.join("\n\n")}\n\n${url}`, layout(firstName, "Your next step: complete your payment.", paragraphs, { label: "Get payment details on WhatsApp", url }));
+}
+
 export function sendMoreDonePaymentConfirmation(email: string, firstName: string, seats: MoreDoneSeats, reference: string) {
   const label = placeLabel(seats);
   const total = money(seats);
   const text = `Hi ${firstName},\n\nYour MoreDone payment is confirmed. You have ${label} in the 7-Day AI Business Challenge.\n\nPaid: ${total}\nPayment reference: ${reference}\n\nWe will email your challenge schedule and joining details. Bring the business problem or idea you want to work on. You will use a paid AI building tool during the week; we will help you choose and set it up before the first workshop. That subscription is separate from the challenge fee.\n\nQuestions? Reply to this email.\n\nRun Rentless`;
-  return send(email, firstName, "Your MoreDone payment is confirmed", text, layout(firstName, "Your place is confirmed.", [`Your payment of ${total} for ${label} is complete.`, `Payment reference: ${reference}`, "We will email your challenge schedule and joining details. Bring the problem or idea you want to work on.", "You will use a paid AI building tool during the week. We will help you choose and set it up before the first workshop. That subscription is separate from the challenge fee."]));
+  return send(email, firstName, "Your MoreDone payment is confirmed", `${text}\n\nCohort: ${moreDoneCohortDates}`, layout(firstName, "Your place is confirmed.", [`Your payment of ${total} for ${label} is complete.`, `Your cohort runs ${moreDoneCohortDates}, live online with GD. Workshop times and joining links will arrive by email.`, `Payment reference: ${reference}`, "Bring the problem or idea you want to work on. We will help you choose the first feature to build.", "You will use a paid AI building tool during the week. We will help you choose and set it up before the first workshop. That subscription is separate from the challenge fee."]));
 }

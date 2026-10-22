@@ -84,6 +84,6 @@ export function OfferCheckout() {
       {message && <p className="offer-error" role="alert">{message} <a href="mailto:info@runrentless.com?subject=AI%20Execution%20Lab%20booking">Contact Run Rentless</a></p>}
       <p className="offer-form__note">Payment is handled by Paystack. We never see your card details. By continuing, you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
     </form>}
-    <p className="offer-partner-contact">Questions about bringing your team? <a href="https://wa.me/25079904461" target="_blank" rel="noopener noreferrer">WhatsApp Navrademy at +250 799 044 661 ↗</a></p>
+    <p className="offer-partner-contact">Questions about bringing your team? <a href="https://wa.me/250799904461" target="_blank" rel="noopener noreferrer">WhatsApp Navrademy at +250 799 904 461 ↗</a></p>
   </div>;
 }

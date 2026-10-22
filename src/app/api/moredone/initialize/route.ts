@@ -1,6 +1,6 @@
-import { cleanMoreDoneText, isMoreDoneNairaSeats, isMoreDoneSeats, moreDonePlans, moreDonePrice, moreDoneProjects, type MoreDoneCountry } from "@/lib/moredone";
+import { cleanMoreDoneText, isMoreDoneNairaSeats, isMoreDoneSeats, moreDonePlans, moreDonePaymentRequest, moreDoneProjects, type MoreDoneCountry } from "@/lib/moredone";
 import { saveMoreDoneCheckoutUrl, saveMoreDoneLead } from "@/lib/moredone-sender";
-import { sendMoreDoneCheckoutLink } from "@/lib/moredone-email";
+import { sendMoreDoneCheckoutLink, sendMoreDonePaymentRequest } from "@/lib/moredone-email";
 import { readPublicForm } from "@/lib/public-form-request";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ const headers = { "Cache-Control": "no-store" };
 const fail = (message: string, status: number) => Response.json({ error: message }, { status, headers });
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production" && request.headers.get("origin") !== "https://www.runrentless.com") {
+  if (process.env.NODE_ENV === "production" && !["https://www.runrentless.com", "https://runrentless.com"].includes(request.headers.get("origin") || "")) {
     return fail("Please start from the MoreDone page.", 403);
   }
   const parsed = await readPublicForm(request, 5000);
@@ -42,10 +42,12 @@ export async function POST(request: Request) {
     return fail("We could not save your details. Please try again before paying.", 502);
   }
   if (paymentCountry !== "ng") {
-    const message = `I want to register for the More Done With AI Challenge. My name is ${firstName} ${lastName}. I would need the payment details to complete my payment for ${moreDonePlans[seats].label.toLowerCase()} (${moreDonePrice(seats, paymentCountry)}).`;
-    const url = new URL("https://wa.me/25079904461");
-    url.searchParams.set("text", message);
-    return Response.json({ url: url.toString(), paymentRoute: paymentCountry }, { headers });
+    const url = moreDonePaymentRequest(firstName, lastName, seats, paymentCountry);
+    try { await saveMoreDoneCheckoutUrl(email, reference, url); }
+    catch (error) { console.error("MoreDone payment request sync failed", error instanceof Error ? error.message : "Unknown error"); }
+    try { await sendMoreDonePaymentRequest(email, firstName, seats, paymentCountry, url); }
+    catch (error) { console.error("MoreDone payment request email failed", error instanceof Error ? error.message : "Unknown error"); }
+    return Response.json({ url, paymentRoute: paymentCountry }, { headers });
   }
   try {
     const response = await fetch("https://api.paystack.co/transaction/initialize", {

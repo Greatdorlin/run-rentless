@@ -1,4 +1,4 @@
-import { isMoreDoneNairaSeats, type MoreDoneCountry, type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
+import { isMoreDoneSeats, moreDonePaymentRequest, type MoreDoneCountry, type MoreDoneSeats, moreDonePlans } from "@/lib/moredone";
 import { sendMoreDonePaymentConfirmation } from "@/lib/moredone-email";
 
 const base = "https://api.sender.net/v2";
@@ -131,7 +131,7 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     "MoreDone reminder accepted": "Not sent",
     "MoreDone amount USD": lead.paymentCountry === "other" ? String(moreDonePlans[lead.seats].usd) : "Not applicable",
     "MoreDone amount RWF": lead.paymentCountry === "rw" ? String(moreDonePlans[lead.seats].rwf) : "Not applicable",
-    "MoreDone payment country": lead.paymentCountry === "ng" ? "Nigeria" : lead.paymentCountry === "rw" ? "Rwanda" : "Other countries",
+    "MoreDone payment country": lead.paymentCountry === "ng" ? "Nigeria" : lead.paymentCountry === "rw" ? "Rwanda" : "Global",
     "MoreDone payment route": nigeria ? "Paystack" : "WhatsApp payment request",
   };
   if (!fieldTitles.every((title) => fieldNames[title])) throw new Error("Sender fields unavailable");
@@ -164,7 +164,7 @@ export async function saveMoreDoneCheckoutUrl(email: string, reference: string, 
   if (!response.ok) throw new Error(`Sender checkout URL save ${response.status}`);
 }
 
-export type MoreDoneCheckoutCandidate = { email: string; firstName: string; reference: string; seats: MoreDoneSeats; url: string };
+export type MoreDoneCheckoutCandidate = { email: string; firstName: string; reference: string; seats: MoreDoneSeats; url: string; country: MoreDoneCountry };
 
 export async function listMoreDoneCheckoutCandidates(): Promise<MoreDoneCheckoutCandidate[]> {
   const group = await groupId();
@@ -185,14 +185,23 @@ export async function listMoreDoneCheckoutCandidates(): Promise<MoreDoneCheckout
       const value = (title: string) => String(record?.columns?.find((column) => column.title === title)?.value || "");
       const reference = value("MoreDone payment reference");
       const seats = Number(value("MoreDone seats"));
-      const url = value("MoreDone checkout URL");
+      const country: MoreDoneCountry = value("MoreDone payment country") === "Nigeria" ? "ng" : value("MoreDone payment country") === "Rwanda" ? "rw" : "other";
+      const status = value("MoreDone payment status");
+      const needsConfirmation = status === "Paid" && !value("MoreDone payment email accepted").startsWith(`${reference}:`);
+      const needsReminder = ["Checkout started", "Awaiting payment details"].includes(status) && value("MoreDone reminder accepted") === "Not sent";
       const submitted = new Date(value("MoreDone submitted at")).getTime();
-      if (value("MoreDone payment status") !== "Checkout started" || value("MoreDone reminder accepted") !== "Not sent" ||
+      if ((!needsConfirmation && !needsReminder) ||
         value("MoreDone business").includes("(email test)") || !/^rrmd_[a-f0-9]{32}$/.test(reference) ||
-        !isMoreDoneNairaSeats(seats) || !Number.isFinite(submitted) || now - submitted < 18 * 60 * 60 * 1000 || now - submitted > 21 * 24 * 60 * 60 * 1000) return null;
+        !isMoreDoneSeats(seats) || !Number.isFinite(submitted) || now - submitted < 18 * 60 * 60 * 1000 || now - submitted > 21 * 24 * 60 * 60 * 1000) return null;
+      if (country !== "ng") {
+        if (status === "Paid") return null;
+        const url = moreDonePaymentRequest(record?.firstname || "", record?.lastname || "", seats, country);
+        return { email: entry.email!, firstName: record?.firstname || "there", reference, seats, url, country };
+      }
+      const url = value("MoreDone checkout URL");
       const checkout = new URL(url);
       if (checkout.protocol !== "https:" || checkout.hostname !== "checkout.paystack.com") return null;
-      return { email: entry.email!, firstName: record?.firstname || "there", reference, seats, url };
+      return { email: entry.email!, firstName: record?.firstname || "there", reference, seats, url, country };
     }));
     for (const item of batch) if (item.status === "fulfilled" && item.value) candidates.push(item.value);
   }
