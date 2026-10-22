@@ -50,25 +50,22 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
   ];
   return <div className="md-page">
     <section className="md-hero" aria-labelledby="md-title"><div className="md-shell md-hero__grid">
+      <div className="md-hero__top"><p className="md-brandline">Run Rentless <span>×</span> Navrademy</p><CountrySwitcher country={country} /></div>
       <div className="md-hero__copy">
-        <div className="md-hero__top"><p className="md-brandline">Run Rentless <span>×</span> Navrademy</p><CountrySwitcher country={country} /></div>
         <p className="md-program">MoreDone: The 7-Day AI Business Challenge</p>
         <h1 id="md-title">Build the tool your business keeps wishing it had.</h1>
         <p className="md-hero__lede">Bring a business problem you want fixed. In seven days, we will help you build and test a working first version of the tool you need for your company, your job or a client. No coding experience needed.</p>
         <div className="md-hero__actions"><a className="md-button" href="#join">Join the cohort <span aria-hidden="true">↗</span></a><a className="md-text-link" href="#projects">See what you could build ↓</a></div>
         <p className="md-hero__micro">Bringing your team? <a href="#team-offer">See the team offer ↗</a></p>
       </div>
-      <div className="md-hero__visual" aria-label="Illustration of a customer follow-up tool you could build">
-        <div className="md-visual__top"><span>ONE POSSIBLE BUILD</span><span className="md-status"><i /> CUSTOMER FOLLOW-UP</span></div>
-        <div className="md-visual__body">
-          <div className="md-visual__head"><span>YOUR OWN SALES TOOL</span><strong>Every customer. Every next step.</strong></div>
-          <div className="md-visual__summary"><span>NEW ENQUIRY</span><b aria-hidden="true">→</b><span>RIGHT PERSON</span><b aria-hidden="true">→</b><span>TIMELY REPLY</span></div>
-          <div className="md-visual__list-label"><span>CUSTOMER WORK</span><span>NEXT ACTION</span></div>
-          <div className="md-visual__item"><div><i className="md-visual__dot" /><span><strong>Website enquiry</strong><small>Someone asked for a quote</small></span></div><em>Assign owner ↗</em></div>
-          <div className="md-visual__item"><div><i className="md-visual__dot md-visual__dot--orange" /><span><strong>Quote sent</strong><small>Customer is waiting to hear back</small></span></div><em>Follow up today ↗</em></div>
+      <div className="md-hero__visual" aria-label="Examples of what you can build and learn in MoreDone">
+        <div className="md-build-stack__top"><span>ONE CHALLENGE</span><strong>Many ways to use it.</strong></div>
+        <div className="md-build-stack">
+          <article className="md-build-card md-build-card--crm"><span className="md-build-card__number">01 / BUILD</span><h2>Your own CRM</h2><p>See every lead and who needs a reply.</p><span className="md-build-card__mark" aria-hidden="true">↗</span></article>
+          <article className="md-build-card md-build-card--stock"><span className="md-build-card__number">02 / BUILD</span><h2>A stock manager</h2><p>Know what is selling and what needs restocking.</p><span className="md-build-card__mark" aria-hidden="true">↗</span></article>
+          <article className="md-build-card md-build-card--ads"><span className="md-build-card__number">03 / LEARN</span><h2>ChatGPT Ads</h2><p>Prepare an offer and your first campaign.</p><span className="md-build-card__mark" aria-hidden="true">↗</span></article>
         </div>
-        <div className="md-visual__foot"><span>BUILT AROUND YOUR WORK</span><span>NOT ANOTHER GENERIC APP <b aria-hidden="true">↗</b></span></div>
-        <p>Illustration only. Your first build starts with a problem you choose.</p>
+        <p className="md-build-stack__note">Choose one tool to build. The ads lesson is part of the challenge.</p>
       </div>
     </div></section>
 
