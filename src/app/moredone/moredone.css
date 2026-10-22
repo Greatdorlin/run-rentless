@@ -37,9 +37,13 @@
 .md-brandline{margin-bottom:22px}
 .md-program{margin:0 0 14px;color:var(--md-lime);font-size:13px;font-weight:850;letter-spacing:.035em}
 .md-hero__micro a{color:#e5ffc1;text-decoration:underline;text-underline-offset:4px}
+.md-for{background:#dceacb;color:var(--md-ink);padding:25px 0}.md-for__grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.md-for__grid>div{padding:12px 22px 12px 0}.md-for__grid>div+div{border-left:1px solid #a7bfaa;padding-left:32px}.md-for strong{font-family:var(--display);font-size:24px}.md-for p{max-width:500px;margin:8px 0 0;color:#345246;font-size:14px;line-height:1.5}
 #md-pricing-title{scroll-margin-top:100px}
 .md-software h3{max-width:480px;margin:42px 0 18px;font-size:clamp(30px,3.2vw,46px);line-height:1.08;letter-spacing:-.045em}
 .md-software p{max-width:480px;font-size:15px;line-height:1.65}
+.md-website{display:grid;grid-template-columns:1fr 1fr;gap:35px;margin-top:18px;padding:clamp(25px,4vw,48px);background:#e9f5d8;color:var(--md-ink)}.md-website span{font-size:11px;font-weight:850;letter-spacing:.14em;color:#386143}.md-website h3{max-width:550px;margin:18px 0 0;font-size:clamp(29px,3.2vw,45px);line-height:1.05;letter-spacing:-.045em}.md-website p{align-self:center;max-width:520px;margin:0;font-size:16px;line-height:1.65}
+.md-days__layout>div>p:not(.md-section-kicker){max-width:480px;color:#536256;font-size:16px;line-height:1.65}.md-days__tools{margin-top:30px;padding:20px;background:#e6eddf;border-left:4px solid #39734e}.md-days__tools strong{color:var(--md-ink)}
+.md-form__tool-note{margin:4px 0 22px;padding:15px 17px;background:#e6eddf;color:#274b37;font-size:12px;line-height:1.55}.md-form__tool-note strong{color:var(--md-ink)}
 .md-hero__visual{transform:none}
 .md-join{scroll-margin-top:78px}
 .md-form__seats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
@@ -57,4 +61,4 @@
 .md-payment-result p{line-height:1.5}
 .md-payment-result code{display:block;overflow-wrap:anywhere;margin:20px 0}
 .md-page .md-form__seats button:focus-visible,.md-page textarea:focus-visible{outline:3px solid #19593f;outline-offset:3px}
-@media(max-width:680px){.md-hero{padding:36px 0 46px}.md-hero__grid{gap:0}.md-hero h1{font-size:clamp(40px,10.4vw,56px);line-height:1.02}.md-hero__lede{font-size:16px;line-height:1.45}.md-hero__actions{margin-top:22px;gap:12px}.md-hero__micro{margin-top:18px}.md-hero__visual{display:none}.md-program{font-size:12px}.md-form__seats button{min-height:70px;padding:10px}.md-form__seats strong{font-size:19px}}
+@media(max-width:680px){.md-hero{padding:36px 0 46px}.md-hero__grid{gap:0}.md-hero h1{font-size:clamp(40px,10.4vw,56px);line-height:1.02}.md-hero__lede{font-size:16px;line-height:1.45}.md-hero__actions{margin-top:22px;gap:12px}.md-hero__micro{margin-top:18px}.md-hero__visual{display:none}.md-program{font-size:12px}.md-for__grid,.md-website{grid-template-columns:1fr}.md-for__grid{gap:5px}.md-for__grid>div{padding:12px 0}.md-for__grid>div+div{border-left:0;border-top:1px solid #a7bfaa;padding:18px 0 12px}.md-website{gap:18px}.md-form__seats button{min-height:70px;padding:10px}.md-form__seats strong{font-size:19px}}
