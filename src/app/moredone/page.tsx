@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { moreDonePlans, moreDonePrice, type MoreDoneCountry, type MoreDoneSeats } from "@/lib/moredone";
 import { MoreDoneForm } from "./more-done-form";
-import { MoreDoneSound } from "./more-done-sound";
 import { CountrySwitcher } from "./country-switcher";
 import "./moredone.css";
 
@@ -58,14 +57,18 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
         <p className="md-hero__lede">That idea you keep wishing someone would build for your business? Bring it to MoreDone. In seven days, we will help you build and test a working first version, even if you have never coded.</p>
         <div className="md-hero__actions"><a className="md-button" href="#join">Join the cohort <span aria-hidden="true">↗</span></a><a className="md-text-link" href="#projects">See what you could build ↓</a></div>
         <p className="md-hero__micro">Bringing your team? <a href="#team-offer">See the team offer ↗</a></p>
-        <MoreDoneSound />
       </div>
-      <div className="md-hero__visual" aria-label="Illustrative customer follow-up project">
-        <div className="md-visual__top"><span>ONE POSSIBLE BUILD</span><span className="md-status"><i /> Customer enquiries</span></div>
-        <div className="md-visual__body"><div className="md-visual__head"><span>Sales follow-up</span><strong>Every enquiry has a next step.</strong></div>
-          <div className="md-visual__flow"><div><span>Customer</span><strong>Enquires</strong></div><b>→</b><div><span>Team</span><strong>Gets owner</strong></div><b>→</b><div><span>Follow-up</span><strong>Gets reminder</strong></div></div>
-          <div className="md-visual__row"><span>New request</span><span>Assigned to Timi</span></div><div className="md-visual__row"><span>Quote sent</span><span>Check back tomorrow</span></div>
-        </div><p>Example only. Your first build starts with a problem you choose.</p>
+      <div className="md-hero__visual" aria-label="Illustration of a customer follow-up tool you could build">
+        <div className="md-visual__top"><span>ONE POSSIBLE BUILD</span><span className="md-status"><i /> CUSTOMER FOLLOW-UP</span></div>
+        <div className="md-visual__body">
+          <div className="md-visual__head"><span>YOUR OWN SALES TOOL</span><strong>Every customer. Every next step.</strong></div>
+          <div className="md-visual__summary"><span>NEW ENQUIRY</span><b aria-hidden="true">→</b><span>RIGHT PERSON</span><b aria-hidden="true">→</b><span>TIMELY REPLY</span></div>
+          <div className="md-visual__list-label"><span>CUSTOMER WORK</span><span>NEXT ACTION</span></div>
+          <div className="md-visual__item"><div><i className="md-visual__dot" /><span><strong>Website enquiry</strong><small>Someone asked for a quote</small></span></div><em>Assign owner ↗</em></div>
+          <div className="md-visual__item"><div><i className="md-visual__dot md-visual__dot--orange" /><span><strong>Quote sent</strong><small>Customer is waiting to hear back</small></span></div><em>Follow up today ↗</em></div>
+        </div>
+        <div className="md-visual__foot"><span>BUILT AROUND YOUR WORK</span><span>NOT ANOTHER GENERIC APP <b aria-hidden="true">↗</b></span></div>
+        <p>Illustration only. Your first build starts with a problem you choose.</p>
       </div>
     </div></section>
 
