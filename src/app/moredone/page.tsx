@@ -54,20 +54,20 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
       <div className="md-hero__copy">
         <p className="md-program">MoreDone: The 7-Day AI Business Challenge</p>
         <h1 id="md-title">Build the tool your business keeps wishing it had.</h1>
-        <p className="md-hero__lede">Bring a business problem you want fixed. In seven days, we will help you build and test a working first version of the tool you need for your company, your job or a client. No coding experience needed.</p>
+        <p className="md-hero__lede">Build the website you need or the tool you keep paying to use. Choose one project for your business, your job or a client, and we will guide you through building and testing its first version in seven days. You do not need to know how to code.</p>
         <div className="md-hero__actions"><a className="md-button" href="#join">Join the cohort <span aria-hidden="true">↗</span></a><a className="md-text-link" href="#projects">See what you could build ↓</a></div>
         <p className="md-hero__micro">Bringing your team? <a href="#team-offer">See the team offer ↗</a></p>
       </div>
       <div className="md-hero__visual" aria-label="Examples of what you can build and learn in MoreDone">
         <div className="md-build-stack">
-          <article className="md-build-card"><h2>Your own CRM</h2><p>Keep customer details and follow-ups together.</p></article>
-          <article className="md-build-card"><h2>Stock manager</h2><p>Track sales and know when to restock.</p></article>
-          <article className="md-build-card"><h2>Business website</h2><p>Show your work and bring in enquiries.</p></article>
-          <article className="md-build-card"><h2>Booking app</h2><p>Let customers book an available time.</p></article>
-          <article className="md-build-card"><h2>Client portal</h2><p>Share files and project updates in one place.</p></article>
-          <article className="md-build-card"><h2>AI assistant</h2><p>Prepare quotes and replies for you to review.</p></article>
+          <article className="md-build-card"><h2>Your own CRM</h2><p>Know who is ready to buy and who needs a follow-up.</p></article>
+          <article className="md-build-card"><h2>Stock manager</h2><p>See what is running low before a customer asks.</p></article>
+          <article className="md-build-card"><h2>Business website</h2><p>Give customers a reason to trust you and a way to buy.</p></article>
+          <article className="md-build-card"><h2>Booking app</h2><p>Let customers choose a time without a string of messages.</p></article>
+          <article className="md-build-card"><h2>Client portal</h2><p>Let clients find their files and check progress without calling.</p></article>
+          <article className="md-build-card"><h2>AI assistant</h2><p>Turn your business information into a draft quote or reply.</p></article>
         </div>
-        <div className="md-build-ads"><h2>Learn ChatGPT Ads</h2><p>Plan your first campaign and track the enquiries it brings.</p></div>
+        <div className="md-build-ads"><h2>Learn ChatGPT Ads</h2><p>Learn how to put your offer in front of people exploring what to buy.</p></div>
       </div>
     </div></section>
 
