@@ -216,9 +216,9 @@
 @media(prefers-reduced-motion:reduce){.md-idea__spark span,.md-idea__screen li{animation:none}.md-idea__form input{transition:none}}
 
 /* The document already offsets anchors for the fixed header. */
-#join,#team-offer,#projects,#md-registration,#md-country{scroll-margin-top:0}
+#join,#team-offer,#projects,#md-registration,#md-country,#md-idea-title{scroll-margin-top:0}
 #md-registration:focus{outline:none}
-@media(max-width:680px){#join,#team-offer,#projects,#md-registration{scroll-margin-top:60px}}
+@media(max-width:680px){#join,#team-offer,#projects,#md-registration,#md-idea-title{scroll-margin-top:60px}}
 
 .md-teacher .md-teacher__portrait{width:160px;height:160px;image-rendering:auto}
 .md-companion{position:fixed;left:0;top:0;width:92px;height:108px;z-index:45;opacity:0;pointer-events:none;transition:opacity 140ms;will-change:transform;isolation:isolate}
