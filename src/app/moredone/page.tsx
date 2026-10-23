@@ -8,6 +8,7 @@ import { CountrySwitcher } from "./country-switcher";
 import { CostScenario } from "./cost-scenario";
 import { IdeaPreview } from "./idea-preview";
 import { PlanChoice } from "./plan-choice";
+import { BuildCompanion } from "./build-companion";
 import "./moredone.css";
 
 export const metadata: Metadata = {
@@ -62,6 +63,7 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
     { seats: 5 as const, note: "Bring more of your team into the build. Pay less per person." },
   ];
   return <div className="md-page">
+    <BuildCompanion />
     <section className="md-hero" aria-labelledby="md-title"><div className="md-shell md-hero__grid">
       <div className="md-hero__top"><p className="md-brandline">Run Rentless <span>×</span> Navrademy</p><CountrySwitcher country={country} /></div>
       <div className="md-hero__copy">
@@ -92,7 +94,7 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
     </div></section>
 
     <IdeaPreview />
-    <section className="md-teacher" aria-label="Your instructor"><div className="md-shell md-teacher__inner"><Image className="md-teacher__portrait" src="/gd-moredone.png" width={160} height={160} sizes="(max-width: 680px) 88px, 120px" alt="Greatdorlin Wisdom (GD), founder of Run Rentless" /><div><h2>Learn with GD, founder of Run Rentless.</h2><p>GD builds AI systems for businesses and will guide you through building your own. Try the <Link href="/#audit">Run Rentless tool audit</Link> to see one of the tools behind the business.</p></div></div></section>
+    <section className="md-teacher" aria-label="Your instructor"><div className="md-shell md-teacher__inner"><Image className="md-teacher__portrait" src="/gd-moredone.png" width={320} height={320} quality={90} sizes="(max-width: 680px) 112px, 160px" alt="Greatdorlin Wisdom (GD), founder of Run Rentless" /><div><h2>Learn with GD, founder of Run Rentless.</h2><p>GD builds AI systems for businesses and will guide you through building your own. Try the <Link href="/#audit">Run Rentless tool audit</Link> to see one of the tools behind the business.</p></div></div></section>
     <section className="md-numbers" aria-labelledby="md-cost-title"><div className="md-shell">
       <div className="md-heading"><h2 id="md-cost-title">That idea you keep putting off? Build it with us.</h2><span>Your shop needs a stock tracker. A client needs a website. You spend every Friday putting the same report together. Bring one problem and leave with a first version you can use and improve.</span></div>
       <div className="md-numbers__grid">

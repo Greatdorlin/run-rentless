@@ -2,6 +2,7 @@ import { cleanMoreDoneText, isMoreDoneNairaSeats, isMoreDoneSeats, moreDonePlans
 import { saveMoreDoneCheckoutUrl, saveMoreDoneLead } from "@/lib/moredone-sender";
 import { sendMoreDoneCheckoutLink, sendMoreDonePaymentRequest } from "@/lib/moredone-email";
 import { readPublicForm } from "@/lib/public-form-request";
+import { after } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -35,18 +36,19 @@ export async function POST(request: Request) {
   const key = process.env.PAYSTACK_SECRET_KEY;
   if (!process.env.SENDER_API || (paymentCountry === "ng" && !key)) return fail("Registration is temporarily unavailable. Please try again shortly.", 503);
   const reference = `rrmd_${crypto.randomUUID().replaceAll("-", "")}`;
+  const paymentRequestUrl = paymentCountry !== "ng" ? moreDonePaymentRequest(firstName, lastName, seats, paymentCountry) : undefined;
   try {
-    await saveMoreDoneLead({ firstName, lastName, email, company, teamSize: teamSize || "Not shared", project, goal, seats, reference, paymentCountry });
+    await saveMoreDoneLead({ firstName, lastName, email, company, teamSize: teamSize || "Not shared", project, goal, seats, reference, paymentCountry, checkoutUrl: paymentRequestUrl });
   } catch (error) {
     console.error("MoreDone Sender sync failed", error instanceof Error ? error.message : "Unknown error");
     return fail("We could not save your details. Please try again before paying.", 502);
   }
   if (paymentCountry !== "ng") {
-    const url = moreDonePaymentRequest(firstName, lastName, seats, paymentCountry);
-    try { await saveMoreDoneCheckoutUrl(email, reference, url); }
-    catch (error) { console.error("MoreDone payment request sync failed", error instanceof Error ? error.message : "Unknown error"); }
-    try { await sendMoreDonePaymentRequest(email, firstName, seats, paymentCountry, url); }
-    catch (error) { console.error("MoreDone payment request email failed", error instanceof Error ? error.message : "Unknown error"); }
+    const url = paymentRequestUrl!;
+    after(async () => {
+      try { await sendMoreDonePaymentRequest(email, firstName, seats, paymentCountry, url); }
+      catch (error) { console.error("MoreDone payment request email failed", error instanceof Error ? error.message : "Unknown error"); }
+    });
     return Response.json({ url, paymentRoute: paymentCountry }, { headers });
   }
   try {
@@ -65,12 +67,13 @@ export async function POST(request: Request) {
     if (!response.ok || !result.status || !url || result.data?.reference !== reference) throw new Error(`Paystack initialize ${response.status}`);
     const checkout = new URL(url);
     if (checkout.protocol !== "https:" || checkout.hostname !== "checkout.paystack.com" || checkout.username || checkout.password) throw new Error("Unexpected Paystack checkout URL");
-    try { await saveMoreDoneCheckoutUrl(email, reference, url); }
-    catch (error) { console.error("MoreDone checkout URL sync failed", error instanceof Error ? error.message : "Unknown error"); }
-    let checkoutEmailSent = false;
-    try { await sendMoreDoneCheckoutLink(email, firstName, seats, url); checkoutEmailSent = true; }
-    catch (error) { console.error("MoreDone checkout email failed", error instanceof Error ? error.message : "Unknown error"); }
-    return Response.json({ url, checkoutEmailSent }, { headers });
+    after(async () => {
+      await Promise.allSettled([
+        saveMoreDoneCheckoutUrl(email, reference, url).catch((error) => { console.error("MoreDone checkout URL sync failed", error instanceof Error ? error.message : "Unknown error"); }),
+        sendMoreDoneCheckoutLink(email, firstName, seats, url).catch((error) => { console.error("MoreDone checkout email failed", error instanceof Error ? error.message : "Unknown error"); }),
+      ]);
+    });
+    return Response.json({ url }, { headers });
   } catch (error) {
     console.error("MoreDone checkout failed", error instanceof Error ? error.message : "Unknown error");
     return fail("Paystack could not open checkout. Your details are saved, and no payment was taken. Please try again.", 502);

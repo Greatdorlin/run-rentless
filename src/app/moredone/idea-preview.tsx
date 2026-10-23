@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+
+const ideaExamples = ["A booking app for my salon", "A tool to manage my stock", "A website that takes orders", "A customer tracker for my business", "An assistant that prepares quotes", "A portal for my clients", "A dashboard for my weekly reports"];
 
 const concepts = [
   { match: /book|salon|appointment|schedule/i, name: "Booking app", steps: ["Choose a time", "Confirm the booking", "See the schedule"], rows: [["Tuesday", "10:30 AM", "Available"], ["Service selected", "Time reserved", "Confirmation prepared"], ["New appointment", "Customer details", "Follow-up reminder"]], actions: ["Book this time", "Confirm appointment", "Try the flow again"] },
@@ -13,10 +15,17 @@ const concepts = [
 
 export function IdeaPreview() {
   const [idea, setIdea] = useState("");
+  const [exampleIndex, setExampleIndex] = useState(0);
+  const [focused, setFocused] = useState(false);
   const [preview, setPreview] = useState("");
   const [step, setStep] = useState(0);
   const [choice, setChoice] = useState("10:30 AM");
   const [quantity, setQuantity] = useState(2);
+  useEffect(() => {
+    if (focused || idea || preview || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => { if (!document.hidden) setExampleIndex((index) => (index + 1) % ideaExamples.length); }, 3800);
+    return () => window.clearInterval(timer);
+  }, [focused, idea, preview]);
   const concept = concepts.find((item) => item.match.test(preview)) || concepts[5];
   function show(value: string) { if (!value.trim()) return; setIdea(value); setPreview(value.trim()); setStep(0); }
   function submit(event: FormEvent) { event.preventDefault(); show(idea); }
@@ -26,7 +35,7 @@ export function IdeaPreview() {
   }
   return <section className="md-idea-section" aria-labelledby="md-idea-title"><div className="md-shell"><div className="md-idea">
     <div className="md-idea__intro"><div className="md-idea__spark" aria-hidden="true"><span /><span /><span /><i>✦</i></div><h2 id="md-idea-title">Your idea could be the next thing you build.</h2><p>Build a booking app for your salon or a shop that tracks every order. Enter your idea and try a clickable example before you join.</p></div>
-    <form onSubmit={submit} className="md-idea__form"><label className="md-idea__label" htmlFor="md-idea-input">What would you like to build?</label><div><input id="md-idea-input" value={idea} onChange={(event) => setIdea(event.target.value)} maxLength={180} required placeholder="A booking app for my salon…" /><button type="submit">Preview my idea <span aria-hidden="true">↗</span></button></div></form>
+    <form onSubmit={submit} className="md-idea__form"><label className="md-idea__label" htmlFor="md-idea-input">What would you like to build?</label><div><input id="md-idea-input" value={idea} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} onChange={(event) => setIdea(event.target.value)} maxLength={180} required placeholder={`${ideaExamples[exampleIndex]}…`} /><button type="submit">Preview my idea <span aria-hidden="true">↗</span></button></div></form>
     <div className="md-idea__examples"><span>Or choose one:</span>{["A customer tracker for my business", "A stock manager for my shop", "A booking app for my salon"].map((example) => <button type="button" key={example} onClick={() => show(example)}>{example}</button>)}</div>
     {!preview && <div className="md-idea__invite"><span>You can learn to build this yourself, with our help.</span><a href="#join">Join the cohort ↗</a></div>}
     {preview && <div className="md-idea__reveal" key={preview}>

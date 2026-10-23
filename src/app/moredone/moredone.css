@@ -219,3 +219,22 @@
 #join,#team-offer,#projects,#md-registration,#md-country{scroll-margin-top:0}
 #md-registration:focus{outline:none}
 @media(max-width:680px){#join,#team-offer,#projects,#md-registration{scroll-margin-top:60px}}
+
+.md-teacher .md-teacher__portrait{width:160px;height:160px;image-rendering:auto}
+.md-companion{position:fixed;left:0;top:0;width:92px;height:108px;z-index:45;opacity:0;pointer-events:none;transition:opacity 140ms;will-change:transform;isolation:isolate}
+.md-companion--visible{opacity:1;pointer-events:auto}
+.md-companion__body{position:absolute;bottom:0;left:8px;width:72px;height:76px;padding:0;border:0;background:transparent;cursor:grab;touch-action:none;filter:drop-shadow(0 8px 10px #00190f55)}
+.md-companion__body:active{cursor:grabbing}
+.md-companion__body svg{display:block;width:100%;height:100%}
+.md-companion__body svg{transition:transform 120ms ease-out}.md-companion__body:active svg{transform:scale(.97)}.md-companion__dismiss{z-index:2}
+.md-companion__feet{fill:none;stroke:#eaffaf;stroke-width:4;stroke-linecap:round}
+.md-companion__eyes{transform-origin:36px 36px;animation:md-companion-blink 9s infinite}
+.md-companion__dismiss{position:absolute;right:0;top:0;display:grid;place-items:center;min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:#cde5bc;text-shadow:0 1px 4px #031e19;font-size:20px;cursor:pointer}
+.md-companion__dismiss:before{content:"";position:absolute;inset:9px;border-radius:50%;background:#10372b;border:1px solid #80a371;z-index:-1}
+.md-companion__hint{position:absolute;right:92px;bottom:20px;width:max-content;padding:8px 12px;border:1px solid #82a667;border-radius:20px;background:#10372b;color:#efffd9;font-size:12px;opacity:0;pointer-events:none;transition:opacity 140ms}
+.md-companion:focus-within .md-companion__hint,.md-companion:hover .md-companion__hint{opacity:1}
+.md-companion__body:focus-visible,.md-companion__dismiss:focus-visible{outline:2px solid #ff8c61;outline-offset:1px;border-radius:16px}
+@keyframes md-companion-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}}
+@media(max-width:680px){.md-teacher .md-teacher__portrait{width:112px;height:112px}.md-companion__hint{display:none}}
+@media(prefers-reduced-motion:reduce){.md-companion,.md-companion__hint,.md-companion__body svg{transition:none}.md-companion__eyes{animation:none}.md-companion__body:active svg{transform:none;opacity:.8}}
+@media(prefers-contrast:more){.md-companion__dismiss:before{border:2px solid #eaffaf}.md-companion__body{filter:drop-shadow(0 0 2px #031e19)}}

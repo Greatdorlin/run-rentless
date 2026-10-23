@@ -111,7 +111,7 @@ export function MoreDoneForm({ country, initialSeats = 1 }: { country: MoreDoneC
     <div className="md-form__trap" aria-hidden="true"><label>Website<input name="companyWebsite" tabIndex={-1} autoComplete="off" /></label></div>
     <label className="md-form__consent"><input name="consent" type="checkbox" required /><span>Send me my payment and course information by email. I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>
     {error && <p className="md-form__error" role="alert">{error}</p>}
-    <button className="md-button md-form__pay" type="submit" disabled={busy}>{busy ? nigeria ? "Opening secure checkout…" : "Preparing your payment request…" : nigeria ? `Pay ${moreDonePrice(seats, country)} securely` : "Continue to payment details"} <span aria-hidden="true">↗</span></button>
+    <button className="md-button md-form__pay" type="submit" disabled={busy}>{busy ? nigeria ? "Opening secure checkout…" : "Opening payment details…" : nigeria ? `Pay ${moreDonePrice(seats, country)} securely` : "Continue to payment details"} <span aria-hidden="true">↗</span></button>
     <small>{nigeria ? "Our payment partner processes your card details securely." : "We will open a message with your name and chosen places. Your place is confirmed after payment."}</small>
   </form>;
 }

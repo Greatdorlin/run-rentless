@@ -23,6 +23,7 @@ export type MoreDoneLead = {
   firstName: string; lastName: string; email: string; company: string; teamSize: string;
   project: string; goal: string; seats: MoreDoneSeats; reference: string;
   paymentCountry: MoreDoneCountry;
+  checkoutUrl?: string;
 };
 
 async function sender(path: string, init: RequestInit = {}) {
@@ -54,7 +55,17 @@ function items(value: unknown): Field[] {
   return found;
 }
 
+let groupCache: { value: string; until: number } | undefined;
+let fieldCache: { value: Record<string, string>; until: number } | undefined;
+
 async function groupId() {
+  if (groupCache && groupCache.until > Date.now()) return groupCache.value;
+  const value = await loadGroupId();
+  groupCache = { value, until: Date.now() + 300000 };
+  return value;
+}
+
+async function loadGroupId() {
   const listed = await sender("/groups?limit=100");
   if (!listed.ok) throw new Error(`Sender group lookup ${listed.status}`);
   const existing = items(await listed.json()).find((item) => item.title === groupTitle);
@@ -71,7 +82,14 @@ async function groupId() {
   return result.data.id;
 }
 
-async function fields() {
+async function fields(refresh = false) {
+  if (!refresh && fieldCache && fieldCache.until > Date.now()) return fieldCache.value;
+  const value = await loadFields();
+  fieldCache = { value, until: Date.now() + 300000 };
+  return value;
+}
+
+async function loadFields() {
   const known: Field[] = [];
   for (let page = 1; page <= 10; page += 1) {
     const response = await sender(`/fields?limit=100&page=${page}`);
@@ -113,9 +131,16 @@ function retainedFields(record: Subscriber | undefined, fieldNames: Record<strin
   }));
 }
 
+async function subscriberAndFields(email: string) {
+  const [record, cachedNames] = await Promise.all([subscriber(email), fields()]);
+  const fieldNames = record?.columns?.some((column) => column.title && !cachedNames[column.title]) ? await fields(true) : cachedNames;
+  return [record, fieldNames] as const;
+}
+
 export async function saveMoreDoneLead(lead: MoreDoneLead) {
   const nigeria = lead.paymentCountry === "ng";
-  const [group, fieldNames, existing] = await Promise.all([groupId(), fields(), subscriber(lead.email)]);
+  const [group, cachedFieldNames, existing] = await Promise.all([groupId(), fields(), subscriber(lead.email)]);
+  const fieldNames = existing?.columns?.some((column) => column.title && !cachedFieldNames[column.title]) ? await fields(true) : cachedFieldNames;
   const expected: Record<(typeof fieldTitles)[number], string> = {
     "MoreDone business": lead.company,
     "MoreDone team size": lead.teamSize,
@@ -127,7 +152,7 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     "MoreDone payment status": nigeria ? "Checkout started" : "Awaiting payment details",
     "MoreDone submitted at": new Date().toISOString(),
     "MoreDone payment email accepted": "Not sent",
-    "MoreDone checkout URL": nigeria ? "Not ready" : "WhatsApp payment request",
+    "MoreDone checkout URL": lead.checkoutUrl || (nigeria ? "Not ready" : "WhatsApp payment request"),
     "MoreDone reminder accepted": "Not sent",
     "MoreDone amount USD": lead.paymentCountry === "other" ? String(moreDonePlans[lead.seats].usd) : "Not applicable",
     "MoreDone amount RWF": lead.paymentCountry === "rw" ? String(moreDonePlans[lead.seats].rwf) : "Not applicable",
@@ -143,20 +168,22 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     body: JSON.stringify({ email: lead.email, firstname: lead.firstName, lastname: lead.lastName, groups, fields: profileFields, trigger_automation: false }),
   });
   if (!saved.ok) throw new Error(`Sender subscriber save ${saved.status}`);
-  const identity = await sender(path, { method: "PATCH", body: JSON.stringify({ firstname: lead.firstName, lastname: lead.lastName, fields: profileFields, trigger_automation: false }) });
-  if (!identity.ok) throw new Error(`Sender name update ${identity.status}`);
   for (const delay of [0, 250, 700]) {
     if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
     const stored = await subscriber(lead.email);
     const correctGroup = stored?.subscriber_tags?.some((item) => item.id === group || item.title === groupTitle);
     const correctFields = fieldTitles.every((title) => stored?.columns?.some((column) => column.title === title && String(column.value) === expected[title]));
     if (correctGroup && correctFields && stored?.firstname === lead.firstName && stored?.lastname === lead.lastName) return;
+    if (delay === 0 && (stored?.firstname !== lead.firstName || stored?.lastname !== lead.lastName)) {
+      const identity = await sender(path, { method: "PATCH", body: JSON.stringify({ firstname: lead.firstName, lastname: lead.lastName, fields: profileFields, trigger_automation: false }) });
+      if (!identity.ok) throw new Error(`Sender name update ${identity.status}`);
+    }
   }
   throw new Error("Sender did not retain MoreDone answers");
 }
 
 export async function saveMoreDoneCheckoutUrl(email: string, reference: string, url: string) {
-  const [record, fieldNames] = await Promise.all([subscriber(email), fields()]);
+  const [record, fieldNames] = await subscriberAndFields(email);
   if (!record?.columns?.some((column) => column.title === "MoreDone payment reference" && column.value === reference)) throw new Error("MoreDone checkout record missing");
   const response = await sender(`/subscribers/${encodeURIComponent(email)}`, {
     method: "PATCH", body: JSON.stringify({ fields: { ...retainedFields(record, fieldNames), [fieldNames["MoreDone checkout URL"]]: url }, trigger_automation: false }),
@@ -209,7 +236,7 @@ export async function listMoreDoneCheckoutCandidates(): Promise<MoreDoneCheckout
 }
 
 export async function markMoreDoneReminderAccepted(email: string, reference: string, emailId: string) {
-  const [record, fieldNames] = await Promise.all([subscriber(email), fields()]);
+  const [record, fieldNames] = await subscriberAndFields(email);
   if (!record?.columns?.some((column) => column.title === "MoreDone payment reference" && column.value === reference)) throw new Error("MoreDone reminder record missing");
   const response = await sender(`/subscribers/${encodeURIComponent(email)}`, {
     method: "PATCH", body: JSON.stringify({ fields: { ...retainedFields(record, fieldNames), [fieldNames["MoreDone reminder accepted"]]: `${reference}:${emailId}` }, trigger_automation: false }),
@@ -218,7 +245,7 @@ export async function markMoreDoneReminderAccepted(email: string, reference: str
 }
 
 export async function markMoreDonePaid(email: string, reference: string, seats: MoreDoneSeats) {
-  const [record, fieldNames] = await Promise.all([subscriber(email), fields()]);
+  const [record, fieldNames] = await subscriberAndFields(email);
   if (!record || !record.columns?.some((column) => column.title === "MoreDone payment reference" && column.value === reference)) {
     throw new Error("MoreDone payment record missing");
   }

@@ -21,8 +21,10 @@ function load(path, dependencies = {}, globals = {}) {
   assert.equal([...link.searchParams.keys()].length, 1);
 
   let saves = 0, emails = 0;
+  const followUps = [];
   const publicForm = load('src/lib/public-form-request.ts', {}, { TextDecoder });
   const initialize = load('src/app/api/moredone/initialize/route.ts', {
+    'next/server': { after: callback => { followUps.push(callback); } },
     '@/lib/moredone': plans,
     '@/lib/moredone-sender': { saveMoreDoneLead: async () => { saves++; }, saveMoreDoneCheckoutUrl: async () => {} },
     '@/lib/moredone-email': { sendMoreDonePaymentRequest: async () => { emails++; } },
@@ -36,7 +38,9 @@ function load(path, dependencies = {}, globals = {}) {
     assert.equal(new URL(result.url).pathname, '/250799904461');
     assert.match(new URL(result.url).searchParams.get('text'), /330,000/);
   }
-  assert.equal(saves, 2); assert.equal(emails, 2);
+  assert.equal(saves, 2); assert.equal(emails, 0, 'Email must not hold up the payment response');
+  await Promise.all(followUps.map(task => task()));
+  assert.equal(emails, 2, 'Both payment emails still run after the response');
   const denied = await initialize.POST(new Request('https://www.runrentless.com/api/moredone/initialize', { method: 'POST', headers: { origin: 'https://example.com' }, body: '{}' }));
   assert.equal(denied.status, 403); assert.equal(saves, 2);
   const malformed = await initialize.POST(new Request('https://www.runrentless.com/api/moredone/initialize', { method: 'POST', headers: { origin: 'https://www.runrentless.com', 'Content-Type': 'application/json' }, body: '{' }));
@@ -61,5 +65,40 @@ function load(path, dependencies = {}, globals = {}) {
   assert.equal(result.status, 200);
   assert.equal(confirmations, 1); assert.equal(reminders, 2);
   assert.equal((await result.json()).failed, 0);
+  const fieldList = [{ title: 'Existing answer', field_name: 'existing', id: 'existing' }];
+  let profile = { firstname: 'Old', lastname: 'Name', columns: [{ title: 'Existing answer', value: 'Keep this' }], subscriber_tags: [] };
+  let metadataCalls = 0;
+  const actualSender = load('src/lib/moredone-sender.ts', {
+    '@/lib/moredone': plans, '@/lib/moredone-email': {},
+  }, { setTimeout, fetch: async (url, options = {}) => {
+    const path = new URL(url).pathname;
+    const method = options.method || 'GET';
+    const body = options.body ? JSON.parse(options.body) : {};
+    if (path === '/v2/groups') { metadataCalls++; return Response.json({ data: [{ id: 'group', title: 'MoreDone Challenge' }] }); }
+    if (path === '/v2/fields') {
+      metadataCalls++;
+      if (method === 'POST') fieldList.push({ title: body.title, field_name: `field${fieldList.length}`, id: `id${fieldList.length}` });
+      return Response.json({ data: fieldList, meta: { last_page: 1 } });
+    }
+    assert.ok(path.startsWith('/v2/subscribers'));
+    if (method === 'PATCH' || method === 'POST') {
+      profile = { firstname: body.firstname || profile.firstname, lastname: body.lastname || profile.lastname, subscriber_tags: body.groups ? [{ id: 'group', title: 'MoreDone Challenge' }] : profile.subscriber_tags, columns: Object.entries(body.fields || {}).map(([name, value]) => ({ title: fieldList.find(field => field.field_name === name)?.title, value })) };
+    }
+    return Response.json({ data: profile });
+  } });
+  const lead = { firstName: 'Example', lastName: 'Buyer', email: 'buyer@example.com', company: 'Demo', teamSize: 'Just me', project: 'Business website', goal: 'An order page', seats: 3, reference: 'rrmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', paymentCountry: 'rw', checkoutUrl: plans.moreDonePaymentRequest('Example', 'Buyer', 3, 'rw') };
+  await actualSender.saveMoreDoneLead(lead);
+  const firstLookups = metadataCalls;
+  await actualSender.saveMoreDoneLead(lead);
+  assert.equal(metadataCalls, firstLookups, 'Warm requests reuse schema lookups');
+  assert.equal(profile.firstname, 'Example');
+  assert.equal(profile.columns.find(field => field.title === 'Existing answer').value, 'Keep this');
+  assert.equal(profile.columns.find(field => field.title === 'MoreDone checkout URL').value, lead.checkoutUrl);
+  fieldList.push({ title: 'New answer', field_name: 'new_answer', id: 'new' });
+  profile.columns.push({ title: 'New answer', value: 'Also keep this' });
+  await actualSender.saveMoreDoneLead(lead);
+  assert.ok(metadataCalls > firstLookups, 'New fields refresh the cache');
+  assert.equal(profile.columns.find(field => field.title === 'New answer').value, 'Also keep this');
+  console.log('PASS schema cache saves lookups, stored names and answers verified, new fields retained, WhatsApp URL saved before handoff, email deferred until after response');
   console.log('PASS correct WhatsApp recipient, encoded names and totals, both production origins, registration sync and email, cron authorization, paid checkout suppression, international reminder');
 })().catch(error => { console.error(error); process.exitCode = 1; });
