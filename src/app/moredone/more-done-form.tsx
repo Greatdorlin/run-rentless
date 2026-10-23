@@ -10,8 +10,8 @@ const examples = [
   "An assistant that turns a customer brief into a first quote",
 ];
 
-export function MoreDoneForm({ country }: { country: MoreDoneCountry }) {
-  const [seats, setSeats] = useState<MoreDoneSeats>(1);
+export function MoreDoneForm({ country, initialSeats = 1 }: { country: MoreDoneCountry; initialSeats?: MoreDoneSeats }) {
+  const [seats, setSeats] = useState<MoreDoneSeats>(initialSeats);
   useEffect(() => {
     const chooseSeats = (event: Event) => {
       const value = (event as CustomEvent<unknown>).detail;
@@ -48,9 +48,6 @@ export function MoreDoneForm({ country }: { country: MoreDoneCountry }) {
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#join`);
       document.getElementById("join")?.scrollIntoView({ block: "start" });
     }
-    if (params.get("seats") === "2" && country !== "ng") queueMicrotask(() => setSeats(2));
-    if (params.get("seats") === "3") queueMicrotask(() => setSeats(3));
-    if (params.get("seats") === "5") queueMicrotask(() => setSeats(5));
     const returned = params.get("reference");
     if (!returned) return;
     queueMicrotask(() => { setReference(returned); setPayment("checking"); });

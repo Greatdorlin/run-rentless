@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { headers } from "next/headers";
-import { moreDonePlans, moreDonePrice, moreDoneCohortDates, type MoreDoneCountry, type MoreDoneSeats } from "@/lib/moredone";
+import { isMoreDoneSeats, moreDonePlans, moreDonePrice, moreDoneCohortDates, type MoreDoneCountry, type MoreDoneSeats } from "@/lib/moredone";
 import { MoreDoneForm } from "./more-done-form";
 import { CountrySwitcher } from "./country-switcher";
 import { CostScenario } from "./cost-scenario";
@@ -40,7 +40,7 @@ const days = [
   ["07", "Show the working tool", "Run the agreed test and leave with a clear next step for using or improving it."],
 ];
 
-export default async function MoreDonePage({ searchParams }: { searchParams: Promise<{ country?: string; region?: string }> }) {
+export default async function MoreDonePage({ searchParams }: { searchParams: Promise<{ country?: string; region?: string; seats?: string }> }) {
   const requested = await searchParams;
   const detected = (await headers()).get("x-vercel-ip-country")?.toUpperCase();
   const country: MoreDoneCountry = requested.country === "ng" || requested.country === "rw" || requested.country === "other"
@@ -48,6 +48,8 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
     : requested.region === "ng" ? "ng" : requested.region === "international" ? "other"
     : detected === "NG" ? "ng" : detected === "RW" ? "rw" : "other";
   const isNigeria = country === "ng";
+  const requestedSeats = Number(requested.seats);
+  const initialSeats = isMoreDoneSeats(requestedSeats) && (!isNigeria || requestedSeats !== 2) ? requestedSeats : 1;
   const amount = (seats: MoreDoneSeats) => moreDonePrice(seats, country);
   const savings = (seats: MoreDoneSeats) => country === "ng"
     ? `₦${((moreDonePlans[1].amount * seats - moreDonePlans[seats].amount) / 100).toLocaleString("en-NG")}`
@@ -107,6 +109,6 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
 
     <section className="md-pricing" aria-labelledby="md-pricing-title"><div className="md-shell" id="team-offer"><div className="md-heading"><h2 id="md-pricing-title">How many people are joining?</h2><span>Every place includes both live workshops, daily exercises, help with your build and the ChatGPT Ads lesson.</span></div><div className="md-price-list">{offers.map(({ seats }) => <PlanChoice key={seats} seats={seats} country={country}><span className="md-price-row__people">{seats === 1 ? "Just me" : `${seats} people`}<small>{seats === 1 ? "One place" : "Team package"}</small></span><span className="md-price-row__total">{amount(seats)}<small>Total for {seats === 1 ? "one person" : `all ${seats} people`}</small></span><span className="md-price-row__saving">{seats > 1 ? `Save ${savings(seats)}` : "Individual price"}</span><span className="md-price-row__action">Choose <span aria-hidden="true">↗</span></span></PlanChoice>)}</div><p className="md-pricing__fine">Team savings compared with buying individual places. Prices shown for {country === "ng" ? "Nigeria" : country === "rw" ? "Rwanda" : "Global"}. <a href="#md-country">Change country ↑</a></p><p className="md-pricing__fine">A paid AI building tool, hosting and ad spend are separate where needed. We explain these before you use them.</p></div></section>
     <section className="md-faq" aria-labelledby="md-faq-title"><div className="md-shell md-faq__layout"><h2 id="md-faq-title">Questions before you join</h2><div className="md-faq__list"><details><summary>Can I get a refund?</summary><p>Yes. Before you begin, we agree on what your first tool will do and the test it must pass. Attend the classes and complete the exercises. If the tool fails that test after you follow the guidance, we give you another guided session free. If it still fails, we refund your challenge fee.</p></details><details><summary>Can I join without a business or coding experience?</summary><p>Yes. You can build something for your job, a client or an idea of your own. We show you how to give AI instructions, make changes and check that your tool works.</p></details><details><summary>What do I finish with?</summary><p>One first version that completes the job we agreed on, plus a review of how it works and what to improve next. Choose a project such as a customer tracker, booking app or website. Larger ideas begin with one main feature.</p></details><details><summary>Can I see something built by Run Rentless?</summary><p>Try our <Link href="/#audit">free tool audit</Link> to add tools and see your costs, or explore the <Link href="/webinar">webinar registration page</Link>. They show the kinds of forms, reports and customer journeys you can learn to build.</p></details><details><summary>Can I run ChatGPT Ads from my country?</summary><p>The lesson covers your offer, ad and customer enquiry page. Submitting an ad requires access to ChatGPT Ads in your market. <a href="https://help.openai.com/en/articles/20001245-ads-manager-availability" target="_blank" rel="noopener noreferrer">Check current availability</a> before budgeting for a campaign. Advertising spend is separate.</p></details></div></div></section>
-    <section className="md-join" aria-labelledby="md-join-title"><div className="md-shell md-join__layout" id="join"><div><h2 id="md-join-title">Join the cohort. Bring your idea.</h2><p className="md-cohort-date"><strong>{moreDoneCohortDates}</strong><span>Live online with GD · Workshop times and joining links sent by email</span></p><p>Choose your places below. {isNigeria ? "Complete your payment to join." : "Continue to our payment team on WhatsApp to complete your registration."}</p></div><MoreDoneForm country={country} /></div></section>
+    <section className="md-join" aria-labelledby="md-join-title"><div className="md-shell md-join__layout" id="join"><div><h2 id="md-join-title">Join the cohort. Bring your idea.</h2><p className="md-cohort-date"><strong>{moreDoneCohortDates}</strong><span>Live online with GD · Workshop times and joining links sent by email</span></p><p>Choose your places below. {isNigeria ? "Complete your payment to join." : "Continue to our payment team on WhatsApp to complete your registration."}</p></div><MoreDoneForm country={country} initialSeats={initialSeats} /></div></section>
   </div>;
 }
