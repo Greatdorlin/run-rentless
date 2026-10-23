@@ -214,3 +214,8 @@
   .md-teacher p{font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){.md-idea__spark span,.md-idea__screen li{animation:none}.md-idea__form input{transition:none}}
+
+/* The document already offsets anchors for the fixed header. */
+#join,#team-offer,#projects,#md-registration,#md-country{scroll-margin-top:0}
+#md-registration:focus{outline:none}
+@media(max-width:680px){#join,#team-offer,#projects,#md-registration{scroll-margin-top:60px}}

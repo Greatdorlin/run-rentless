@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, type FormEvent } from "react";
-import { moreDonePlans, moreDonePrice, moreDoneProjects, type MoreDoneCountry, type MoreDoneSeats } from "@/lib/moredone";
+import { isMoreDoneSeats, moreDonePlans, moreDonePrice, moreDoneProjects, type MoreDoneCountry, type MoreDoneSeats } from "@/lib/moredone";
 
 const examples = [
   "An online store that tracks every order and low-stock item",
@@ -12,6 +12,14 @@ const examples = [
 
 export function MoreDoneForm({ country }: { country: MoreDoneCountry }) {
   const [seats, setSeats] = useState<MoreDoneSeats>(1);
+  useEffect(() => {
+    const chooseSeats = (event: Event) => {
+      const value = (event as CustomEvent<unknown>).detail;
+      if (isMoreDoneSeats(value) && (country !== "ng" || value !== 2)) setSeats(value);
+    };
+    window.addEventListener("moredone:seats", chooseSeats);
+    return () => window.removeEventListener("moredone:seats", chooseSeats);
+  }, [country]);
   const nigeria = country === "ng";
   const saving = country === "ng"
     ? (moreDonePlans[1].amount * seats - moreDonePlans[seats].amount) / 100
@@ -36,6 +44,10 @@ export function MoreDoneForm({ country }: { country: MoreDoneCountry }) {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    if (window.location.hash === "#checkout") {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#join`);
+      document.getElementById("join")?.scrollIntoView({ block: "start" });
+    }
     if (params.get("seats") === "2" && country !== "ng") queueMicrotask(() => setSeats(2));
     if (params.get("seats") === "3") queueMicrotask(() => setSeats(3));
     if (params.get("seats") === "5") queueMicrotask(() => setSeats(5));
@@ -82,7 +94,7 @@ export function MoreDoneForm({ country }: { country: MoreDoneCountry }) {
     <a href={`mailto:info@runrentless.com?subject=MoreDone%20payment%20${encodeURIComponent(reference)}`}>Contact Run Rentless ↗</a>
   </div>;
 
-  return <form className="md-form" onSubmit={submit}>
+  return <form className="md-form" id="md-registration" tabIndex={-1} aria-label="Join the MoreDone cohort" onSubmit={submit}>
     <div className="md-form__top"><span>MORE DONE</span><strong>Join the challenge</strong></div>
     <p className="md-form__country-note">Prices shown for {country === "ng" ? "Nigeria" : country === "rw" ? "Rwanda" : "Global"}. <a href="#md-country">Change country ↑</a></p>
     <p className="md-form__choice-label">How many people are joining?</p>

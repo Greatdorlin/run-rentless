@@ -4,7 +4,6 @@ import { Logo } from "./logo";
 const footerLinks = [
   ["Free Audit", "/#audit"],
   ["Past Webinar", "/webinar"],
-  ["AI Execution Lab", "/webinar-pay"],
   ["MoreDone Challenge", "/moredone"],
   ["How It Works", "/#how-it-works"],
   ["Leads Desk", "/#leads-desk"],

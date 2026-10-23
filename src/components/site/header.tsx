@@ -55,8 +55,8 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <Link className="button button--small" href={isMoreDone ? "/moredone#join" : pathname === "/webinar-pay" ? "/webinar-pay#checkout" : "/#audit"} onClick={() => setOpen(false)}>
-            {isMoreDone ? "Join the cohort" : pathname === "/webinar-pay" ? "Choose your seats" : "Start Free Audit"}
+          <Link className="button button--small" href={isMoreDone || pathname === "/webinar-pay" ? "/moredone#join" : "/#audit"} onClick={() => setOpen(false)}>
+            {isMoreDone || pathname === "/webinar-pay" ? "Join the cohort" : "Start Free Audit"}
           </Link>
         </nav>
       </div>

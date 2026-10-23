@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [{ source: "/webinar-pay", destination: "/moredone", permanent: true, missing: [{ type: "query", key: "reference" }] }];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: [
