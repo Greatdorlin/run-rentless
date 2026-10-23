@@ -10,12 +10,13 @@ const examples = [
   "An assistant that turns a customer brief into a first quote",
 ];
 
-export function MoreDoneForm({ country, initialSeats = 1 }: { country: MoreDoneCountry; initialSeats?: MoreDoneSeats }) {
+export function MoreDoneForm({ country, initialSeats = 1, initialPackageSelected = false }: { country: MoreDoneCountry; initialSeats?: MoreDoneSeats; initialPackageSelected?: boolean }) {
   const [seats, setSeats] = useState<MoreDoneSeats>(initialSeats);
+  const [packageSelected, setPackageSelected] = useState(initialPackageSelected);
   useEffect(() => {
     const chooseSeats = (event: Event) => {
       const value = (event as CustomEvent<unknown>).detail;
-      if (isMoreDoneSeats(value) && (country !== "ng" || value !== 2)) setSeats(value);
+      if (isMoreDoneSeats(value) && (country !== "ng" || value !== 2)) { setSeats(value); setPackageSelected(true); }
     };
     window.addEventListener("moredone:seats", chooseSeats);
     return () => window.removeEventListener("moredone:seats", chooseSeats);
@@ -25,7 +26,7 @@ export function MoreDoneForm({ country, initialSeats = 1 }: { country: MoreDoneC
     ? (moreDonePlans[1].amount * seats - moreDonePlans[seats].amount) / 100
     : country === "rw" ? moreDonePlans[1].rwf * seats - moreDonePlans[seats].rwf
     : moreDonePlans[1].usd * seats - moreDonePlans[seats].usd;
-  const savingLabel = new Intl.NumberFormat("en", { style: "currency", currency: nigeria ? "NGN" : country === "rw" ? "RWF" : "USD", maximumFractionDigits: 0 }).format(saving);
+  const savingLabel = new Intl.NumberFormat(nigeria ? "en-NG" : "en", { style: "currency", currency: nigeria ? "NGN" : country === "rw" ? "RWF" : "USD", maximumFractionDigits: 0 }).format(saving);
   const [exampleIndex, setExampleIndex] = useState(0);
   const [goal, setGoal] = useState("");
   useEffect(() => {
@@ -41,6 +42,13 @@ export function MoreDoneForm({ country, initialSeats = 1 }: { country: MoreDoneC
   const [reference, setReference] = useState("");
   const [payment, setPayment] = useState<"checking" | "paid" | "unconfirmed" | null>(null);
   const [confirmationAccepted, setConfirmationAccepted] = useState(false);
+  function selectPackage(count: MoreDoneSeats) {
+    setSeats(count); setPackageSelected(true);
+    const url = new URL(window.location.href);
+    url.searchParams.set("seats", String(count));
+    url.hash = "md-registration";
+    window.history.replaceState(null, "", url);
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -94,20 +102,22 @@ export function MoreDoneForm({ country, initialSeats = 1 }: { country: MoreDoneC
   return <form className="md-form" id="md-registration" tabIndex={-1} aria-label="Join the MoreDone cohort" onSubmit={submit}>
     <div className="md-form__top"><span>MORE DONE</span><strong>Join the challenge</strong></div>
     <p className="md-form__country-note">Prices shown for {country === "ng" ? "Nigeria" : country === "rw" ? "Rwanda" : "Global"}. <a href="#md-country">Change country ↑</a></p>
+    {packageSelected ? <div className="md-form__selected" aria-live="polite"><div><span>{moreDonePlans[seats].label}</span><strong>{moreDonePrice(seats, country)}</strong>{saving > 0 && <small>Your team saves {savingLabel}.</small>}</div><button type="button" onClick={() => setPackageSelected(false)}>Change</button></div> : <>
     <p className="md-form__choice-label">How many people are joining?</p>
     <div className={`md-form__seats${nigeria ? "" : " md-form__seats--four"}`} role="group" aria-label="Number of places">
-      {([1, 2, 3, 5] as const).filter((count) => !nigeria || count !== 2).map((count) => <button key={count} type="button" aria-pressed={seats === count} onClick={() => setSeats(count)}>
+      {([1, 2, 3, 5] as const).filter((count) => !nigeria || count !== 2).map((count) => <button key={count} type="button" aria-pressed={seats === count} onClick={() => selectPackage(count)}>
         <span>{moreDonePlans[count].label}</span><strong>{moreDonePrice(count, country)}</strong>
       </button>)}
     </div>
     <p className="md-form__amount" aria-live="polite">{moreDonePlans[seats].label} · Total: <strong>{moreDonePrice(seats, country)}</strong></p>
     {saving > 0 && <p className="md-form__saving" aria-live="polite">You save {savingLabel} compared with individual places.</p>}
+    </>}
     <div className="md-form__row"><label>First name<input name="firstName" autoComplete="given-name" required maxLength={80} /></label><label>Last name<input name="lastName" autoComplete="family-name" required maxLength={80} /></label></div>
     <label>Email for your place<input name="email" type="email" autoComplete="email" required maxLength={160} /></label>
     <label>Business or project name<input name="company" autoComplete="organization" required maxLength={120} /></label>
     <div className="md-form__row"><label>How big is your business? <span className="md-form__optional">Optional</span><select name="teamSize" defaultValue=""><option value="">Choose if you know</option><option>Just me</option><option>2–5 people</option><option>6–15 people</option><option>16+ people</option></select></label><label>What would you build?<select name="project" required defaultValue=""><option value="" disabled>Choose a starting point</option>{moreDoneProjects.map((project) => <option key={project}>{project}</option>)}</select></label></div>
     <label className="md-form__idea">What would you love to build? <span className="md-form__optional">Optional</span><textarea name="goal" maxLength={400} rows={3} value={goal} onChange={(event) => setGoal(event.target.value)} placeholder={examples[exampleIndex]} /><span className="md-form__idea-hint">Tell us the idea in your own words. We will help you shape the first build.</span></label>
-    <p className="md-form__tool-note">You will need access to a paid AI building tool during the challenge. That subscription is separate. We will help you choose and set it up before the first workshop.</p>
+    <p className="md-form__tool-note">Our team helps you choose your AI tool and get it ready for class. Your AI subscription is paid separately from your challenge place.</p>
     <div className="md-form__trap" aria-hidden="true"><label>Website<input name="companyWebsite" tabIndex={-1} autoComplete="off" /></label></div>
     <label className="md-form__consent"><input name="consent" type="checkbox" required /><span>Send me my payment and course information by email. I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>
     {error && <p className="md-form__error" role="alert">{error}</p>}

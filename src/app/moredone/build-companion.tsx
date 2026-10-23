@@ -19,7 +19,7 @@ export function BuildCompanion() {
   const [typing, setTyping] = useState(false);
 
   function bounds() {
-    return { left: 12, right: Math.max(12, window.innerWidth - 104), top: 145, bottom: Math.max(145, window.innerHeight - 125) };
+    return { left: 32, right: Math.max(32, window.innerWidth - 104), top: 145, bottom: Math.max(145, window.innerHeight - 165) };
   }
   function clamp(point: Point) {
     const box = bounds();
@@ -119,6 +119,9 @@ export function BuildCompanion() {
   function openIdea() {
     document.getElementById("md-idea-title")?.scrollIntoView({ block: "start", behavior: reduced.current ? "instant" : "smooth" });
   }
+  function joinChallenge() {
+    document.getElementById("join")?.scrollIntoView({ block: "start", behavior: reduced.current ? "instant" : "smooth" });
+  }
   function keyboard(event: KeyboardEvent<HTMLButtonElement>) {
     const moves: Record<string, Point> = { ArrowLeft: { x: -32, y: 0 }, ArrowRight: { x: 32, y: 0 }, ArrowUp: { x: 0, y: -32 }, ArrowDown: { x: 0, y: 32 } };
     if (moves[event.key]) { event.preventDefault(); settle({ x: position.current.x + moves[event.key].x, y: position.current.y + moves[event.key].y }); }
@@ -132,8 +135,9 @@ export function BuildCompanion() {
 
   return <div ref={root} className={`md-companion${visible && !atForm && !typing ? " md-companion--visible" : ""}`} hidden={!visible} inert={!visible || atForm || typing}>
     <button className="md-companion__dismiss" type="button" aria-label="Hide companion" onClick={dismiss}>×</button>
+    <button className="md-companion__sign" type="button" onClick={joinChallenge}>Join the<br />challenge <span aria-hidden="true">↗</span></button>
     <button className="md-companion__body" type="button" aria-label="Move companion with arrow keys, or press Enter to try an idea" title="Drag to move. Click to try your idea." onPointerDown={down} onPointerMove={move} onPointerUp={event => release(event)} onPointerCancel={event => release(event, true)} onLostPointerCapture={event => { if (pointer.current) release(event, true); }} onKeyDown={keyboard} tabIndex={atForm || typing ? -1 : 0}>
-      <svg viewBox="0 0 72 72" aria-hidden="true"><defs><linearGradient id="md-buddy-shell" x2="0" y2="1"><stop stopColor="#ecffae"/><stop offset="1" stopColor="#b3e84c"/></linearGradient></defs><path className="md-companion__feet" d="M18 61l-4 5m40-5 4 5"/><path fill="url(#md-buddy-shell)" stroke="#e8ffb2" d="M14 22Q14 12 25 12h22q11 0 11 10l4 25q2 14-12 15H22Q8 61 10 47Z"/><rect x="17" y="25" width="38" height="24" rx="11" fill="#0a3025"/><g className="md-companion__eyes" fill="#e8ffb2"><ellipse cx="28" cy="36" rx="3" ry="4"/><ellipse cx="44" cy="36" rx="3" ry="4"/></g><path d="M32 43q4 3 8 0" fill="none" stroke="#e8ffb2" strokeWidth="1.5" strokeLinecap="round"/><path d="M36 12V6m-3 0h6" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="m5 35-3 7m65-7 3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/></svg>
+      <svg viewBox="0 0 72 72" aria-hidden="true"><defs><linearGradient id="md-buddy-shell" x2="0" y2="1"><stop stopColor="#ecffae"/><stop offset="1" stopColor="#b3e84c"/></linearGradient></defs><path className="md-companion__feet" d="M18 61l-4 5m40-5 4 5"/><path fill="url(#md-buddy-shell)" stroke="#e8ffb2" d="M14 22Q14 12 25 12h22q11 0 11 10l4 25q2 14-12 15H22Q8 61 10 47Z"/><rect x="17" y="25" width="38" height="24" rx="11" fill="#0a3025"/><g className="md-companion__eyes" fill="#e8ffb2"><ellipse cx="28" cy="36" rx="3" ry="4"/><ellipse cx="44" cy="36" rx="3" ry="4"/></g><g className="md-companion__cheeks" fill="#ff9166"><ellipse cx="23" cy="42" rx="3" ry="1.8"/><ellipse cx="49" cy="42" rx="3" ry="1.8"/></g><path className="md-companion__smile" d="M31 42q5 7 10 0" fill="none" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="M36 12V6m-3 0h6" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="m5 35-3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/><path className="md-companion__wave" d="m65 35 3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/></svg>
     </button><span className="md-companion__hint">Try your idea</span>
   </div>;
 }
