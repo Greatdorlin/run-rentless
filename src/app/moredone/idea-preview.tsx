@@ -25,11 +25,12 @@ export function IdeaPreview() {
     document.getElementById("join")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
   }
   return <section className="md-idea-section" aria-labelledby="md-idea-title"><div className="md-shell"><div className="md-idea">
-    <div className="md-idea__intro"><h2 id="md-idea-title">Try a little of what you could build.</h2><p>Enter your idea to open an example you can click through.</p></div>
+    <div className="md-idea__intro"><div className="md-idea__spark" aria-hidden="true"><span /><span /><span /><i>✦</i></div><h2 id="md-idea-title">Your idea could be the next thing you build.</h2><p>Build a booking app for your salon or a shop that tracks every order. Enter your idea and try a clickable example before you join.</p></div>
     <form onSubmit={submit} className="md-idea__form"><label className="md-idea__label" htmlFor="md-idea-input">What would you like to build?</label><div><input id="md-idea-input" value={idea} onChange={(event) => setIdea(event.target.value)} maxLength={180} required placeholder="A booking app for my salon…" /><button type="submit">Preview my idea <span aria-hidden="true">↗</span></button></div></form>
-    <div className="md-idea__examples"><span>Try an idea:</span>{["A CRM for my agency", "A stock manager for my shop", "A website for my business"].map((example) => <button type="button" key={example} onClick={() => show(example)}>{example}</button>)}</div>
+    <div className="md-idea__examples"><span>Or choose one:</span>{["A customer tracker for my business", "A stock manager for my shop", "A booking app for my salon"].map((example) => <button type="button" key={example} onClick={() => show(example)}>{example}</button>)}</div>
+    {!preview && <div className="md-idea__invite"><span>You can learn to build this yourself, with our help.</span><a href="#join">Join the cohort ↗</a></div>}
     {preview && <div className="md-idea__reveal" key={preview}>
-      <div className="md-idea__caption"><span>INTERACTIVE CONCEPT</span><button type="button" onClick={() => setPreview("")}>Close preview ×</button></div>
+      <div className="md-idea__caption"><span><i aria-hidden="true" /> YOUR CLICKABLE EXAMPLE</span><button type="button" onClick={() => setPreview("")}>Close preview ×</button></div>
       <h3 className="md-idea__name">{preview}</h3>
       <div className="md-idea__workspace"><div className="md-idea__steps" role="group" aria-label="Explore the suggested flow">{concept.steps.map((title, index) => <button key={title} type="button" aria-pressed={step === index} onClick={() => setStep(index)}><span>{index + 1}</span>{title}</button>)}</div>
         <div className="md-idea__screen" key={`${preview}-${step}`}><div className="md-idea__screen-bar"><i /><i /><i /><span>{concept.name}</span></div><h4>{concept.steps[step]}</h4>
@@ -40,7 +41,7 @@ export function IdeaPreview() {
           : <ul>{concept.rows[step].map((row) => <li key={row}><span aria-hidden="true">✓</span>{row}</li>)}</ul>}
           <button type="button" onClick={() => setStep((step + 1) % 3)}>{concept.actions[step]} <span aria-hidden="true">→</span></button></div>
       </div>
-      <div className="md-idea__handoff"><p>This is an example matched to your idea. Your challenge project starts with the job you want it to do.</p><button type="button" onClick={carryIdea}>Bring this idea to the challenge ↗</button></div>
+      <div className="md-idea__handoff"><p>Ready to build your own? Join the challenge and we will help you turn your idea into a working first version.</p><button type="button" onClick={carryIdea}>Join the cohort with this idea ↗</button></div>
     </div>}
   </div></div></section>;
 }

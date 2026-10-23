@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { headers } from "next/headers";
 import { moreDonePlans, moreDonePrice, moreDoneCohortDates, type MoreDoneCountry, type MoreDoneSeats } from "@/lib/moredone";
 import { MoreDoneForm } from "./more-done-form";
@@ -88,7 +89,7 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
     </div></section>
 
     <IdeaPreview />
-    <section className="md-teacher" aria-label="Your instructor"><div className="md-shell md-teacher__inner"><span className="md-teacher__avatar" aria-hidden="true">GD</span><div><h2>Learn with GD, founder of Run Rentless.</h2><p>GD builds AI systems for businesses and will guide you through building your own. Try the <Link href="/#audit">Run Rentless tool audit</Link> to see one of the tools behind the business.</p></div></div></section>
+    <section className="md-teacher" aria-label="Your instructor"><div className="md-shell md-teacher__inner"><Image className="md-teacher__portrait" src="/gd-moredone.png" width={160} height={160} sizes="(max-width: 680px) 88px, 120px" alt="Greatdorlin Wisdom (GD), founder of Run Rentless" /><div><h2>Learn with GD, founder of Run Rentless.</h2><p>GD builds AI systems for businesses and will guide you through building your own. Try the <Link href="/#audit">Run Rentless tool audit</Link> to see one of the tools behind the business.</p></div></div></section>
     <section className="md-numbers" aria-labelledby="md-cost-title"><div className="md-shell">
       <div className="md-heading"><h2 id="md-cost-title">That idea you keep putting off? Build it with us.</h2><span>Your shop needs a stock tracker. A client needs a website. You spend every Friday putting the same report together. Bring one problem and leave with a first version you can use and improve.</span></div>
       <div className="md-numbers__grid">
