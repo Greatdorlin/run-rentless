@@ -1,5 +1,6 @@
 .md-page{--md-ink:#031e19;--md-deep:#082a23;--md-lime:#c6ff00;--md-paper:#f4f5eb;--md-muted:#c7d2c7;background:var(--md-ink);color:#fdfff4;overflow:clip}
 .md-shell{width:min(1240px,calc(100% - 80px));margin-inline:auto}
+.md-listen-link{display:inline-flex;align-items:center;gap:10px;min-height:44px;margin-top:8px;padding:0;border:0;background:transparent;color:#dceccf;font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}.md-listen-link:hover{color:#c6ff00}
 .md-page a:focus-visible,.md-page button:focus-visible,.md-page input:focus-visible,.md-page select:focus-visible{outline:3px solid var(--md-lime);outline-offset:4px}
 .md-page h1,.md-page h2,.md-page h3{font-family:var(--display);font-weight:650}
 .md-hero{position:relative;padding:clamp(90px,9vw,148px) 0 115px;background:radial-gradient(circle at 74% 35%,#155d46 0,transparent 34%),linear-gradient(145deg,#031e19 10%,#092d24 100%)}

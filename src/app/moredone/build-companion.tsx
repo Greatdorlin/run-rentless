@@ -30,7 +30,7 @@ export function BuildCompanion() {
   }
   function paint(point: Point) {
     position.current = point;
-    if (root.current) root.current.style.transform = `translate3d(${point.x}px,${point.y}px,0)`;
+    if (root.current) root.current.style.transform = `translate3d(clamp(32px,${point.x}px,calc(100vw - 104px)),clamp(12px,${point.y}px,calc(100dvh - 165px)),0)`;
   }
   function settle(target: Point, initialVelocity: Point = { x: 0, y: 0 }) {
     cancelAnimationFrame(frame.current);
@@ -144,4 +144,8 @@ export function BuildCompanion() {
       <svg viewBox="0 0 72 72" aria-hidden="true"><defs><linearGradient id="md-buddy-shell" x2="0" y2="1"><stop stopColor="#ecffae"/><stop offset="1" stopColor="#b3e84c"/></linearGradient></defs><path className="md-companion__feet" d="M18 61l-4 5m40-5 4 5"/><path fill="url(#md-buddy-shell)" stroke="#e8ffb2" d="M14 22Q14 12 25 12h22q11 0 11 10l4 25q2 14-12 15H22Q8 61 10 47Z"/><rect x="17" y="25" width="38" height="24" rx="11" fill="#0a3025"/><g className="md-companion__eyes" fill="#e8ffb2"><ellipse cx="28" cy="36" rx="3" ry="4"/><ellipse cx="44" cy="36" rx="3" ry="4"/></g><g className="md-companion__cheeks" fill="#ff9166"><ellipse cx="23" cy="42" rx="3" ry="1.8"/><ellipse cx="49" cy="42" rx="3" ry="1.8"/></g><path className="md-companion__smile" d="M31 42q5 7 10 0" fill="none" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="M36 12V6m-3 0h6" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="m5 35-3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/><path className="md-companion__wave" d="m65 35 3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/></svg>
     </button><span className="md-companion__hint">{speaking ? "Talking you through it" : "Read or listen"}</span>
   </div></>;
+}
+
+export function ListenToTourButton() {
+  return <button type="button" className="md-listen-link" onClick={() => window.dispatchEvent(new Event("moredone:tour"))}>Listen to the tour <span aria-hidden="true">◖))</span></button>;
 }

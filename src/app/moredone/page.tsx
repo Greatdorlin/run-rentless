@@ -8,7 +8,7 @@ import { CountrySwitcher } from "./country-switcher";
 import { CostScenario } from "./cost-scenario";
 import { IdeaPreview } from "./idea-preview";
 import { PlanChoice } from "./plan-choice";
-import { BuildCompanion } from "./build-companion";
+import { BuildCompanion, ListenToTourButton } from "./build-companion";
 import "./moredone.css";
 
 export const metadata: Metadata = {
@@ -73,6 +73,7 @@ export default async function MoreDonePage({ searchParams }: { searchParams: Pro
         <p className="md-cohort-date">Next cohort: <strong>{moreDoneCohortDates}</strong><span>Live online · Workshop times sent by email</span></p>
         <div className="md-hero__actions"><a className="md-button" href="#join">Join the cohort <span aria-hidden="true">↗</span></a><a className="md-text-link" href="#projects">See what you could build ↓</a></div>
         <p className="md-hero__micro">Bringing your team? <a href="#team-offer">See the team offer ↗</a></p>
+        <ListenToTourButton />
       </div>
       <div className="md-hero__visual" aria-label="Examples of what you can build and learn in MoreDone">
         <div className="md-build-stack">

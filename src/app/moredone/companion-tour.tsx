@@ -48,9 +48,11 @@ export function CompanionTour({ open, onOpen, onClose, onSpeaking }: { open: boo
   function close() { stop(); remember(); onClose(); }
 
   useEffect(() => {
+    const openTour = () => onOpen();
+    window.addEventListener("moredone:tour", openTour);
     if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
       queueMicrotask(() => setSupported(false));
-      if (!hasGdVoice) return;
+      if (!hasGdVoice) return () => window.removeEventListener("moredone:tour", openTour);
     }
     const synth = window.speechSynthesis;
     const load = () => setVoices((synth?.getVoices() ?? []).filter(voice => /^en(?:-|_)/i.test(voice.lang)).sort((a, b) => Number(/natural|premium|enhanced/i.test(b.name)) - Number(/natural|premium|enhanced/i.test(a.name))));
@@ -63,7 +65,7 @@ export function CompanionTour({ open, onOpen, onClose, onSpeaking }: { open: boo
       const form = document.getElementById("join")?.getBoundingClientRect();
       if (!document.hidden && !(form && form.top < innerHeight && form.bottom > 0) && !document.activeElement?.matches("input,textarea,select")) onOpen();
     }, 8000);
-    return () => { clearTimeout(timer); cancel(); synth?.removeEventListener("voiceschanged", load); document.removeEventListener("visibilitychange", hidden); };
+    return () => { clearTimeout(timer); cancel(); synth?.removeEventListener("voiceschanged", load); document.removeEventListener("visibilitychange", hidden); window.removeEventListener("moredone:tour", openTour); };
     // Event handlers use refs; the invitation is scheduled once per visit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
