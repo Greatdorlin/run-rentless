@@ -1,4 +1,4 @@
-.md-page{--md-ink:#031e19;--md-deep:#082a23;--md-lime:#c6ff00;--md-paper:#f4f5eb;--md-muted:#c7d2c7;background:var(--md-ink);color:#fdfff4;overflow:clip}
+.md-page{--display:var(--font-moredone),Arial,sans-serif;--body:var(--font-moredone),Arial,sans-serif;font-family:var(--body);--md-ink:#031e19;--md-deep:#082a23;--md-lime:#c6ff00;--md-paper:#f4f5eb;--md-muted:#c7d2c7;background:var(--md-ink);color:#fdfff4;overflow:clip}
 .md-shell{width:min(1240px,calc(100% - 80px));margin-inline:auto}
 .md-page .md-companion{width:100px;height:160px}
 .md-page .md-companion__body{width:92px;height:112px;left:4px}
@@ -281,3 +281,15 @@ html[data-md-mouth-sync=true] .md-gd--talking .md-gd__mouth{animation:none;trans
 @media(prefers-reduced-motion:reduce){.md-companion--speaking .md-companion__smile{animation:none}}
 .md-companion--speaking{opacity:0!important;pointer-events:none!important}.md-tour--compact{width:min(560px,calc(100vw - 40px));padding:16px 20px}.md-tour__mini-top{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:8px}.md-tour__mini-top strong{font-size:13px;line-height:1.4}.md-tour__mini-top button{flex:none;width:44px;border:0;background:transparent;color:#123e30;font-size:24px}.md-tour .md-tour__readalong{line-height:2.2;padding-top:25px;font-size:14px;max-height:190px;overflow:auto}.md-tour__word{position:relative;box-decoration-break:clone;-webkit-box-decoration-break:clone}.md-tour__word--current{background:#d5ff57;color:#09281f;border-radius:3px}.md-tour__word-pet{position:absolute;pointer-events:none;width:26px;height:22px;top:-22px;left:50%;transform:translateX(-50%);overflow:visible}.md-tour__mini-status{display:block;margin-top:9px;font-size:11px;color:#45634e}.md-tour__follow{display:flex;align-items:center;gap:8px;min-height:44px;font-size:12px}.md-tour__follow input{accent-color:#123e30;width:18px;height:18px}.md-tour--compact .md-tour__controls{position:sticky;bottom:0;background:#f7f8ef;padding-top:6px}@media(max-width:680px){.md-tour--compact{width:calc(100vw - 24px);padding:12px 16px}.md-tour .md-tour__readalong{max-height:155px;font-size:13px}}
 .md-form .md-form__email-option{display:block;width:100%;min-height:48px;margin-top:12px;padding:12px 15px;border:1px solid #60836c;border-radius:6px;background:#fff;color:#123e30;font:inherit;font-size:13px;font-weight:700;line-height:1.5;white-space:normal;overflow-wrap:anywhere;cursor:pointer}.md-form__email-option:hover{background:#eaf2e2}.md-form__email-option:disabled{opacity:.6;cursor:wait}.md-form__email-option:focus-visible{outline:3px solid #b33a19;outline-offset:3px}
+
+/* MoreDone typography: an open, readable rhythm across desktop and mobile. */
+.md-page h1,.md-page h2,.md-page h3{font-weight:700;letter-spacing:-.035em;text-wrap:balance}
+.md-page .md-hero h1{line-height:1.08;letter-spacing:-.045em}
+.md-page .md-heading h2,.md-page .md-days h2,.md-page .md-ads h2,.md-page .md-join h2{line-height:1.1;letter-spacing:-.035em}
+.md-page p{line-height:1.7}
+.md-page .md-hero__lede{line-height:1.65}
+.md-page .md-website{align-items:center;gap:clamp(24px,4vw,56px)}
+.md-page .md-website h3{line-height:1.15;letter-spacing:-.025em}
+.md-page .md-website p{font-size:clamp(17px,1.45vw,19px);font-weight:450;line-height:1.8;max-width:48ch;letter-spacing:0}
+.md-page .md-project p,.md-page .md-faq details p{font-size:15px;line-height:1.75}
+@media(max-width:680px){.md-page .md-website p{font-size:17px;line-height:1.75}.md-page .md-hero h1{font-size:clamp(37px,9.8vw,53px)}}
