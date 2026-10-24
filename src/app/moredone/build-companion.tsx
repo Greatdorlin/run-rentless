@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent, type KeyboardEvent } from "react";
+import { CompanionTour } from "./companion-tour";
 
 type Point = { x: number; y: number };
 type Sample = Point & { time: number };
@@ -17,6 +18,8 @@ export function BuildCompanion() {
   const [visible, setVisible] = useState(false);
   const [atForm, setAtForm] = useState(false);
   const [typing, setTyping] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   function bounds() {
     return { left: 32, right: Math.max(32, window.innerWidth - 104), top: 145, bottom: Math.max(145, window.innerHeight - 165) };
@@ -81,7 +84,7 @@ export function BuildCompanion() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => { blocked.current = atForm || typing; }, [atForm, typing]);
+  useEffect(() => { blocked.current = atForm || typing || tourOpen; }, [atForm, typing, tourOpen]);
 
   function down(event: PointerEvent<HTMLButtonElement>) {
     if (pointer.current || (event.pointerType === "mouse" && event.button !== 0)) return;
@@ -117,9 +120,10 @@ export function BuildCompanion() {
     if (!cancelled && !drag.moved) openIdea();
   }
   function openIdea() {
-    document.getElementById("md-idea-title")?.scrollIntoView({ block: "start", behavior: reduced.current ? "instant" : "smooth" });
+    setTourOpen(true);
   }
   function joinChallenge() {
+    setTourOpen(false);
     document.getElementById("join")?.scrollIntoView({ block: "start", behavior: reduced.current ? "instant" : "smooth" });
   }
   function keyboard(event: KeyboardEvent<HTMLButtonElement>) {
@@ -129,15 +133,15 @@ export function BuildCompanion() {
     if (event.key === "Escape") dismiss();
   }
   function dismiss() {
-    cancelAnimationFrame(frame.current); setVisible(false);
+    cancelAnimationFrame(frame.current); setVisible(false); setTourOpen(false);
     try { sessionStorage.setItem(storageKey, "1"); } catch { /* Dismissal still applies to this page. */ }
   }
 
-  return <div ref={root} className={`md-companion${visible && !atForm && !typing ? " md-companion--visible" : ""}`} hidden={!visible} inert={!visible || atForm || typing}>
+  return <><CompanionTour open={tourOpen} onOpen={() => setTourOpen(true)} onClose={() => setTourOpen(false)} onSpeaking={setSpeaking} /><div ref={root} className={`md-companion${visible && !atForm && !typing ? " md-companion--visible" : ""}${speaking ? " md-companion--speaking" : ""}`} hidden={!visible} inert={!visible || atForm || typing}>
     <button className="md-companion__dismiss" type="button" aria-label="Hide companion" onClick={dismiss}>×</button>
     <button className="md-companion__sign" type="button" onClick={joinChallenge}>Join the<br />challenge <span aria-hidden="true">↗</span></button>
-    <button className="md-companion__body" type="button" aria-label="Move companion with arrow keys, or press Enter to try an idea" title="Drag to move. Click to try your idea." onPointerDown={down} onPointerMove={move} onPointerUp={event => release(event)} onPointerCancel={event => release(event, true)} onLostPointerCapture={event => { if (pointer.current) release(event, true); }} onKeyDown={keyboard} tabIndex={atForm || typing ? -1 : 0}>
+    <button className="md-companion__body" type="button" aria-label="Open audio tour. Use arrow keys to move companion." title="Drag to move. Click for an audio tour." onPointerDown={down} onPointerMove={move} onPointerUp={event => release(event)} onPointerCancel={event => release(event, true)} onLostPointerCapture={event => { if (pointer.current) release(event, true); }} onKeyDown={keyboard} tabIndex={atForm || typing ? -1 : 0}>
       <svg viewBox="0 0 72 72" aria-hidden="true"><defs><linearGradient id="md-buddy-shell" x2="0" y2="1"><stop stopColor="#ecffae"/><stop offset="1" stopColor="#b3e84c"/></linearGradient></defs><path className="md-companion__feet" d="M18 61l-4 5m40-5 4 5"/><path fill="url(#md-buddy-shell)" stroke="#e8ffb2" d="M14 22Q14 12 25 12h22q11 0 11 10l4 25q2 14-12 15H22Q8 61 10 47Z"/><rect x="17" y="25" width="38" height="24" rx="11" fill="#0a3025"/><g className="md-companion__eyes" fill="#e8ffb2"><ellipse cx="28" cy="36" rx="3" ry="4"/><ellipse cx="44" cy="36" rx="3" ry="4"/></g><g className="md-companion__cheeks" fill="#ff9166"><ellipse cx="23" cy="42" rx="3" ry="1.8"/><ellipse cx="49" cy="42" rx="3" ry="1.8"/></g><path className="md-companion__smile" d="M31 42q5 7 10 0" fill="none" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="M36 12V6m-3 0h6" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="m5 35-3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/><path className="md-companion__wave" d="m65 35 3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/></svg>
-    </button><span className="md-companion__hint">Try your idea</span>
-  </div>;
+    </button><span className="md-companion__hint">{speaking ? "Talking you through it" : "Read or listen"}</span>
+  </div></>;
 }
