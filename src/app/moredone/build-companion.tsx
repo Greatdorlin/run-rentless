@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent, type KeyboardEvent } from "react";
-import { CompanionTour } from "./companion-tour";
+import { CompanionTour } from "./full-companion-tour";
 import { GdCharacter } from "./gd-character";
 
 type Point = { x: number; y: number };
