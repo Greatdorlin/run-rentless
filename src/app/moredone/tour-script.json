@@ -1,0 +1,20 @@
+[
+  { "title": "Build the idea you keep coming back to", "target": "projects", "lines": [
+    "Your idea deserves more than another note on your phone. In the MoreDone seven-day challenge, we help you build a working first version with AI, even if you have never written code.",
+    "Build a booking app for your salon, or a stock manager that shows what is selling. You could create a website that takes orders, or your own customer tracker with the features your business needs.",
+    "You can join for your business, a project at work, or a service you want to sell to clients. Bring one idea and build it with our guidance."
+  ] },
+  { "title": "Build it with support", "target": "md-days-title", "lines": [
+    "You get two live ninety-minute workshops with daily exercises, starter templates and group support. We help you choose the main feature, build it, and test it on a real example.",
+    "You will learn how to make your tool look like your brand and work on a phone. We also show you how to protect customer details before you publish."
+  ] },
+  { "title": "Put your new skills to work", "target": "md-ads-title", "lines": [
+    "Keep using these skills after the challenge. Improve a tool for your own business, or build websites and customer systems for clients who need them.",
+    "You will also learn to prepare a ChatGPT Ads campaign, write an offer, and create the page people visit. Track the enquiries that turn into customers so you can see what your advertising brings back."
+  ] },
+  { "title": "Bring your idea to the cohort", "target": "team-offer", "lines": [
+    "Choose one place for yourself, or bring your colleagues and save on the total. Every place includes the workshops and building support. The prices on this page show what you pay for your chosen package.",
+    "We guide you through choosing and setting up your AI tool. Budget separately for its subscription, any hosting you need and any ads you decide to run.",
+    "Choose your package and add your details. Complete the payment steps to join the cohort. Bring the idea you have been waiting to build, and spend the week making it work with us."
+  ] }
+]

@@ -3,6 +3,7 @@ import { sendMoreDonePaymentConfirmation } from "@/lib/moredone-email";
 
 const base = "https://api.sender.net/v2";
 const groupTitle = "MoreDone Challenge";
+const emailGroupTitle = "MoreDone - Send payment details by email";
 const fieldTitles = [
   "MoreDone business", "MoreDone team size", "MoreDone project", "MoreDone project goal",
   "MoreDone seats", "MoreDone amount NGN", "MoreDone payment reference",
@@ -10,6 +11,7 @@ const fieldTitles = [
   "MoreDone payment email accepted",
   "MoreDone checkout URL", "MoreDone reminder accepted",
   "MoreDone amount USD", "MoreDone amount RWF", "MoreDone payment country", "MoreDone payment route",
+  "MoreDone payment contact method", "MoreDone payment details request",
 ] as const;
 
 type Field = { title?: string; field_name?: string; name?: string; id?: string };
@@ -24,6 +26,7 @@ export type MoreDoneLead = {
   project: string; goal: string; seats: MoreDoneSeats; reference: string;
   paymentCountry: MoreDoneCountry;
   checkoutUrl?: string;
+  paymentContactMethod?: "email" | "whatsapp";
 };
 
 async function sender(path: string, init: RequestInit = {}) {
@@ -55,25 +58,26 @@ function items(value: unknown): Field[] {
   return found;
 }
 
-let groupCache: { value: string; until: number } | undefined;
+const groupCache = new Map<string, { value: string; until: number }>();
 let fieldCache: { value: Record<string, string>; until: number } | undefined;
 
-async function groupId() {
-  if (groupCache && groupCache.until > Date.now()) return groupCache.value;
-  const value = await loadGroupId();
-  groupCache = { value, until: Date.now() + 300000 };
+async function groupId(title = groupTitle) {
+  const cached = groupCache.get(title);
+  if (cached && cached.until > Date.now()) return cached.value;
+  const value = await loadGroupId(title);
+  groupCache.set(title, { value, until: Date.now() + 300000 });
   return value;
 }
 
-async function loadGroupId() {
+async function loadGroupId(title: string) {
   const listed = await sender("/groups?limit=100");
   if (!listed.ok) throw new Error(`Sender group lookup ${listed.status}`);
-  const existing = items(await listed.json()).find((item) => item.title === groupTitle);
+  const existing = items(await listed.json()).find((item) => item.title === title);
   if (existing?.id) return existing.id;
-  const created = await sender("/groups", { method: "POST", body: JSON.stringify({ title: groupTitle }) });
+  const created = await sender("/groups", { method: "POST", body: JSON.stringify({ title }) });
   if (!created.ok) {
     const retry = await sender("/groups?limit=100");
-    const recovered = retry.ok ? items(await retry.json()).find((item) => item.title === groupTitle) : undefined;
+    const recovered = retry.ok ? items(await retry.json()).find((item) => item.title === title) : undefined;
     if (recovered?.id) return recovered.id;
     throw new Error(`Sender group creation ${created.status}`);
   }
@@ -139,7 +143,8 @@ async function subscriberAndFields(email: string) {
 
 export async function saveMoreDoneLead(lead: MoreDoneLead) {
   const nigeria = lead.paymentCountry === "ng";
-  const [group, cachedFieldNames, existing] = await Promise.all([groupId(), fields(), subscriber(lead.email)]);
+  const emailRequested = !nigeria && lead.paymentContactMethod === "email";
+  const [group, cachedFieldNames, existing, emailGroup] = await Promise.all([groupId(), fields(), subscriber(lead.email), emailRequested ? groupId(emailGroupTitle) : Promise.resolve(undefined)]);
   const fieldNames = existing?.columns?.some((column) => column.title && !cachedFieldNames[column.title]) ? await fields(true) : cachedFieldNames;
   const expected: Record<(typeof fieldTitles)[number], string> = {
     "MoreDone business": lead.company,
@@ -149,18 +154,20 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     "MoreDone seats": String(lead.seats),
     "MoreDone amount NGN": nigeria ? String(moreDonePlans[lead.seats].amount / 100) : "Not applicable",
     "MoreDone payment reference": lead.reference,
-    "MoreDone payment status": nigeria ? "Checkout started" : "Awaiting payment details",
+    "MoreDone payment status": nigeria ? "Checkout started" : emailRequested ? "Send payment details by email" : "Awaiting payment details",
     "MoreDone submitted at": new Date().toISOString(),
     "MoreDone payment email accepted": "Not sent",
-    "MoreDone checkout URL": lead.checkoutUrl || (nigeria ? "Not ready" : "WhatsApp payment request"),
+    "MoreDone checkout URL": lead.checkoutUrl || (nigeria ? "Not ready" : emailRequested ? "Payment details requested by email" : "WhatsApp payment request"),
     "MoreDone reminder accepted": "Not sent",
     "MoreDone amount USD": lead.paymentCountry === "other" ? String(moreDonePlans[lead.seats].usd) : "Not applicable",
     "MoreDone amount RWF": lead.paymentCountry === "rw" ? String(moreDonePlans[lead.seats].rwf) : "Not applicable",
     "MoreDone payment country": lead.paymentCountry === "ng" ? "Nigeria" : lead.paymentCountry === "rw" ? "Rwanda" : "Global",
-    "MoreDone payment route": nigeria ? "Paystack" : "WhatsApp payment request",
+    "MoreDone payment route": nigeria ? "Paystack" : emailRequested ? "Email payment request" : "WhatsApp payment request",
+    "MoreDone payment contact method": nigeria ? "Online checkout" : emailRequested ? "Email" : "WhatsApp",
+    "MoreDone payment details request": nigeria ? "Checkout link" : emailRequested ? "EMAIL: Send payment details" : "WhatsApp payment request",
   };
   if (!fieldTitles.every((title) => fieldNames[title])) throw new Error("Sender fields unavailable");
-  const groups = [...new Set([...(existing?.subscriber_tags || []).map((item) => item.id).filter((id): id is string => Boolean(id)), group])];
+  const groups = [...new Set([...(existing?.subscriber_tags || []).filter(item => emailRequested || item.title !== emailGroupTitle).map((item) => item.id).filter((id): id is string => Boolean(id)), group, ...(emailGroup ? [emailGroup] : [])])];
   const profileFields = { ...retainedFields(existing, fieldNames), ...Object.fromEntries(fieldTitles.map((title) => [fieldNames[title], expected[title]])) };
   const path = `/subscribers/${encodeURIComponent(lead.email)}`;
   const saved = await sender(existing ? path : "/subscribers", {
@@ -172,8 +179,9 @@ export async function saveMoreDoneLead(lead: MoreDoneLead) {
     if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
     const stored = await subscriber(lead.email);
     const correctGroup = stored?.subscriber_tags?.some((item) => item.id === group || item.title === groupTitle);
+    const correctEmailGroup = emailRequested ? stored?.subscriber_tags?.some(item => item.id === emailGroup || item.title === emailGroupTitle) : !stored?.subscriber_tags?.some(item => item.title === emailGroupTitle);
     const correctFields = fieldTitles.every((title) => stored?.columns?.some((column) => column.title === title && String(column.value) === expected[title]));
-    if (correctGroup && correctFields && stored?.firstname === lead.firstName && stored?.lastname === lead.lastName) return;
+    if (correctGroup && correctEmailGroup && correctFields && stored?.firstname === lead.firstName && stored?.lastname === lead.lastName) return;
     if (delay === 0 && (stored?.firstname !== lead.firstName || stored?.lastname !== lead.lastName)) {
       const identity = await sender(path, { method: "PATCH", body: JSON.stringify({ firstname: lead.firstName, lastname: lead.lastName, fields: profileFields, trigger_automation: false }) });
       if (!identity.ok) throw new Error(`Sender name update ${identity.status}`);

@@ -1,6 +1,6 @@
 import { cleanMoreDoneText, isMoreDoneNairaSeats, isMoreDoneSeats, moreDonePlans, moreDonePaymentRequest, moreDoneProjects, type MoreDoneCountry } from "@/lib/moredone";
 import { saveMoreDoneCheckoutUrl, saveMoreDoneLead } from "@/lib/moredone-sender";
-import { sendMoreDoneCheckoutLink, sendMoreDonePaymentRequest } from "@/lib/moredone-email";
+import { sendMoreDoneCheckoutLink, sendMoreDonePaymentRequest, sendMoreDoneEmailRequestReceipt } from "@/lib/moredone-email";
 import { readPublicForm } from "@/lib/public-form-request";
 import { after } from "next/server";
 
@@ -33,17 +33,26 @@ export async function POST(request: Request) {
     return fail("Please complete the required details and agree to receive course updates.", 400);
   }
   if (paymentCountry === "ng" && !isMoreDoneNairaSeats(seats)) return fail("Choose one, three or five places for naira checkout.", 400);
+  if (body.paymentContactMethod !== undefined && body.paymentContactMethod !== "email" && body.paymentContactMethod !== "whatsapp") return fail("Please choose how to receive your payment details.", 400);
+  const emailRequested = paymentCountry !== "ng" && body.paymentContactMethod === "email";
   const key = process.env.PAYSTACK_SECRET_KEY;
   if (!process.env.SENDER_API || (paymentCountry === "ng" && !key)) return fail("Registration is temporarily unavailable. Please try again shortly.", 503);
   const reference = `rrmd_${crypto.randomUUID().replaceAll("-", "")}`;
-  const paymentRequestUrl = paymentCountry !== "ng" ? moreDonePaymentRequest(firstName, lastName, seats, paymentCountry) : undefined;
+  const paymentRequestUrl = paymentCountry !== "ng" && !emailRequested ? moreDonePaymentRequest(firstName, lastName, seats, paymentCountry) : undefined;
   try {
-    await saveMoreDoneLead({ firstName, lastName, email, company, teamSize: teamSize || "Not shared", project, goal, seats, reference, paymentCountry, checkoutUrl: paymentRequestUrl });
+    await saveMoreDoneLead({ firstName, lastName, email, company, teamSize: teamSize || "Not shared", project, goal, seats, reference, paymentCountry, paymentContactMethod: emailRequested ? "email" : "whatsapp", checkoutUrl: paymentRequestUrl });
   } catch (error) {
     console.error("MoreDone Sender sync failed", error instanceof Error ? error.message : "Unknown error");
     return fail("We could not save your details. Please try again before paying.", 502);
   }
   if (paymentCountry !== "ng") {
+    if (emailRequested) {
+      after(async () => {
+        try { await sendMoreDoneEmailRequestReceipt(email, firstName, seats, paymentCountry); }
+        catch (error) { console.error("MoreDone email request receipt failed", error instanceof Error ? error.message : "Unknown error"); }
+      });
+      return Response.json({ requestedByEmail: true }, { headers });
+    }
     const url = paymentRequestUrl!;
     after(async () => {
       try { await sendMoreDonePaymentRequest(email, firstName, seats, paymentCountry, url); }

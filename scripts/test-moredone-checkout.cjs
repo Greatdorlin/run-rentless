@@ -20,14 +20,14 @@ function load(path, dependencies = {}, globals = {}) {
   assert.match(link.searchParams.get('text'), /\$180/);
   assert.equal([...link.searchParams.keys()].length, 1);
 
-  let saves = 0, emails = 0;
+  let saves = 0, emails = 0, emailReceipts = 0, savedLead;
   const followUps = [];
   const publicForm = load('src/lib/public-form-request.ts', {}, { TextDecoder });
   const initialize = load('src/app/api/moredone/initialize/route.ts', {
     'next/server': { after: callback => { followUps.push(callback); } },
     '@/lib/moredone': plans,
-    '@/lib/moredone-sender': { saveMoreDoneLead: async () => { saves++; }, saveMoreDoneCheckoutUrl: async () => {} },
-    '@/lib/moredone-email': { sendMoreDonePaymentRequest: async () => { emails++; } },
+    '@/lib/moredone-sender': { saveMoreDoneLead: async lead => { saves++; savedLead = lead; }, saveMoreDoneCheckoutUrl: async () => {} },
+    '@/lib/moredone-email': { sendMoreDonePaymentRequest: async () => { emails++; }, sendMoreDoneEmailRequestReceipt: async () => { emailReceipts++; } },
     '@/lib/public-form-request': publicForm,
   });
   const body = { firstName: 'Example', lastName: 'Buyer', email: 'buyer@example.com', company: 'Demo', project: 'Business website', consent: true, seats: 3, paymentCountry: 'rw' };
@@ -45,6 +45,16 @@ function load(path, dependencies = {}, globals = {}) {
   assert.equal(denied.status, 403); assert.equal(saves, 2);
   const malformed = await initialize.POST(new Request('https://www.runrentless.com/api/moredone/initialize', { method: 'POST', headers: { origin: 'https://www.runrentless.com', 'Content-Type': 'application/json' }, body: '{' }));
   assert.equal(malformed.status, 400); assert.equal(saves, 2);
+  followUps.length = 0;
+  const emailRequest = await initialize.POST(new Request('https://www.runrentless.com/api/moredone/initialize', { method: 'POST', headers: { origin: 'https://www.runrentless.com', 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, paymentContactMethod: 'email' }) }));
+  assert.equal(emailRequest.status, 200);
+  assert.deepEqual(await emailRequest.json(), { requestedByEmail: true });
+  assert.equal(savedLead.paymentContactMethod, 'email');
+  assert.equal(savedLead.checkoutUrl, undefined, 'Email requests must not open WhatsApp');
+  assert.equal(emailReceipts, 0);
+  await Promise.all(followUps.map(task => task()));
+  assert.equal(emailReceipts, 1);
+  assert.equal(emails, 2, 'Email requests must not send a WhatsApp payment message');
 
   let reminders = 0, confirmations = 0;
   const candidates = [
@@ -74,7 +84,7 @@ function load(path, dependencies = {}, globals = {}) {
     const path = new URL(url).pathname;
     const method = options.method || 'GET';
     const body = options.body ? JSON.parse(options.body) : {};
-    if (path === '/v2/groups') { metadataCalls++; return Response.json({ data: [{ id: 'group', title: 'MoreDone Challenge' }] }); }
+    if (path === '/v2/groups') { metadataCalls++; return Response.json({ data: [{ id: 'group', title: 'MoreDone Challenge' }, { id: 'emailgroup', title: 'MoreDone - Send payment details by email' }] }); }
     if (path === '/v2/fields') {
       metadataCalls++;
       if (method === 'POST') fieldList.push({ title: body.title, field_name: `field${fieldList.length}`, id: `id${fieldList.length}` });
@@ -82,7 +92,7 @@ function load(path, dependencies = {}, globals = {}) {
     }
     assert.ok(path.startsWith('/v2/subscribers'));
     if (method === 'PATCH' || method === 'POST') {
-      profile = { firstname: body.firstname || profile.firstname, lastname: body.lastname || profile.lastname, subscriber_tags: body.groups ? [{ id: 'group', title: 'MoreDone Challenge' }] : profile.subscriber_tags, columns: Object.entries(body.fields || {}).map(([name, value]) => ({ title: fieldList.find(field => field.field_name === name)?.title, value })) };
+      profile = { firstname: body.firstname || profile.firstname, lastname: body.lastname || profile.lastname, subscriber_tags: body.groups ? body.groups.map(id => ({ id, title: id === 'emailgroup' ? 'MoreDone - Send payment details by email' : 'MoreDone Challenge' })) : profile.subscriber_tags, columns: Object.entries(body.fields || {}).map(([name, value]) => ({ title: fieldList.find(field => field.field_name === name)?.title, value })) };
     }
     return Response.json({ data: profile });
   } });
@@ -99,6 +109,15 @@ function load(path, dependencies = {}, globals = {}) {
   await actualSender.saveMoreDoneLead(lead);
   assert.ok(metadataCalls > firstLookups, 'New fields refresh the cache');
   assert.equal(profile.columns.find(field => field.title === 'New answer').value, 'Also keep this');
+  await actualSender.saveMoreDoneLead({ ...lead, paymentContactMethod: 'email', checkoutUrl: undefined });
+  assert.equal(profile.columns.find(field => field.title === 'MoreDone payment contact method').value, 'Email');
+  assert.equal(profile.columns.find(field => field.title === 'MoreDone payment status').value, 'Send payment details by email');
+  assert.equal(profile.columns.find(field => field.title === 'MoreDone payment details request').value, 'EMAIL: Send payment details');
+  assert.equal(profile.columns.find(field => field.title === 'Existing answer').value, 'Keep this');
+  console.log('PASS email-only payment request saves and verifies the contact preference and staff action; acknowledgement deferred; no WhatsApp redirect');
+  assert.ok(profile.subscriber_tags.some(group => group.id === 'emailgroup'));
+  await actualSender.saveMoreDoneLead(lead);
+  assert.ok(!profile.subscriber_tags.some(group => group.id === 'emailgroup'), 'Switching to WhatsApp removes the email task group');
   console.log('PASS schema cache saves lookups, stored names and answers verified, new fields retained, WhatsApp URL saved before handoff, email deferred until after response');
   console.log('PASS correct WhatsApp recipient, encoded names and totals, both production origins, registration sync and email, cron authorization, paid checkout suppression, international reminder');
 })().catch(error => { console.error(error); process.exitCode = 1; });

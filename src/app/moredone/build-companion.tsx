@@ -137,7 +137,7 @@ export function BuildCompanion() {
     try { sessionStorage.setItem(storageKey, "1"); } catch { /* Dismissal still applies to this page. */ }
   }
 
-  return <><CompanionTour open={tourOpen} onOpen={() => setTourOpen(true)} onClose={() => setTourOpen(false)} onSpeaking={setSpeaking} /><div ref={root} className={`md-companion${visible && !atForm && !typing ? " md-companion--visible" : ""}${speaking ? " md-companion--speaking" : ""}`} hidden={!visible} inert={!visible || atForm || typing}>
+  return <><CompanionTour open={tourOpen} onOpen={() => setTourOpen(true)} onClose={() => setTourOpen(false)} onSpeaking={setSpeaking} /><div ref={root} className={`md-companion${visible && !atForm && !typing ? " md-companion--visible" : ""}${speaking ? " md-companion--speaking" : ""}`} hidden={!visible} inert={!visible || atForm || typing || speaking}>
     <button className="md-companion__dismiss" type="button" aria-label="Hide companion" onClick={dismiss}>×</button>
     <button className="md-companion__sign" type="button" onClick={joinChallenge}>Join the<br />challenge <span aria-hidden="true">↗</span></button>
     <button className="md-companion__body" type="button" aria-label="Open audio tour. Use arrow keys to move companion." title="Drag to move. Click for an audio tour." onPointerDown={down} onPointerMove={move} onPointerUp={event => release(event)} onPointerCancel={event => release(event, true)} onLostPointerCapture={event => { if (pointer.current) release(event, true); }} onKeyDown={keyboard} tabIndex={atForm || typing ? -1 : 0}>

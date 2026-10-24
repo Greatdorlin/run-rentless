@@ -42,6 +42,7 @@ export function MoreDoneForm({ country, initialSeats = 1, initialPackageSelected
   const [reference, setReference] = useState("");
   const [payment, setPayment] = useState<"checking" | "paid" | "unconfirmed" | null>(null);
   const [confirmationAccepted, setConfirmationAccepted] = useState(false);
+  const [emailRequested, setEmailRequested] = useState(false);
   function selectPackage(count: MoreDoneSeats) {
     setSeats(count); setPackageSelected(true);
     const url = new URL(window.location.href);
@@ -77,13 +78,20 @@ export function MoreDoneForm({ country, initialSeats = 1, initialPackageSelected
     if (busy) return;
     setBusy(true); setError("");
     const form = new FormData(event.currentTarget);
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    const paymentContactMethod = !nigeria && submitter instanceof HTMLButtonElement && submitter.value === "email" ? "email" : "whatsapp";
     try {
       const response = await fetch("/api/moredone/initialize", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
         firstName: form.get("firstName"), lastName: form.get("lastName"), email: form.get("email"), company: form.get("company"),
         teamSize: form.get("teamSize"), project: form.get("project"), goal: form.get("goal"), seats,
-        consent: form.get("consent") === "on", companyWebsite: form.get("companyWebsite"), paymentCountry: country,
+        consent: form.get("consent") === "on", companyWebsite: form.get("companyWebsite"), paymentCountry: country, paymentContactMethod,
       }) });
-      const result = await response.json() as { url?: string; error?: string };
+      const result = await response.json() as { url?: string; error?: string; requestedByEmail?: boolean };
+      if (response.ok && result.requestedByEmail) {
+        setEmailRequested(true); setBusy(false);
+        requestAnimationFrame(() => document.getElementById("md-registration")?.scrollIntoView({ block: "start", behavior: "instant" }));
+        return;
+      }
       if (!response.ok || !result.url) throw new Error(result.error || "Checkout could not open. Please try again.");
       window.location.assign(result.url);
     } catch (cause) {
@@ -91,6 +99,13 @@ export function MoreDoneForm({ country, initialSeats = 1, initialPackageSelected
       setBusy(false);
     }
   }
+
+  if (emailRequested) return <div className="md-form md-payment-result" id="md-registration" role="status" tabIndex={-1}>
+    <h3>Expect an email from our team soon.</h3>
+    <p>We have your request for {moreDonePlans[seats].label.toLowerCase()} at {moreDonePrice(seats, country)}. Our payment team will email the details you need to complete your payment.</p>
+    <p>Check your inbox, including Spam and Promotions. Your place is confirmed after payment.</p>
+    <a href="mailto:info@runrentless.com?subject=MoreDone%20payment%20details">Contact our payment team ↗</a>
+  </div>;
 
   if (payment) return <div className="md-form md-payment-result" role="status">
     <h3>{payment === "paid" ? "Your place is paid." : payment === "checking" ? "Checking your payment…" : "We cannot confirm payment yet."}</h3>
@@ -122,6 +137,7 @@ export function MoreDoneForm({ country, initialSeats = 1, initialPackageSelected
     <label className="md-form__consent"><input name="consent" type="checkbox" required /><span>Send me my payment and course information by email. I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>
     {error && <p className="md-form__error" role="alert">{error}</p>}
     <button className="md-button md-form__pay" type="submit" disabled={busy}>{busy ? nigeria ? "Opening secure checkout…" : "Opening payment details…" : nigeria ? `Pay ${moreDonePrice(seats, country)} securely` : "Continue to payment details"} <span aria-hidden="true">↗</span></button>
+    {!nigeria && <button className="md-form__email-option" type="submit" name="paymentContactMethod" value="email" disabled={busy}>I don’t have WhatsApp. Email me payment details.</button>}
     <small>{nigeria ? "Our payment partner processes your card details securely." : "We will open a message with your name and chosen places. Your place is confirmed after payment."}</small>
   </form>;
 }

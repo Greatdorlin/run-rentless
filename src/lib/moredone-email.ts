@@ -53,6 +53,16 @@ export function sendMoreDonePaymentRequest(email: string, firstName: string, sea
   return send(email, firstName, reminder ? "Complete your MoreDone registration" : "Your MoreDone payment details", `Hi ${firstName},\n\n${paragraphs.join("\n\n")}\n\n${url}`, layout(firstName, "Your next step: complete your payment.", paragraphs, { label: "Get payment details on WhatsApp", url }));
 }
 
+export function sendMoreDoneEmailRequestReceipt(email: string, firstName: string, seats: MoreDoneSeats, country: MoreDoneCountry) {
+  const paragraphs = [
+    `We have your request for ${placeLabel(seats)} at ${moreDonePrice(seats, country)} for MoreDone, ${moreDoneCohortDates}.`,
+    "Our payment team will email you the payment details. You can complete this step by email, without WhatsApp.",
+    "Bring the idea you want to build. We will help you turn its main feature into a working tool during the challenge.",
+    "Your place is confirmed after payment. If you have a question, reply here and our team will help.",
+  ];
+  return send(email, firstName, "We received your request for MoreDone payment details", `Hi ${firstName},\n\n${paragraphs.join("\n\n")}`, layout(firstName, "Your payment team will be in touch.", paragraphs));
+}
+
 export function sendMoreDonePaymentConfirmation(email: string, firstName: string, seats: MoreDoneSeats, reference: string) {
   const label = placeLabel(seats);
   const total = money(seats);
