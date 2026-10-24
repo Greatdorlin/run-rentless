@@ -116,18 +116,20 @@ export function CompanionTour({ open, onOpen, onClose, onSpeaking }: { open: boo
     <h2>{active ? status === "done" ? "Your idea could be next." : chapter.title : "Read it yourself, or let me talk you through it?"}</h2>
     {!active && <p>A short tour of what you can build and how to join.</p>}
     {supported ? <>
-      <div className="md-tour__voices" role="group" aria-label="Choose a voice">
-        <button type="button" disabled={!female} aria-pressed={Boolean(female && voiceId === female.voiceURI)} onClick={() => female && chooseVoice(female.voiceURI)}>Female voice</button>
-        <button type="button" disabled={!male} aria-pressed={Boolean(male && voiceId === male.voiceURI)} onClick={() => male && chooseVoice(male.voiceURI)}>Male voice</button>
-      </div>
-      <label className="md-tour__voice-label">Voice on this device<select value={voiceId} onChange={event => chooseVoice(event.target.value)}><option value="">Device default</option>{voices.map(voice => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name}</option>)}</select></label>
-      {(!female || !male) && <small>Some voice options are unavailable on this device.</small>}
       <div className="md-tour__status" role="status">{status === "error" ? "Audio could not start. Try another voice, or read the tour below." : status === "paused" ? "Paused. Resume picks up at this sentence." : status === "loading" ? "Starting audio…" : status === "playing" ? "Reading aloud" : status === "done" ? "Tour complete" : "Audio starts only when you choose Listen."}</div>
-      {active && status !== "done" && <p className="md-tour__caption">{segments[index].text}</p>}
       <div className="md-tour__controls">
         {status === "playing" || status === "loading" ? <button type="button" className="md-tour__primary" onClick={pause}>Pause audio</button> : <button type="button" className="md-tour__primary" onClick={() => play()}>{status === "paused" ? "Resume audio" : status === "done" ? "Listen again" : status === "error" ? "Try audio again" : "Listen to the tour"}</button>}
         {active ? <button type="button" onClick={stop}>Stop</button> : <button type="button" onClick={close}>I’ll read it</button>}
       </div>
+      <details className="md-tour__transcript"><summary>Choose a male or female voice</summary>
+        <div className="md-tour__voices" role="group" aria-label="Choose a voice">
+          <button type="button" disabled={!female} aria-pressed={Boolean(female && voiceId === female.voiceURI)} onClick={() => female && chooseVoice(female.voiceURI)}>Female voice</button>
+          <button type="button" disabled={!male} aria-pressed={Boolean(male && voiceId === male.voiceURI)} onClick={() => male && chooseVoice(male.voiceURI)}>Male voice</button>
+        </div>
+        <label className="md-tour__voice-label">Voice on this device<select value={voiceId} onChange={event => chooseVoice(event.target.value)}><option value="">Device default</option>{voices.map(voice => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name}</option>)}</select></label>
+        {(!female || !male) && <small>Some voice options are unavailable on this device.</small>}
+      </details>
+      {active && status !== "done" && <p className="md-tour__caption">{segments[index].text}</p>}
       {active && status !== "done" && <button type="button" className="md-tour__section" onClick={() => showSection(chapter.target)}>Show this section ↓</button>}
     </> : <p>Audio is unavailable in this browser. You can read the tour below.</p>}
     <details className="md-tour__transcript"><summary>Read the tour</summary>{chapters.map(item => <section key={item.title}><h3>{item.title}</h3>{item.lines.map(line => <p key={line}>{line}</p>)}</section>)}</details>
