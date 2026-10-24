@@ -15,6 +15,7 @@ const preferenceKey = "moredone:gd-tour-choice";
 
 export function CompanionTour({ open, onOpen, onClose, onSpeaking }: { open: boolean; onOpen: () => void; onClose: () => void; onSpeaking: (value: boolean) => void }) {
   const [status, setStatus] = useState<Status>("idle");
+  const [staleAudio, setStaleAudio] = useState(false);
   const [compact, setCompact] = useState(false);
   const [follow, setFollow] = useState(true);
   const current = useRef(0);
@@ -50,6 +51,7 @@ export function CompanionTour({ open, onOpen, onClose, onSpeaking }: { open: boo
   }
   function pause() {
     paused.current = true; clearTimer(); player.current?.pause(); cancelAnimationFrame(frame.current);
+    document.documentElement.style.removeProperty("--md-mouth-open");
     onSpeaking(true); setStatus("paused");
   }
   async function connectMeter(element: HTMLAudioElement) {
@@ -102,10 +104,13 @@ export function CompanionTour({ open, onOpen, onClose, onSpeaking }: { open: boo
   async function start() {
     if (!ready) return;
     const restarting = status === "done" || status === "idle" || isIntro.current;
-    halt(); paused.current = false; remember(); setCompact(true); setStatus("loading"); onSpeaking(true);
+    halt(); paused.current = false; remember(); setStaleAudio(false); setCompact(true); setStatus("loading"); onSpeaking(true);
     if (restarting) playhead.current = 0;
     targets.current.clear();
     assets.segments.forEach((clip, index) => { const passage = locatePassage(clip.parts); if (passage) targets.current.set(index, passage); });
+    if (targets.current.size !== assets.segments.length) {
+      halt(); setStaleAudio(true); setStatus("error"); setCompact(false); return;
+    }
     const token = generation.current;
     const element = player.current ?? new window.Audio(); player.current = element; isIntro.current = false;
     if (!element.src.endsWith(assets.track!.src)) { element.src = assets.track!.src; element.preload = "auto"; }
@@ -114,7 +119,11 @@ export function CompanionTour({ open, onOpen, onClose, onSpeaking }: { open: boo
     element.onerror = fail;
     element.onwaiting = () => { if (!paused.current && token === generation.current) { clearTimer(); setStatus("loading"); watchdog.current = setTimeout(fail, 25000); } };
     element.onplaying = () => { if (!paused.current && token === generation.current) { clearTimer(); setStatus("playing"); track(element); } };
-    element.onended = () => { if (token === generation.current) { clearTimer(); cancelAnimationFrame(frame.current); clearReading(); setStatus("done"); } };
+    element.onended = () => { if (token === generation.current) {
+      clearTimer(); cancelAnimationFrame(frame.current); clearReading();
+      document.documentElement.style.removeProperty("--md-mouth-open");
+      onSpeaking(false); setStatus("done");
+    } };
     watchdog.current = setTimeout(fail, 25000);
     await connectMeter(element);
     if (token !== generation.current || paused.current) return;
@@ -167,7 +176,7 @@ export function CompanionTour({ open, onOpen, onClose, onSpeaking }: { open: boo
     <button type="button" className="md-tour__close" onClick={close} aria-label="Close audio tour">×</button>
     <span className="md-tour__eyebrow">LISTEN WITH GD</span><h2>Would you like me to read this page to you?</h2>
     <p>I’ll read the page and highlight the words as we go.</p>
-    {status === "error" && <p role="alert">The audio connection stopped. Tap to continue, or carry on reading.</p>}
+    {status === "error" && <p role="alert">{staleAudio ? "GD’s recording needs updating to match this page. Please continue reading while we finish the full-page audio." : "The audio connection stopped. Tap to continue, or carry on reading."}</p>}
     {!ready && <p>The voice guide is being updated. You can continue reading the page.</p>}
     <div className="md-tour__controls"><button type="button" className="md-tour__primary" onClick={() => void start()} disabled={!ready}>{status === "error" ? "Continue audio" : "Yes, read it to me"}</button><button type="button" onClick={close}>No, I’ll read</button></div>
     {ready && <label className="md-tour__follow"><input type="checkbox" checked={follow} onChange={event => { followPage.current = event.target.checked; setFollow(event.target.checked); }} /> Follow the page as I listen</label>}
