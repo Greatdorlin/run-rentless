@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type PointerEvent, type KeyboardEvent } from "react";
 import { CompanionTour } from "./companion-tour";
+import { GdCharacter } from "./gd-character";
 
 type Point = { x: number; y: number };
 type Sample = Point & { time: number };
@@ -22,7 +23,7 @@ export function BuildCompanion() {
   const [speaking, setSpeaking] = useState(false);
 
   function bounds() {
-    return { left: 32, right: Math.max(32, window.innerWidth - 104), top: 145, bottom: Math.max(145, window.innerHeight - 165) };
+    return { left: 32, right: Math.max(32, window.innerWidth - 120), top: 145, bottom: Math.max(145, window.innerHeight - 185) };
   }
   function clamp(point: Point) {
     const box = bounds();
@@ -30,7 +31,7 @@ export function BuildCompanion() {
   }
   function paint(point: Point) {
     position.current = point;
-    if (root.current) root.current.style.transform = `translate3d(clamp(32px,${point.x}px,calc(100vw - 104px)),clamp(12px,${point.y}px,calc(100dvh - 165px)),0)`;
+    if (root.current) root.current.style.transform = `translate3d(clamp(32px,${point.x}px,calc(100vw - 120px)),clamp(12px,${point.y}px,calc(100dvh - 185px - env(safe-area-inset-bottom))),0)`;
   }
   function settle(target: Point, initialVelocity: Point = { x: 0, y: 0 }) {
     cancelAnimationFrame(frame.current);
@@ -141,7 +142,7 @@ export function BuildCompanion() {
     <button className="md-companion__dismiss" type="button" aria-label="Hide companion" onClick={dismiss}>×</button>
     <button className="md-companion__sign" type="button" onClick={joinChallenge}>Join the<br />challenge <span aria-hidden="true">↗</span></button>
     <button className="md-companion__body" type="button" aria-label="Open audio tour. Use arrow keys to move companion." title="Drag to move. Click for an audio tour." onPointerDown={down} onPointerMove={move} onPointerUp={event => release(event)} onPointerCancel={event => release(event, true)} onLostPointerCapture={event => { if (pointer.current) release(event, true); }} onKeyDown={keyboard} tabIndex={atForm || typing ? -1 : 0}>
-      <svg viewBox="0 0 72 72" aria-hidden="true"><defs><linearGradient id="md-buddy-shell" x2="0" y2="1"><stop stopColor="#ecffae"/><stop offset="1" stopColor="#b3e84c"/></linearGradient></defs><path className="md-companion__feet" d="M18 61l-4 5m40-5 4 5"/><path fill="url(#md-buddy-shell)" stroke="#e8ffb2" d="M14 22Q14 12 25 12h22q11 0 11 10l4 25q2 14-12 15H22Q8 61 10 47Z"/><rect x="17" y="25" width="38" height="24" rx="11" fill="#0a3025"/><g className="md-companion__eyes" fill="#e8ffb2"><ellipse cx="28" cy="36" rx="3" ry="4"/><ellipse cx="44" cy="36" rx="3" ry="4"/></g><g className="md-companion__cheeks" fill="#ff9166"><ellipse cx="23" cy="42" rx="3" ry="1.8"/><ellipse cx="49" cy="42" rx="3" ry="1.8"/></g><path className="md-companion__smile" d="M31 42q5 7 10 0" fill="none" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="M36 12V6m-3 0h6" stroke="#e8ffb2" strokeWidth="2" strokeLinecap="round"/><path d="m5 35-3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/><path className="md-companion__wave" d="m65 35 3 7" stroke="#c6ff00" strokeWidth="3" strokeLinecap="round"/></svg>
+      <GdCharacter />
     </button><span className="md-companion__hint">{speaking ? "Talking you through it" : "Read or listen"}</span>
   </div></>;
 }

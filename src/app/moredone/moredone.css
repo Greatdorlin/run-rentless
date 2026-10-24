@@ -1,5 +1,26 @@
 .md-page{--md-ink:#031e19;--md-deep:#082a23;--md-lime:#c6ff00;--md-paper:#f4f5eb;--md-muted:#c7d2c7;background:var(--md-ink);color:#fdfff4;overflow:clip}
 .md-shell{width:min(1240px,calc(100% - 80px));margin-inline:auto}
+.md-page .md-companion{width:100px;height:160px}
+.md-page .md-companion__body{width:92px;height:112px;left:4px}
+.md-page .md-companion__sign{top:4px;left:-8px}
+.md-page .md-tour{left:auto;right:14px;bottom:calc(190px + env(safe-area-inset-bottom));width:min(310px,calc(100vw - 28px));max-height:50dvh}
+.md-voice-dock{position:fixed;right:14px;bottom:max(12px,env(safe-area-inset-bottom));z-index:80;width:116px;text-align:center;color:#f5ffe7}
+.md-voice-dock__avatar{display:block;width:96px;height:118px;margin:0 auto;padding:0;border:0;background:transparent;cursor:pointer;filter:drop-shadow(0 6px 9px #001c1855)}
+.md-gd{display:block;width:100%;height:100%;overflow:visible}
+.md-gd__eyes{transform-box:fill-box;transform-origin:center;animation:md-gd-blink 7s ease-in-out infinite}
+.md-gd--talking .md-gd__mouth{transform-box:fill-box;transform-origin:center;animation:md-gd-talk .29s ease-in-out infinite alternate}
+.md-voice-dock__controls{display:flex;gap:5px;margin-top:3px}
+.md-voice-dock__controls button{flex:1;min-width:0;min-height:44px;padding:6px;border:1px solid #779a80;border-radius:9px;background:#123e30;color:#f7ffe9;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
+.md-voice-dock__controls button:first-child{background:#c6ff00;color:#09281f;border-color:#c6ff00}
+.md-voice-dock button:focus-visible{outline:3px solid #ff794b;outline-offset:3px}
+.md-voice-dock__status{display:inline-block;margin-top:5px;padding:3px 8px;border-radius:20px;background:#123e30;color:#e3f5db;font-size:10px;line-height:1.4}
+.md-page-word{box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.md-page-word--current{background:#c6ff00;color:#082a23;border-radius:3px;box-shadow:0 0 0 2px #c6ff00}
+[data-md-narration]{scroll-margin-top:calc(var(--header-height) + 72px)}
+@keyframes md-gd-blink{0%,40%,44%,100%{transform:scaleY(1)}42%{transform:scaleY(.12)}}
+@keyframes md-gd-talk{0%{transform:scaleY(.65)}100%{transform:scaleY(1.14)}}
+@media(max-width:680px){.md-voice-dock{right:10px;width:108px}.md-voice-dock__avatar{width:86px;height:105px}.md-page .md-tour{right:10px;width:min(300px,calc(100vw - 20px));padding:18px}}
+@media(prefers-reduced-motion:reduce){.md-gd__eyes,.md-gd__mouth{animation:none!important}}
 .md-listen-link{display:inline-flex;align-items:center;gap:10px;min-height:44px;margin-top:8px;padding:0;border:0;background:transparent;color:#dceccf;font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}.md-listen-link:hover{color:#c6ff00}
 .md-page a:focus-visible,.md-page button:focus-visible,.md-page input:focus-visible,.md-page select:focus-visible{outline:3px solid var(--md-lime);outline-offset:4px}
 .md-page h1,.md-page h2,.md-page h3{font-family:var(--display);font-weight:650}

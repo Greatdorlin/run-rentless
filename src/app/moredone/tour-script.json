@@ -1,20 +1,86 @@
 [
-  { "title": "Build the idea you keep coming back to", "target": "projects", "lines": [
-    "Your idea deserves more than another note on your phone. In the MoreDone seven-day challenge, we help you build a working first version with AI, even if you have never written code.",
-    "Build a booking app for your salon, or a stock manager that shows what is selling. You could create a website that takes orders, or your own customer tracker with the features your business needs.",
-    "You can join for your business, a project at work, or a service you want to sell to clients. Bring one idea and build it with our guidance."
-  ] },
-  { "title": "Build it with support", "target": "md-days-title", "lines": [
-    "You get two live ninety-minute workshops with daily exercises, starter templates and group support. We help you choose the main feature, build it, and test it on a real example.",
-    "You will learn how to make your tool look like your brand and work on a phone. We also show you how to protect customer details before you publish."
-  ] },
-  { "title": "Put your new skills to work", "target": "md-ads-title", "lines": [
-    "Keep using these skills after the challenge. Improve a tool for your own business, or build websites and customer systems for clients who need them.",
-    "You will also learn to prepare a ChatGPT Ads campaign, write an offer, and create the page people visit. Track the enquiries that turn into customers so you can see what your advertising brings back."
-  ] },
-  { "title": "Bring your idea to the cohort", "target": "team-offer", "lines": [
-    "Choose one place for yourself, or bring your colleagues and save on the total. Every place includes the workshops and building support. The prices on this page show what you pay for your chosen package.",
-    "We guide you through choosing and setting up your AI tool. Budget separately for its subscription, any hosting you need and any ads you decide to run.",
-    "Choose your package and add your details. Complete the payment steps to join the cohort. Bring the idea you have been waiting to build, and spend the week making it work with us."
-  ] }
+  {
+    "title": "The challenge",
+    "target": "md-title",
+    "lines": [
+      "Build the tool your business keeps wishing it had."
+    ]
+  },
+  {
+    "title": "Build with AI",
+    "target": "md-narration-1",
+    "lines": [
+      "Spend seven days building something you can use: a website that takes orders, an app that tracks customers, or a tool that saves you hours of repeat work. We teach you how to build it with AI, even if you have never written code."
+    ]
+  },
+  {
+    "title": "For your business",
+    "target": "md-narration-2",
+    "lines": [
+      "Build the customer tracker, booking app or website your business needs. Start with one job you want to make easier."
+    ]
+  },
+  {
+    "title": "For your own project",
+    "target": "md-narration-3",
+    "lines": [
+      "Build a tool for your work or a client. You will learn a skill you can keep using after the challenge."
+    ]
+  },
+  {
+    "title": "Project ideas",
+    "target": "md-narration-4",
+    "lines": [
+      "Bring the idea you keep coming back to. These examples are a starting point. We will help you choose the part to build and test in seven days."
+    ]
+  },
+  {
+    "title": "Your website and tools",
+    "target": "md-narration-5",
+    "lines": [
+      "We will help you make your tool look and sound like the business it serves. You will check it on a phone and learn how to protect customer details before sharing it. You can change an AI-generated design that feels generic."
+    ]
+  },
+  {
+    "title": "What your place includes",
+    "target": "md-narration-6",
+    "lines": [
+      "Your place includes two live 90-minute workshops, daily building exercises, starter templates, group guidance and a final review. You work on one project throughout the seven days, with help as you build."
+    ]
+  },
+  {
+    "title": "Your working first version",
+    "target": "md-narration-7",
+    "lines": [
+      "A first version does one useful job from start to finish. For a booking app, that means someone chooses a time and the booking appears in your schedule. We agree on your project’s main job before you begin and test it together at the end."
+    ]
+  },
+  {
+    "title": "The ads lesson",
+    "target": "md-narration-8",
+    "lines": [
+      "We will help you prepare an offer, an ad and the page people visit after clicking. You will leave with a way to record enquiries and see which become customers. Learn how to prepare your first campaign and decide which results to measure."
+    ]
+  },
+  {
+    "title": "Your places",
+    "target": "md-narration-9",
+    "lines": [
+      "Every place includes both live workshops, daily exercises, help with your build and the ChatGPT Ads lesson."
+    ]
+  },
+  {
+    "title": "Getting set up",
+    "target": "md-narration-10",
+    "lines": [
+      "Our team guides you through choosing and setting up what your project needs. Your challenge place covers the training and guidance. AI subscriptions, hosting and any ads you choose to run are paid separately."
+    ]
+  },
+  {
+    "title": "Join the cohort",
+    "target": "md-join-title",
+    "lines": [
+      "Join the cohort. Bring your idea."
+    ]
+  }
 ]
