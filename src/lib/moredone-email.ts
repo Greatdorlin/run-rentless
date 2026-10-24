@@ -60,7 +60,7 @@ export function sendMoreDoneEmailRequestReceipt(email: string, firstName: string
     "Bring the idea you want to build. We will help you turn its main feature into a working tool during the challenge.",
     "Your place is confirmed after payment. If you have a question, reply here and our team will help.",
   ];
-  return send(email, firstName, "We received your request for MoreDone payment details", `Hi ${firstName},\n\n${paragraphs.join("\n\n")}`, layout(firstName, "Your payment team will be in touch.", paragraphs));
+  return send(email, firstName, "We received your request for MoreDone payment details", `Hi ${firstName},\n\n${paragraphs.join("\n\n")}`, layout(firstName, "Our payment team will be in touch.", paragraphs));
 }
 
 export function sendMoreDonePaymentConfirmation(email: string, firstName: string, seats: MoreDoneSeats, reference: string) {
